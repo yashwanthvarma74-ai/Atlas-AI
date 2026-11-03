@@ -1,0 +1,16 @@
+.panel {
+  display: grid;
+  gap: var(--mrd-space-6);
+  max-width: 26rem;
+  margin: var(--mrd-space-8) auto 0;
+}
+
+.form {
+  display: grid;
+  gap: var(--mrd-space-4);
+}
+
+.switch {
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
+}

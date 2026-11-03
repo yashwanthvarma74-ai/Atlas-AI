@@ -1,0 +1,41 @@
+.page {
+  display: grid;
+  gap: var(--mrd-space-6);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mrd-space-4);
+}
+
+.grid {
+  display: grid;
+  gap: var(--mrd-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+/* positions the stretched link below, which would otherwise cover the whole page */
+.item {
+  position: relative;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mrd-space-3);
+}
+
+/* the whole card is the click target: the link's box is stretched over it */
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}

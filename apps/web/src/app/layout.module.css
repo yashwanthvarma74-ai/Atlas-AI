@@ -1,0 +1,26 @@
+.skipLink {
+  position: absolute;
+  top: -4rem;
+  left: var(--mrd-space-2);
+  z-index: var(--mrd-z-toast);
+  padding: var(--mrd-space-2) var(--mrd-space-4);
+  border-radius: var(--mrd-radius-md);
+  background: var(--mrd-color-accent-default);
+  color: var(--mrd-color-accent-on-accent);
+  transition: top var(--mrd-motion-duration-fast) var(--mrd-motion-easing-standard);
+}
+
+.skipLink:focus {
+  top: var(--mrd-space-2);
+}
+
+.main {
+  width: 100%;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: var(--mrd-space-8) var(--mrd-space-4) var(--mrd-space-12);
+}
+
+.main:focus {
+  outline: none;
+}

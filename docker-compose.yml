@@ -1,0 +1,11 @@
+# Backing services for local development: docker compose up -d
+# The API and the web app run from source with "npm run dev" for now; they join this file when the
+# Dockerfiles do (week 6).
+services:
+  mongo:
+    image: mongo:8
+    volumes: [mongo-data:/data/db]
+    ports: ['27017:27017']
+
+volumes:
+  mongo-data:

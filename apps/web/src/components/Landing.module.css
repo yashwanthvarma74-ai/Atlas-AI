@@ -1,0 +1,36 @@
+.landing {
+  display: grid;
+  gap: var(--mrd-space-6);
+  justify-items: start;
+  max-width: 38rem;
+  margin-top: var(--mrd-space-10);
+}
+
+.eyebrow {
+  color: var(--mrd-color-accent-text);
+  font-size: var(--mrd-font-size-sm);
+  font-weight: var(--mrd-font-weight-semibold);
+  letter-spacing: var(--mrd-font-tracking-wide);
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: var(--mrd-font-size-5xl);
+}
+
+.pitch {
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-lg);
+  line-height: var(--mrd-font-line-height-relaxed);
+}
+
+.actions {
+  display: grid;
+  gap: var(--mrd-space-2);
+  justify-items: start;
+}
+
+.note {
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
+}
