@@ -220,7 +220,7 @@ help. Citation consistency is 100% but means little for a model that only quotes
 ## What is left, and it is not code
 
 A hosted deployment with a live link and one-click guest login, the recorded demo video, a run with a real embedder and
-model (which will change every number above), and cleaning up idle guest accounts for a public demo.
+model (which will change every number above).
 
 ## Known limits of week 5
 

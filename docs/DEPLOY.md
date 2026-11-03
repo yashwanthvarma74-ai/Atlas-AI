@@ -46,4 +46,4 @@ tried. What it would need, from the code:
 - The upload parser runs in the worker process with the database credentials and no sandbox
   ([threat model](THREAT-MODEL.md)). Run the worker in a container with no inbound network and a read-only
   filesystem except for `/data` and the temporary directory.
-- Guests are never cleaned up. A public demo needs a job that deletes idle guests and their workspaces.
+- Guests are deleted by the worker after `GUEST_TTL_HOURS` (default 24), with their workspace, documents and files. The lifetime counts from sign-in, not from last use.

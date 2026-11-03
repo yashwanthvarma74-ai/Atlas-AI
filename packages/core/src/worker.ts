@@ -2,6 +2,7 @@ import { UnrecoverableError, Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 import { ObjectId } from 'mongodb';
 import type { Core } from './core';
+import { purgeExpiredGuests } from './guests';
 import { hex } from './ids';
 import { failAllStaleAnswers } from './answer';
 import { markFailed, PermanentIngestError, processDocument } from './ingest';
@@ -59,6 +60,7 @@ export function startIngestWorker(core: Core, deps: ParseDeps = {}): IngestWorke
   const sweep = setInterval(() => {
     void requeueStale(core).catch(() => undefined);
     void failAllStaleAnswers(core).catch(() => undefined);
+    void purgeExpiredGuests(core).catch(() => undefined);
   }, SWEEP_EVERY_MS);
 
   return {

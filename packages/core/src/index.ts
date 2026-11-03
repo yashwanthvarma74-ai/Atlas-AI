@@ -11,6 +11,7 @@ export * from './embeddings';
 export * from './errors';
 export * from './eval';
 export * from './evalRuns';
+export * from './guests';
 export * from './ids';
 export * from './ingest';
 export * from './llm';

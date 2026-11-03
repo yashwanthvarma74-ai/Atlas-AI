@@ -67,7 +67,7 @@ Status: **built** means the code and its test exist today. **week N** means plan
 - **Account enumeration by registration.** Registering with a taken email says so. Rate limited, not prevented
   (see [ADR 0003](adr/0003-accounts-and-sessions.md)).
 - **Anyone who can sign in as a guest can create workspaces and data.** Guest creation is rate limited per
-  address. Guests are not yet cleaned up.
+  address. The worker deletes guests, with their data, after `GUEST_TTL_HOURS`.
 - **A compromised server or database.** Documents are stored as the owner uploaded them, not encrypted per
   workspace.
 - **Denial of service at the network layer.** That belongs to the host and the CDN.
