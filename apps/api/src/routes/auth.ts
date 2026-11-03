@@ -9,7 +9,7 @@ const HOUR = 60 * 60 * 1000;
 
 export function authRouter(core: Core): Router {
   const router = Router();
-  const secure = core.config.NODE_ENV === 'production';
+  const secure = core.config.COOKIE_SECURE ?? core.config.NODE_ENV === 'production';
 
   async function signIn(res: Response, userId: string) {
     setSessionCookie(

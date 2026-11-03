@@ -41,6 +41,11 @@ Status: **built** means the code and its test exist today. **week N** means plan
 
 ## What is not defended
 
+- **The web app has no `script-src` Content-Security-Policy.** It sends frame, base, object and form restrictions, and
+  not a script restriction, which Next's inline scripts would need a per-request nonce for. A cross-site scripting
+  bug would therefore not be contained by the browser. The defences against one are that model output is rendered
+  as text and safe Markdown, and that no user text is ever rendered as HTML.
+
 - **The hosted model providers have not been run against their live services.** Their request and stream formats
   are tested against fixtures in each provider's documented shape. See ADR 0012.
 

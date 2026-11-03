@@ -86,6 +86,15 @@ const envSchema = z.object({
   // Set to the shared parent domain (for example .example.com) when the web app and the API sit on
   // sibling subdomains. Leave empty on localhost.
   COOKIE_DOMAIN: z.string().optional(),
+  // Whether the session cookie is marked Secure (sent only over HTTPS). Defaults to on in production. Turn it off
+  // only to run the production build over plain HTTP on one machine, as docker compose does.
+  COOKIE_SECURE: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .optional(),
+  // Multiplies every per-address rate limit. Leave at 1. It exists so a load test can measure the service rather
+  // than the limiter, and a deployment that raises it has removed a defence.
+  RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
   // How many proxies sit in front of the API (Vercel and Fly make two), so rate limits see the real visitor.
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
 });

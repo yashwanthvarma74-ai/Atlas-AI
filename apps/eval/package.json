@@ -10,10 +10,12 @@
     "check": "tsx --env-file-if-exists=../../.env src/cli.ts check",
     "sweep": "tsx --env-file-if-exists=../../.env src/cli.ts sweep",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "load": "tsx src/load.ts"
   },
   "dependencies": {
     "@atlas/core": "*",
+    "@atlas/shared": "*",
     "mongodb": "^7.0.0",
     "pino": "^10.0.0"
   },

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { signSession, SESSION_COOKIE } from './auth/session';
+import { createTestCore } from '@atlas/core/test';
 import { createTestApp, type TestApp } from './test/context';
 
 let t: TestApp;
@@ -132,6 +133,33 @@ describe('cross-origin writes', () => {
 
   it('does not restrict reads', async () => {
     await t.anonymous().get('/health').set('Origin', 'https://evil.example').expect(200);
+  });
+});
+
+describe('headers and cookies', () => {
+  it('sends security headers and does not announce the framework', async () => {
+    const res = await t.anonymous().get('/health').expect(200);
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBeDefined();
+    expect(res.headers['strict-transport-security']).toBeDefined();
+    expect(res.headers['x-powered-by']).toBeUndefined();
+  });
+
+  it('marks the session cookie Secure in production, and lets plain-HTTP local runs turn that off', async () => {
+    const make = async (overrides: Record<string, string>) => {
+      const local = await createTestApp(await createTestCore(overrides));
+      try {
+        const res = await local.anonymous().post('/auth/guest').expect(201);
+        return res.headers['set-cookie']?.[0] ?? '';
+      } finally {
+        await local.destroy();
+      }
+    };
+    const secret = 'x'.repeat(40);
+    expect(await make({ NODE_ENV: 'production', JWT_SECRET: secret })).toContain('Secure');
+    expect(
+      await make({ NODE_ENV: 'production', JWT_SECRET: secret, COOKIE_SECURE: 'false' }),
+    ).not.toContain('Secure');
   });
 });
 

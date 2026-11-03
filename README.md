@@ -6,11 +6,23 @@ can check.
 Built by [Yashwanth Varma](https://github.com/yashwanthvarma74-ai) with the
 [Meridian design system](https://github.com/yashwanthvarma74-ai/designSystem).
 
-> **Status: week 5 of 6 (measure).** Everything through streaming chat is built, plus an evaluation harness with a
-> gate, cost per answer, an approval flow for the assistant's tool requests with an audit trail, and a red-team
-> suite. Deployment, the benchmark report and the demo video are **not done**. The hosted model providers have
-> **not been run against their live services** (no key was available), and the numbers below come from an offline
-> embedder and answer model: see [docs/EVALUATION.md](docs/EVALUATION.md) before quoting any of them.
+> **Status: all six weeks built; not deployed.** Accounts, workspaces, ingest, hybrid search, streaming cited chat,
+> an evaluation gate, a tool-approval flow and a red-team suite are built and tested, and the whole stack runs in
+> containers (`docker compose --profile app up`). There is **no live link and no recorded demo video**
+> ([how it deploys](docs/DEPLOY.md), [the script](docs/DEMO-SCRIPT.md)). The hosted model providers have **not been run
+> against their live services**, and every number comes from an offline embedder and answer model: read
+> [docs/EVALUATION.md](docs/EVALUATION.md) and [docs/BENCHMARKS.md](docs/BENCHMARKS.md) before quoting one.
+
+## The short version
+
+| Question                               | Answer                                                                                | Where                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Does retrieval find the right passage? | recall@10 about 89% on 276 generated questions; the 0.90 target is not met            | [EVALUATION](docs/EVALUATION.md)                                                                        |
+| Can one workspace see another's text?  | 0 cross-workspace retrievals, with each search stage attacked on its own              | [ADR 0008](docs/adr/0008-hybrid-retrieval-and-the-tenant-filter.md)                                     |
+| Can the model act on its own?          | No: it can only propose, a person approves, everything is audited                     | [ADR 0014](docs/adr/0014-the-assistant-proposes-and-a-person-approves.md), [RED-TEAM](docs/RED-TEAM.md) |
+| How fast?                              | search about 976 req/s, chat about 523 req/s on a laptop, zero errors (offline model) | [BENCHMARKS](docs/BENCHMARKS.md)                                                                        |
+| What is promised?                      | [SLOs](docs/SLOS.md)                                                                  |                                                                                                         |
+| The story                              | [case study](docs/case-study.md)                                                      |                                                                                                         |
 
 ## Try it
 
@@ -21,6 +33,16 @@ You need Node 22+ and Docker. `docker compose up -d` starts MongoDB with Atlas S
 cp .env.example .env
 npm install
 npm run dev      # web http://localhost:3002, API http://localhost:4002, and the ingest worker
+```
+
+Or everything in containers, with no Node needed:
+
+```bash
+JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build
+```
+
+```bash
+
 ```
 
 Open <http://localhost:3002> and press **Continue as guest**: no sign-up, and you land in a workspace you own. Open
@@ -117,7 +139,7 @@ with their `workspaceId`, and the search indexes filter on it inside the query.
 | 3    | Retrieval  | Not started. Hybrid search, tenant filter, citations.                                                                                                                                                                                 |
 | 4    | Chat       | **Done.** Streaming over SSE, Stop that saves the partial answer, Regenerate and Retry, follow-up rewriting, saved and searchable history, sharing with the workspace, time to first word shown, safe Markdown with error boundaries. |
 | 5    | Measure    | **Mostly done.** Benchmark of 276 questions, scored runs and a CI gate, an evaluation dashboard, cost per answer, tool approval with an audit trail, a red-team suite. Not yet: a real-model run, an LLM judge, the benchmark report. |
-| 6    | Show       | Not started. Hardening, deploy, benchmark report, demo video.                                                                                                                                                                         |
+| 6    | Show       | **Mostly done.** Images and a one-command stack (run end to end), security headers, a load test and benchmark report, SLOs, deploy guide, case study, demo script. **Not done:** a hosted deployment and the recorded video.          |     |
 
 ### Numbers
 
@@ -182,6 +204,7 @@ atlas-ai/
 - [0011. Conversations are private until their author shares them](docs/adr/0011-conversations-are-private-until-shared.md)
 - [0013. Quality is a number, and a change that lowers it does not merge](docs/adr/0013-quality-is-a-number-and-a-gate.md)
 - [0014. The assistant proposes, and a person approves](docs/adr/0014-the-assistant-proposes-and-a-person-approves.md)
+- [0015. Containers, and the hardening that came with them](docs/adr/0015-containers-and-hardening.md)
 - [0012. The model is behind an interface, and everything it sees or says is untrusted](docs/adr/0012-the-model-is-behind-an-interface-and-everything-it-sees-or-says-is-untrusted.md)
 
 The threat model is in [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
@@ -193,6 +216,11 @@ Recall@10 is about **89%** on the benchmark (88.7% to 89.2% between runs, becaus
 reranker were chosen from a sweep ([EVALUATION.md](docs/EVALUATION.md)). A relevance cutoff was tried and does not
 help. Citation consistency is 100% but means little for a model that only quotes. The red-team cases are in
 [docs/RED-TEAM.md](docs/RED-TEAM.md). Run it: `docker compose up -d`, then `npm run eval`.
+
+## What is left, and it is not code
+
+A hosted deployment with a live link and one-click guest login, the recorded demo video, a run with a real embedder and
+model (which will change every number above), and cleaning up idle guest accounts for a public demo.
 
 ## Known limits of week 5
 

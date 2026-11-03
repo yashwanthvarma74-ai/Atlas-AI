@@ -24,7 +24,7 @@ export function idParam(req: Request, name: string, what: string): ObjectId {
 export function limit(config: Config, windowMs: number, max: number): RequestHandler {
   return rateLimit({
     windowMs,
-    limit: config.NODE_ENV === 'test' ? 100_000 : max,
+    limit: config.NODE_ENV === 'test' ? 100_000 : Math.round(max * config.RATE_LIMIT_SCALE),
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     message: {

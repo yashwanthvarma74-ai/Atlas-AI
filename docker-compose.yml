@@ -1,9 +1,9 @@
-# Backing services for local development: docker compose up -d
-# The apps run from source with "npm run dev" for now; they join this file when the Dockerfiles do
-# (week 6).
+# Backing services only:        docker compose up -d
+# The whole app in containers:  JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build
+#   then open http://localhost:3002
 services:
-  # MongoDB with Atlas Search and Atlas Vector Search, the same engines as an Atlas cluster. A plain
-  # mongod has neither, and retrieval needs both. Published on 27018 so it can sit next to a local mongod.
+  # MongoDB with Atlas Search and Atlas Vector Search, the same engines as an Atlas cluster. A plain mongod has
+  # neither, and retrieval needs both. Published on 27018 so it can sit next to a local mongod.
   mongo:
     image: mongodb/mongodb-atlas-local:latest
     volumes: [mongo-data:/data/db]
@@ -14,6 +14,47 @@ services:
     volumes: [redis-data:/data]
     ports: ['6379:6379']
 
+  api:
+    profiles: [app]
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    depends_on: [mongo, redis]
+    environment: &app-env
+      NODE_ENV: production
+      # the production build over plain HTTP on one machine: browsers refuse a Secure cookie there
+      COOKIE_SECURE: 'false'
+      MONGODB_URI: mongodb://mongo:27017/atlas_ai?directConnection=true
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET (see the comment at the top of this file)}
+      SITE_ORIGIN: http://localhost:3002
+      STORAGE_DRIVER: local
+      UPLOAD_DIR: /data/uploads
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-hash}
+      LLM_PROVIDER: ${LLM_PROVIDER:-extractive}
+      EXTRACTIVE_DELAY_MS: ${EXTRACTIVE_DELAY_MS:-0}
+      # leave at 1; the load test raises it so it measures the service and not the rate limiter
+      RATE_LIMIT_SCALE: ${RATE_LIMIT_SCALE:-1}
+    volumes: [uploads:/data/uploads]
+    ports: ['4002:4002']
+
+  worker:
+    profiles: [app]
+    build: { context: ., dockerfile: apps/worker/Dockerfile }
+    depends_on: [mongo, redis]
+    environment: *app-env
+    # the worker reads the files the API stored: one volume, or an S3-compatible bucket across machines
+    volumes: [uploads:/data/uploads]
+
+  web:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      # Next bakes the proxy target into the build, so it is set here and not when the container starts
+      args: { API_URL: 'http://api:4002' }
+    depends_on: [api]
+    ports: ['3002:3002']
+
 volumes:
   mongo-data:
   redis-data:
+  uploads:

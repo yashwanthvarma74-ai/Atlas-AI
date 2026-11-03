@@ -1,5 +1,6 @@
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
+import helmet from 'helmet';
 import type { Logger } from 'pino';
 import { pinoHttp } from 'pino-http';
 import { notFound, type Core } from '@atlas/core';
@@ -11,6 +12,9 @@ import { workspacesRouter } from './routes/workspaces';
 export function createApp(core: Core, logger: Logger): Express {
   const app = express();
   app.disable('x-powered-by');
+  // headers that tell a browser not to sniff types, frame the API or send referrers; the API serves JSON and
+  // downloads, never pages, so the strict defaults cost nothing
+  app.use(helmet());
   // behind the Next.js proxy and any load balancer, the client address is in X-Forwarded-For
   app.set('trust proxy', core.config.TRUST_PROXY_HOPS);
 
