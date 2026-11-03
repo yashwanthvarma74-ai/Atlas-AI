@@ -88,7 +88,7 @@ describe('SearchPanel', () => {
       ],
     );
     await ask('cited');
-    await userEvent.click(await screen.findByRole('button', { name: 'Show S2 in context' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Show in context: S2' }));
 
     const dialog = await screen.findByRole('dialog');
     expect(await screen.findByText('The text before it.')).toBeInTheDocument();
