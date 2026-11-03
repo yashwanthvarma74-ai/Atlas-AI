@@ -84,10 +84,12 @@ jobs:
       - run: npx playwright install --with-deps chromium
       # builds the three images, which is also the check that they build, then runs the whole app in them
       - name: Start the app in containers
+        env:
+          RATE_LIMIT_SCALE: '1'
         run: |
-          echo "JWT_SECRET=$(openssl rand -base64 48)" >> "$GITHUB_ENV"
-          JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build -d --wait api
-          for i in $(seq 1 60); do curl -fs http://localhost:3002/ >/dev/null && break; sleep 2; done
+          export JWT_SECRET="$(openssl rand -base64 48)"
+          # --wait returns once every service with a health check is healthy, so the web app is up before the tests run
+          docker compose --profile app up --build -d --wait
       - name: Playwright, against the containers
         run: npm run e2e
       - name: Lighthouse budgets
