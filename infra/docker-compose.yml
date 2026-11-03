@@ -23,6 +23,7 @@ services:
     depends_on: [mongo, redis]
     environment: &app-env
       NODE_ENV: production
+      PARSE_ISOLATION: process
       # the production build over plain HTTP on one machine: browsers refuse a Secure cookie there
       COOKIE_SECURE: 'false'
       MONGODB_URI: mongodb://mongo:27017/atlas_ai?directConnection=true

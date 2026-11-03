@@ -169,6 +169,8 @@ export async function ensureIndexes(d: Database): Promise<void> {
     d.memberships.createIndex({ workspaceId: 1, userId: 1 }, { unique: true }),
     // "my workspaces"
     d.memberships.createIndex({ userId: 1, createdAt: 1 }),
+    // the member list: one workspace's people, oldest first
+    d.memberships.createIndex({ workspaceId: 1, createdAt: 1 }),
 
     // the document library: one workspace's files, newest first
     d.documents.createIndex({ workspaceId: 1, createdAt: -1, _id: -1 }),
@@ -179,8 +181,8 @@ export async function ensureIndexes(d: Database): Promise<void> {
     d.chunks.createIndex({ documentId: 1, ord: 1 }, { unique: true }),
 
     // the history: this person's conversations, and the ones shared with the workspace, newest first
-    d.conversations.createIndex({ workspaceId: 1, userId: 1, updatedAt: -1 }),
-    d.conversations.createIndex({ workspaceId: 1, visibility: 1, updatedAt: -1 }),
+    d.conversations.createIndex({ workspaceId: 1, userId: 1, updatedAt: -1, _id: -1 }),
+    d.conversations.createIndex({ workspaceId: 1, visibility: 1, updatedAt: -1, _id: -1 }),
     d.conversations.createIndex({ workspaceId: 1, title: 'text' }),
 
     // a conversation's messages in order, and searching what was said inside one workspace
@@ -196,9 +198,9 @@ export async function ensureIndexes(d: Database): Promise<void> {
       },
     ),
     // the cards in a conversation, and the audit trail: every call the assistant asked for, newest first
-    d.toolCalls.createIndex({ conversationId: 1, createdAt: 1 }),
-    d.toolCalls.createIndex({ workspaceId: 1, createdAt: -1 }),
-    d.toolCalls.createIndex({ workspaceId: 1, proposedBy: 1, createdAt: -1 }),
+    d.toolCalls.createIndex({ conversationId: 1, createdAt: 1, _id: 1 }),
+    d.toolCalls.createIndex({ workspaceId: 1, createdAt: -1, _id: -1 }),
+    d.toolCalls.createIndex({ workspaceId: 1, proposedBy: 1, createdAt: -1, _id: -1 }),
 
     // the dashboard: evaluation runs, newest first
     d.evalRuns.createIndex({ createdAt: -1 }),
@@ -209,6 +211,18 @@ export async function ensureIndexes(d: Database): Promise<void> {
       { partialFilterExpression: { status: 'streaming' } },
     ),
   ]);
+
+  // These served the same queries before their sorts gained an `_id` tie-break, and now only cost writes. A
+  // database made earlier still has them; one made now never did.
+  const obsolete: [{ dropIndex(name: string): Promise<unknown> }, string][] = [
+    [d.conversations, 'workspaceId_1_userId_1_updatedAt_-1'],
+    [d.conversations, 'workspaceId_1_visibility_1_updatedAt_-1'],
+    [d.toolCalls, 'conversationId_1_createdAt_1'],
+    [d.toolCalls, 'workspaceId_1_createdAt_-1'],
+    [d.toolCalls, 'workspaceId_1_proposedBy_1_createdAt_-1'],
+  ];
+  for (const [collection, name] of obsolete)
+    await collection.dropIndex(name).catch(() => undefined);
 }
 
 export function isDuplicateKey(error: unknown): boolean {

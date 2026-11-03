@@ -11,7 +11,8 @@
     "sweep": "tsx --env-file-if-exists=../../.env src/cli.ts sweep",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "load": "tsx src/load.ts"
+    "load": "tsx src/load.ts",
+    "explain": "tsx --env-file-if-exists=../../.env src/explain.ts"
   },
   "dependencies": {
     "@atlas/core": "*",

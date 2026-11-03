@@ -79,6 +79,9 @@ const envSchema = z.object({
 
   // The first retry waits this long; each one after waits twice as long as the one before.
   INGEST_BACKOFF_MS: z.coerce.number().int().positive().default(2000),
+  // "process" parses each upload in a child process that holds none of this one's credentials and can be killed
+  // alone. Off by default so a development machine needs no build step; the containers turn it on.
+  PARSE_ISOLATION: z.enum(['process', 'none']).default('none'),
   INGEST_STAGE_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
 
   JWT_SECRET: z.string().min(32).default(DEV_SECRET),

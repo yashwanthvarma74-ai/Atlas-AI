@@ -10,6 +10,8 @@ export class ParseError extends Error {}
 export interface ParseDeps {
   // reads the text out of an image; replaceable so tests do not download a language model
   ocr?: (image: Uint8Array) => Promise<string>;
+  // parse in a child process started from this file, instead of in this one
+  isolate?: { childPath: string };
 }
 
 const MAX_PDF_PAGES = 500;

@@ -12,6 +12,7 @@ services:
     envVars:
       - { key: NODE_ENV, value: production }
       - { key: INLINE_WORKER, value: 'true' }
+      - { key: PARSE_ISOLATION, value: process }
       # the browser reaches the API through the web app's proxy, so there are two hops in front of it
       - { key: TRUST_PROXY_HOPS, value: '2' }
       # the web app's public address; writes naming any other origin are refused

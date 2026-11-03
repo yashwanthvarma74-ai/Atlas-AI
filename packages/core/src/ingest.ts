@@ -7,6 +7,7 @@ import { EmbeddingError } from './embeddings';
 import { HttpError } from './errors';
 import { requireAccess } from './access';
 import { ParseError, parseDocument, type ParseDeps } from './parse';
+import { parseInChild } from './parse-isolated';
 import type { IngestJob } from './queues';
 import { withSpan } from './trace';
 
@@ -67,7 +68,18 @@ async function ingestDocument(core: Core, job: IngestJob, deps: ParseDeps): Prom
     if (!(await setStatus(core, doc, 'parsing'))) return;
     const bytes = await core.storage.get(doc.storageKey);
     const pages = await withSpan('ingest.parse', { 'atlas.kind': doc.kind }, () =>
-      stageTimeout(core, 'parsing', parseDocument(doc.kind, bytes, deps)),
+      stageTimeout(
+        core,
+        'parsing',
+        deps.isolate
+          ? parseInChild(
+              deps.isolate.childPath,
+              doc.kind,
+              bytes,
+              core.config.INGEST_STAGE_TIMEOUT_MS,
+            )
+          : parseDocument(doc.kind, bytes, deps),
+      ),
     );
 
     const chunks = chunkPages(pages, {

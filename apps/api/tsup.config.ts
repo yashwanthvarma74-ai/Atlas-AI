@@ -8,7 +8,7 @@ const core = JSON.parse(
 );
 
 export default defineConfig({
-  entry: ['src/server.ts'],
+  entry: ['src/server.ts', 'src/parse-child.ts'],
   format: 'esm',
   target: 'node22',
   clean: true,

@@ -16,6 +16,7 @@ export * from './ids';
 export * from './ingest';
 export * from './llm';
 export * from './parse';
+export * from './parse-isolated';
 export * from './passwords';
 export * from './pricing';
 export * from './prompt';
