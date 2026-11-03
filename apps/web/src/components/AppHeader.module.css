@@ -35,3 +35,7 @@
   align-items: center;
   gap: var(--mrd-space-4);
 }
+
+.avatar {
+  display: inline-flex;
+}

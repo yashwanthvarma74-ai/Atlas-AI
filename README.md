@@ -1,79 +1,22 @@
 # Atlas AI
 
-A private knowledge copilot: upload your documents, ask questions, and get streamed answers with citations you
-can check.
-
-Built by [Yashwanth Varma](https://github.com/yashwanthvarma74-ai) with the
+A private knowledge copilot: upload your documents, ask questions, and get streamed answers with citations you can
+check. Built by [Yashwanth Varma](https://github.com/yashwanthvarma74-ai) on the
 [Meridian design system](https://github.com/yashwanthvarma74-ai/designSystem).
 
-> **Status: all six weeks built; not deployed.** Accounts, workspaces, ingest, hybrid search, streaming cited chat,
-> an evaluation gate, a tool-approval flow and a red-team suite are built and tested, and the whole stack runs in
-> containers (`docker compose --profile app up`). There is **no live link and no recorded demo video**
-> ([how it deploys](docs/DEPLOY.md), [the script](docs/DEMO-SCRIPT.md)). The hosted model providers have **not been run
-> against their live services**, and every number comes from an offline embedder and answer model: read
-> [docs/EVALUATION.md](docs/EVALUATION.md) and [docs/BENCHMARKS.md](docs/BENCHMARKS.md) before quoting one.
+> **Demo video: not recorded yet.** The 90-second script is in [docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md).
 
-## The short version
+## Live demo
 
-| Question                               | Answer                                                                                | Where                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Does retrieval find the right passage? | recall@10 about 89% on 276 generated questions; the 0.90 target is not met            | [EVALUATION](docs/EVALUATION.md)                                                                        |
-| Can one workspace see another's text?  | 0 cross-workspace retrievals, with each search stage attacked on its own              | [ADR 0008](docs/adr/0008-hybrid-retrieval-and-the-tenant-filter.md)                                     |
-| Can the model act on its own?          | No: it can only propose, a person approves, everything is audited                     | [ADR 0014](docs/adr/0014-the-assistant-proposes-and-a-person-approves.md), [RED-TEAM](docs/RED-TEAM.md) |
-| How fast?                              | search about 976 req/s, chat about 523 req/s on a laptop, zero errors (offline model) | [BENCHMARKS](docs/BENCHMARKS.md)                                                                        |
-| What is promised?                      | [SLOs](docs/SLOS.md)                                                                  |                                                                                                         |
-| The story                              | [case study](docs/case-study.md)                                                      |                                                                                                         |
+**<https://atlas-ai-seven-vert.vercel.app>**. Press **Continue as guest**: no sign-up, and you land in a workspace you
+own. Guests and their data are deleted after 24 hours.
 
-## Try it
-
-You need Node 22+ and Docker. `docker compose up -d` starts MongoDB with Atlas Search and Vector Search (the
-`mongodb-atlas-local` image, on port 27018) and Redis. A plain `mongod` also works for everything except searching.
-
-```bash
-cp .env.example .env
-npm install
-npm run dev      # web http://localhost:3002, API http://localhost:4002, and the ingest worker
-```
-
-Or everything in containers, with no Node needed:
-
-```bash
-JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build
-```
-
-```bash
-
-```
-
-Open <http://localhost:3002> and press **Continue as guest**: no sign-up, and you land in a workspace you own. Open
-it, upload a PDF, a text or Markdown file, or a PNG or JPEG, and watch it move from queued through parsing and
-embedding to indexed. Create a second account, add it to your workspace by email, and watch what a viewer can and
-cannot do.
-
-Then open **Conversations** and ask a question. The answer streams in, cites its sources as `S1`, `S2`, ..., and each
-citation opens the exact page's passages with the cited one marked. **Stop** keeps what had arrived, **Regenerate**
-writes it again, a follow-up like "and costs?" is rewritten into a question that stands alone before it is
-searched, and **Share with workspace** lets your colleagues read (not add to) a conversation. The **Search** box
-under the documents finds passages directly.
-
-By default passages are embedded with `EMBEDDING_PROVIDER=hash`, which needs no service and no key but matches on
-shared words only, not meaning. That is enough to run and test the whole pipeline, and the search code is tested
-for meaning with a stand-in embedder that groups synonyms. For real semantic search set `ollama` (local) or
-`openai` in `.env`, and see `.env.example`.
-
-The model that writes answers is `LLM_PROVIDER=extractive` by default: it answers by quoting the passages it is given,
-so the whole chat works with no key and no service, but it cannot reason or paraphrase. Set `openai`, `anthropic` or
-`ollama` for real answers. `EXTRACTIVE_DELAY_MS=40` slows it down so streaming is visible.
-
-```bash
-npm test                 # unit, integration and component tests (needs MongoDB)
-npm run test:coverage    # coverage for core and the API
-npm run lint && npm run typecheck
-```
+It runs on free tiers (Vercel, Render, MongoDB Atlas, Upstash, Supabase Storage), so the first visit after a quiet spell
+waits up to a minute for the API to wake. Retrieval and answers use whichever embedder and model the deployment is
+configured with; with the offline defaults an answer is the best passages quoted back, not written prose. Read the
+[benchmarks](docs/BENCHMARKS.md) before quoting a number.
 
 ## Architecture
-
-The target system. The parts drawn dashed are not built yet.
 
 ```mermaid
 flowchart LR
@@ -81,7 +24,7 @@ flowchart LR
     direction LR
     UP["Upload<br/>PDF, text, images"] --> ST[("Storage<br/>local / S3 / R2")]
     UP --> Q["BullMQ on Redis<br/>retries, backoff, dead letters"]
-    Q --> W["Worker<br/>parse, chunk, embed"]
+    Q --> W["Worker<br/>parse in a child process, chunk, embed"]
     ST --> W
   end
   subgraph answer["Answer lane (streamed)"]
@@ -90,38 +33,27 @@ flowchart LR
     CA --> RT["Retrieve<br/>vector + keyword, filtered"]
     SQ["Search box"] --> RT
     RT --> RR["Fuse and rerank<br/>S1 to S8"]
-    RR --> LLM["LLM<br/>provider interface"]
+    RR --> LLM["LLM<br/>OpenAI, Anthropic, Gemini, Ollama"]
     LLM --> CI["Cite<br/>server maps S-numbers to pages"]
     RR --> CI
   end
   WEB["Web<br/>Next.js + Meridian"] --> API["API<br/>Express + Zod"]
   API --> AC["requireAccess<br/>proof of membership"]
-  AC --> DB[("MongoDB<br/>users, workspaces, documents, chunks")]
+  AC --> DB[("MongoDB Atlas<br/>users, workspaces, documents, chunks, messages")]
   API --> UP
   W --> DB
-  RT --> VS[("Atlas Vector Search + Search<br/>indexes over chunks")]
+  RT --> VS[("Atlas Vector Search + Atlas Search<br/>workspaceId filter inside the query")]
   DB --- VS
-  EV["Evaluation<br/>200+ labelled questions, CI gate (week 5)"] -.-> RT
-  CA --> DB
+  EV["Evaluation<br/>240 labelled questions, CI gate"] --> RT
+  API -.->|OTLP spans| OT["OpenTelemetry<br/>Grafana, Tempo"]
+  W -.->|OTLP spans| OT
 ```
 
-Solid lines exist today. Everything that touches a workspace's data goes through `requireAccess`
-([ADR 0001](docs/adr/0001-workspace-access-is-proved-by-a-type.md)). Chunks and their vectors are already stored
-with their `workspaceId`, and the search indexes filter on it inside the query.
+Everything that touches a workspace's data goes through `requireAccess`
+([ADR 0001](docs/adr/0001-workspace-access-is-proved-by-a-type.md)). Chunks and their vectors are stored with their
+`workspaceId`, and the search indexes filter on it inside the query.
 
-### From upload to indexed (built)
-
-1. The API checks the caller's editor role, reads the first bytes to decide what the file is, stores it, records the
-   document as `queued` and queues a job. It answers `202`.
-2. The worker re-checks that the uploader still has access, then parses the file page by page (PDF text, a text
-   file, or OCR for an image).
-3. Each page is split at paragraph, sentence and word boundaries into chunks that never cross a page
-   ([ADR 0005](docs/adr/0005-chunking-by-structure-with-overlap.md)).
-4. The chunks are embedded in batches and stored with their page, workspace and vector, replacing any earlier
-   attempt. The document becomes `indexed`, or `failed` with a reason the user can act on.
-5. The web app polls while anything is in progress, so the status moves on screen without a refresh.
-
-### How a question becomes a cited answer (built)
+**How a question becomes a cited answer**
 
 1. The UI shows your message instantly and opens a Server-Sent Events stream.
 2. The API rewrites a follow-up ("what about 2025?") into a standalone question.
@@ -130,64 +62,15 @@ with their `workspaceId`, and the search indexes filter on it inside the query.
 5. The model answers from those sources only and cites them by number while tokens stream to the browser.
 6. The server maps each number to its stored page and passage, drops unknown ones, and logs tokens, latency and cost.
 
-## What is built
+**From upload to indexed**
 
-| Week | Phase      | State                                                                                                                                                                                                                                 |
-| ---- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Foundation | **Done.** Accounts, guest login, sessions, workspaces, three roles, member management, threat model, three ADRs, CI, design-system UI.                                                                                                |
-| 2    | Ingest     | Not started. Storage, BullMQ queue, parsing, chunking, embeddings, live status.                                                                                                                                                       |
-| 3    | Retrieval  | Not started. Hybrid search, tenant filter, citations.                                                                                                                                                                                 |
-| 4    | Chat       | **Done.** Streaming over SSE, Stop that saves the partial answer, Regenerate and Retry, follow-up rewriting, saved and searchable history, sharing with the workspace, time to first word shown, safe Markdown with error boundaries. |
-| 5    | Measure    | **Mostly done.** Benchmark of 276 questions, scored runs and a CI gate, an evaluation dashboard, cost per answer, tool approval with an audit trail, a red-team suite. Not yet: a real-model run, an LLM judge, the benchmark report. |
-| 6    | Show       | **Mostly done.** Images and a one-command stack (run end to end), security headers, a load test and benchmark report, SLOs, deploy guide, case study, demo script. **Not done:** a hosted deployment and the recorded video.          |     |
-
-### Numbers
-
-Measured on the development laptop (macOS, Node 22, MongoDB Atlas Local 8.3, Redis 8). Reproduce with
-`docker compose up -d` and `npm run test:coverage`. No performance numbers are published yet: ingest and search
-latency are measured in the week 6 benchmark against a real embedding model, because the hash embedder would
-flatter them.
-
-| What                 | Result                                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Tests                | 479 passing against Atlas Local (shared 34, core 287, API 83, web 66, eval 9); 4 more run in CI against an S3 mock |
-| Without Atlas Search | 319 pass and the 40 search tests are skipped, never faked, on a plain `mongod`                                     |
-| Coverage, core       | 93% statements, 86% branches                                                                                       |
-| Coverage, API        | 96% statements, 88% branches                                                                                       |
-| Cross-workspace hits | 0, in the adversarial suite (each search stage alone, 9 attack queries, 40 random property runs)                   |
-| Streaming            | 20 chunks over 1.1 s through the Next proxy (extractive model at 60 ms a word), uncompressed                       |
-| Strict TypeScript    | `noUncheckedIndexedAccess`, no `any` (lint-enforced)                                                               |
-
-The streaming row measures the transport, not a model: it proves words arrive as they are written and are not held
-back. Time to first word, tokens and total time are recorded on every saved answer, and published against a real
-model with the benchmark in week 5 and 6.
-
-Search tests need `SEARCH_TEST_URL` (for example `mongodb://127.0.0.1:27018` with `docker compose up -d`). The
-full suite ran 5 times in a row without a failure after the index wait was fixed. The two flakes found on the way, and
-what caused them, are written up in [ADR 0007](docs/adr/0007-atlas-search-on-atlas-local.md) and
-[ADR 0008](docs/adr/0008-hybrid-retrieval-and-the-tenant-filter.md).
-
-Known gaps in what the tests cover: the real Tesseract OCR path and the S3 driver's signed links are exercised
-by hand and in CI (S3), not in the default local test run. `parse.ts` is the least covered module (76%) for that
-reason. The CI workflow itself has not been run: I cannot start GitHub Actions from here.
-
-## Repository
-
-```
-atlas-ai/
-├─ apps/
-│  ├─ web/          Next.js frontend, built from @yashwanthvarma74/react
-│  ├─ api/          Express API
-│  └─ worker/       BullMQ worker: parse, chunk, embed
-├─ packages/
-│  ├─ shared/       types and Zod schemas used by both sides
-│  └─ core/         data model, access control, accounts, workspaces,
-│                    documents, queue, parsing, chunking, embeddings, storage
-├─ docs/
-│  ├─ adr/          decision records
-│  └─ THREAT-MODEL.md
-└─ .github/         CI and Dependabot
-```
+1. The API checks the caller's editor role, reads the first bytes to decide what the file is, stores it, records the
+   document as `queued` and queues a job. It answers `202`.
+2. The worker re-checks that the uploader still has access, then parses the file page by page in a child process
+   that holds none of the worker's credentials.
+3. Each page is split at paragraph, sentence and word boundaries into chunks that never cross a page.
+4. The chunks are embedded in batches and stored with their page, workspace and vector. The document becomes
+   `indexed`, or `failed` with a reason the user can act on.
 
 ## Key decisions
 
@@ -202,42 +85,152 @@ atlas-ai/
 - [0009. Citations are owned by the server](docs/adr/0009-citations-are-owned-by-the-server.md)
 - [0010. Answers stream over Server-Sent Events, and Stop means "save what you have"](docs/adr/0010-answers-stream-over-sse-and-stop-means-save.md)
 - [0011. Conversations are private until their author shares them](docs/adr/0011-conversations-are-private-until-shared.md)
+- [0012. The model is behind an interface, and everything it sees or says is untrusted](docs/adr/0012-the-model-is-behind-an-interface-and-everything-it-sees-or-says-is-untrusted.md)
 - [0013. Quality is a number, and a change that lowers it does not merge](docs/adr/0013-quality-is-a-number-and-a-gate.md)
 - [0014. The assistant proposes, and a person approves](docs/adr/0014-the-assistant-proposes-and-a-person-approves.md)
 - [0015. Containers, and the hardening that came with them](docs/adr/0015-containers-and-hardening.md)
-- [0012. The model is behind an interface, and everything it sees or says is untrusted](docs/adr/0012-the-model-is-behind-an-interface-and-everything-it-sees-or-says-is-untrusted.md)
+- [0016. Traces from spans, and a parser in its own process](docs/adr/0016-traces-and-an-isolated-parser.md)
 
-The threat model is in [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
+## Benchmarks and how to reproduce them
 
-## Evaluation results (offline embedder and model)
+Hardware: Apple M4 Pro, 14 cores, 24 GB, macOS, Node 22, MongoDB Atlas Local 8, Redis 8. Dataset: 30 generated
+documents (325 passages) and 240 questions, half in the document's words and half paraphrased, generated from a fixed
+seed so the labels are exact. Models for these runs: the offline hash embedder and the offline extractive answerer, so
+the numbers measure retrieval and the system, not a language model. Full tables and the method are in
+[docs/BENCHMARKS.md](docs/BENCHMARKS.md) and [docs/EVALUATION.md](docs/EVALUATION.md).
 
-Recall@10 is about **89%** on the benchmark (88.7% to 89.2% between runs, because the vector search is approximate; 92% for questions in the document's words, 86% paraphrased), MRR 0.63, with
-**0** cross-workspace retrievals. The 0.90 target is not met. Before tuning it was 71.7%; the chunk size, overlap and
-reranker were chosen from a sweep ([EVALUATION.md](docs/EVALUATION.md)). A relevance cutoff was tried and does not
-help. Citation consistency is 100% but means little for a model that only quotes. The red-team cases are in
-[docs/RED-TEAM.md](docs/RED-TEAM.md). Run it: `docker compose up -d`, then `npm run eval`.
+| Measure                              | Result                                                       | Target            | Reproduce                                                 |
+| ------------------------------------ | ------------------------------------------------------------ | ----------------- | --------------------------------------------------------- |
+| Recall@10                            | **89.2%** (92.5% same words, 85.8% paraphrased)              | 0.90, **not met** | `npm run eval`                                            |
+| Cross-workspace retrievals           | **0**, with each search stage attacked on its own            | 0, met            | `npm run eval`, `isolation.test.ts`                       |
+| Citation consistency                 | 100% of 480 citations (an answerer that only quotes)         | 95%+              | `npm run eval`                                            |
+| Search, 10 in flight                 | p50 7.4 ms, p95 9.5 ms, p99 11.6 ms                          |                   | k6, `infra/k6/atlas.js`                                   |
+| Chat, 10 in flight (offline model)   | p50 11.8 ms, p95 18.5 ms, p99 20.8 ms; 0.00% errors          |                   | k6, `infra/k6/atlas.js`                                   |
+| Time to first word, hosted providers | **not measured**: no hosted model has been benchmarked       | published         | `npm run eval` with a real `LLM_PROVIDER`                 |
+| Cost per answer                      | $0 for the offline model; recorded on every real answer      | measured          | the evaluation page                                       |
+| Query plans                          | every filtered or sorted query uses an index, no memory sort |                   | `npm run explain`, [EXPLAIN-PLANS](docs/EXPLAIN-PLANS.md) |
+| Lighthouse, landing and sign-in      | performance 100, accessibility 100, LCP 0.5 s, CLS 0         | budgets enforced  | `npm run lighthouse`                                      |
+| Web bundle                           | 347 kB gzipped                                               | 400 kB budget     | `npm run size -w @atlas/web`                              |
 
-## What is left, and it is not code
+Honest limits: the 0.90 recall target is missed; the numbers above come from the offline embedder, which matches on
+shared words and not meaning, and will change with a real one. The citation number means little for a model that
+only quotes. Lighthouse measured two routes (the pages that need no sign-in), on localhost.
 
-A hosted deployment with a live link and one-click guest login, the recorded demo video, a run with a real embedder and
-model (which will change every number above).
+## Failure modes
 
-## Known limits of week 5
+What happens when something underneath breaks. Each is a deliberate choice, and the ones with tests name them.
 
-- **Not met:** recall@10 0.90; and no real model or embedder has been measured. The harness records which was used.
-- **Answerability** (saying "the documents do not say") is the model's job and is unmeasured without one.
-- **Tool approval covers one tool** that writes a note; more tools need their own review.
-- **The CI workflow, including the evaluation step, has not been run.**
+| What fails                           | What happens                                                                                                                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Redis is down                        | The API starts and answers; an upload fails fast with "try again" instead of queueing into the void, and chat is unaffected. A sweep re-queues documents saved while it was away. |
+| The queue loses a job                | A sweep re-queues any document stuck in `queued`. Jobs are idempotent, so a duplicate does no harm.                                                                               |
+| The parser crashes or hangs          | It runs in a child process that is killed on a timeout; the document is marked `failed` with a reason and the worker carries on.                                                  |
+| The embedding service is down        | Ingest retries with backoff, then keeps the job as a dead letter and tells the person. Search says the embedding service is unavailable instead of returning nothing.             |
+| The model provider is slow or down   | The first word has 30 seconds and the whole answer two minutes; then the answer is saved as `failed` with a reason and **Retry** is offered. Stop saves what had arrived.         |
+| The browser disconnects mid-answer   | The connection closing aborts the call to the provider and saves the partial answer as `stopped`.                                                                                 |
+| Atlas Search is not available        | Uploading and indexing still work; searching is refused with a clear message, and the app checks again every ten seconds without a restart.                                       |
+| A document tells the model to act    | A tool call is only a proposal: validated, shown to a person with its exact arguments, run once by the conversation's author, and audited ([RED-TEAM](docs/RED-TEAM.md)).         |
+| Two answers race in one conversation | A unique index allows one streaming answer per conversation; the second request gets a 409.                                                                                       |
 
-## Known limits of week 4
+## Run it locally
 
-- **The hosted model providers (OpenAI, Anthropic, Ollama) are untested against their live services.** Their request
-  and stream formats are tested against fixtures in each provider's documented shape. Gemini is not implemented.
-- **Retrieval quality and answer quality are not measured yet.** There is no labelled question set until week 5, and
-  the default embedder and model have no sense of meaning. Nothing here claims a score.
-- **No relevance cutoff.** Search always returns the nearest passages, so an unanswerable question still gets
-  results ([ADR 0008](docs/adr/0008-hybrid-retrieval-and-the-tenant-filter.md)). The cutoff is calibrated in week 5.
-- **A citation is checked to exist, not to support its sentence.** That is the citation-accuracy metric in week 5.
-- **No agents or tool calls yet** (week 5).
-- **Switching embedding model needs a re-index.** The vector index is built for one dimension count.
-- **The CI workflow has not been run**, and the context view shows a page's stored passages, not the rendered PDF page.
+You need Node 22+ and Docker. `docker compose up -d` starts MongoDB with Atlas Search and Vector Search (the
+`mongodb-atlas-local` image, on port 27018) and Redis. If you already run Redis on 6379, start it with
+`REDIS_PORT=6390 docker compose up -d`.
+
+```bash
+cp .env.example .env
+npm install
+docker compose up -d
+npm run seed     # a demo account and 30 documents; it prints the sign-in details
+npm run dev      # web http://localhost:3002, API http://localhost:4002, and the ingest worker
+```
+
+Everything in containers, with no Node needed:
+
+```bash
+JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build
+```
+
+Add traces and a Grafana dashboard (open <http://localhost:3000>, folder "Atlas AI"):
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://grafana:4318 JWT_SECRET=$(openssl rand -base64 48) \
+  docker compose --profile app --profile observability up --build
+```
+
+Real models. The offline defaults need no key. For semantic search and written answers, set the providers in `.env`:
+`EMBEDDING_PROVIDER` is `ollama`, `openai`, `voyage` or `gemini`; `LLM_PROVIDER` is `ollama`, `openai`, `anthropic` or
+`gemini`. A different embedder means a different vector size, so `EMBEDDING_DIMENSIONS` changes with it and the
+vector index is rebuilt (the app refuses to start rather than mix sizes).
+
+```bash
+npm test                  # unit, integration and component tests (needs MongoDB with Atlas Search)
+npm run test:coverage     # core and API, with the 85% floor on core
+npm run lint && npm run typecheck
+npm run eval              # the retrieval benchmark and its gate
+npm run explain           # query plans for every filtered or sorted query
+npm run e2e               # Playwright against the containers (start them first)
+npm run lighthouse        # Lighthouse budgets against the containers
+```
+
+Load test, with k6, against a running API:
+`docker run --rm -i -v "$PWD:/work" -w /work/infra/k6 -e BASE_URL=http://host.docker.internal:4002 grafana/k6 run atlas.js`.
+
+## What changes at 10x and 100x
+
+- **10x (hundreds of users, thousands of documents).** One Node process saturates first; the k6 numbers show latency
+  growing in proportion once 50 requests are in flight. Run the API and the worker as separate services with several
+  API replicas behind a load balancer (nothing in the API holds state), and parse in a pool of workers. The rate
+  limiters keep their counts in each process and move to Redis at this point so replicas agree. Atlas M10 or larger
+  replaces the free tier, with dedicated search nodes.
+- **100x (millions of chunks).** Vector search becomes the cost. Quantised vectors and dedicated search nodes come
+  first; filtering by workspace inside the query already keeps each search small. Embedding becomes a batch pipeline
+  with its own budget and back-pressure, and the model call (not our code) dominates latency and cost, so
+  per-workspace model routing and caching of repeated questions pay for themselves. Evaluation moves from a
+  synthetic set to sampled real traffic with human labels.
+- **What would not change.** The access type, the server-owned citations, the proposal-and-approval path for tools and
+  the gate in CI scale with the code, not with the load.
+
+## Threat model
+
+Short version; the full table with the test behind each row is in [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
+
+| Threat                     | What could happen                                      | Defence                                                                                                                      |
+| -------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Prompt injection in a file | A document tells the model to leak data or call a tool | Document text is data in a block it cannot close. Tools need schema checks, permission checks and approval outside the model |
+| Cross-workspace leak       | Retrieval returns another customer's chunks            | `workspaceId` filter added by server code inside every vector and keyword query; an adversarial suite in CI                  |
+| Malicious upload           | A crafted file crashes or exploits the parser          | Type from the bytes, size and page limits, parsing in a child process with no credentials, nothing executed                  |
+| Runaway cost               | A user or bug burns through tokens                     | Rate limits, token caps, timeouts, cost recorded per answer                                                                  |
+| Secret exposure            | API keys reach the browser or the prompt               | Keys only in server environment variables; request logs never contain headers                                                |
+
+## Repository
+
+```
+atlas-ai/
+├─ apps/
+│  ├─ web/          Next.js frontend, built from @yashwanthvarma74/react
+│  ├─ api/          Express API (and, on hosts with one service, the ingest worker)
+│  ├─ worker/       BullMQ worker: parse, chunk, embed
+│  └─ eval/         the benchmark, the CI gate, query plans, seed script
+├─ packages/
+│  ├─ shared/       types and Zod schemas used by both sides
+│  └─ core/         access control, accounts, workspaces, documents, queue, parsing,
+│                    chunking, embeddings, retrieval, chat, tools, tracing
+├─ infra/           docker-compose, k6 load tests, Grafana dashboard
+├─ e2e/             Playwright: end-to-end flows and accessibility
+├─ docs/            ADRs, threat model, evaluation, benchmarks, SLOs, deploy, case study
+└─ .github/         CI, deploy and Dependabot
+```
+
+More: [SLOs](docs/SLOS.md) · [case study](docs/case-study.md) · [deploying](docs/DEPLOY.md) ·
+[red-team results](docs/RED-TEAM.md) · [resume bullet](docs/resume-bullet.md)
+
+## Known limits
+
+- No hosted model provider has been run against its live service in the benchmark, so nothing here measures one. Their
+  request and stream formats are tested against fixtures in each provider's documented shape.
+- Recall@10 is 89.2%, short of 0.90, on a benchmark answered by an embedder with no sense of meaning.
+- No demo video yet.
+- The Grafana dashboard's span, rate and error panels were checked against Tempo; its latency-percentile panels use
+  TraceQL metrics, which depend on the collector's metrics generator and were not confirmed to draw in this setup.

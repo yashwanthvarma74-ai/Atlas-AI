@@ -8,7 +8,8 @@ services:
     dockerfilePath: apps/api/Dockerfile
     dockerContext: .
     healthCheckPath: /health
-    autoDeploy: true
+    # deployed by .github/workflows/deploy.yml once CI has passed, through this service's deploy hook
+    autoDeploy: false
     envVars:
       - { key: NODE_ENV, value: production }
       - { key: INLINE_WORKER, value: 'true' }

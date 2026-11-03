@@ -80,7 +80,7 @@ export default function SearchPanel({ workspaceId }: { workspaceId: string }) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Show S${source.n} in context`}
+                  aria-label={`Show in context: S${source.n}`}
                   onClick={() => setOpened(source)}
                 >
                   Show in context

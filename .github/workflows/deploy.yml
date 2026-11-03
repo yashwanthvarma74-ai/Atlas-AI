@@ -1,0 +1,29 @@
+name: Deploy
+
+# Runs after CI has passed on main, so a red step anywhere blocks a deploy. The web app deploys itself: Vercel builds
+# every pull request as a preview and main as production. The API is deployed here, through a deploy hook, because
+# render.yaml turns off Render's own deploy-on-push.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    name: Deploy the API
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Ask Render to deploy
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL is not set, so there is nothing to deploy to."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"

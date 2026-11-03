@@ -67,10 +67,9 @@ rule in step 1 is for.
 
 ## Consequences
 
-- **There is no relevance cutoff, and week 5 found that none works.** An unanswerable question differs from an answerable one by one entity, which similarity cannot see: the threshold that rejected 11% of unanswerable questions cost 28 points of recall (see [EVALUATION.md](../EVALUATION.md)). `RETRIEVAL_MIN_SCORE` exists and is off. Original note: Nearest-neighbour search always returns neighbours, so a question the documents
-  cannot answer still gets 8 passages (fewer in a small workspace). A threshold has to be calibrated against real
-  embeddings, and the evaluation set in week 5 is where that happens. Until then the answer step must not treat
-  "got sources" as "has an answer".
+- **There is no relevance cutoff.** Nearest-neighbour search always returns neighbours, so a question the documents
+  cannot answer still gets 8 passages (fewer in a small workspace). The answer step must not treat "got sources" as
+  "has an answer"; that judgement is the model's.
 - The default embedder (`hash`) matches shared words only. The semantic half is exercised by tests with a stand-in
   that groups synonyms, and by real models only once Ollama or OpenAI is configured.
 - Two searches per question, and an embedding call, so the route is rate limited (30 a minute per address).

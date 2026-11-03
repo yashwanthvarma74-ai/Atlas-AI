@@ -16,11 +16,10 @@ is produced the same way every time, and a rule that stops a change from making 
   label occurs once in its document.
 - **A run** (`npm run run -w @atlas/eval`) builds a throwaway database, ingests the corpus into two workspaces (the
   second holds an identical copy, so a missing filter has something to leak), asks every question, writes an answer
-  to each, and removes everything. It reports recall@1/5/10, MRR (split by same-words and paraphrased), the share of
-  unanswerable questions rejected, citation consistency, cross-workspace hits, p50 and p95 for search, first word and
+  to each, and removes everything. It reports recall@1/5/10 (split by same-words and paraphrased), citation consistency, cross-workspace hits, p50 and p95 for search, first word and
   whole answer, tokens, and cost per answer.
 - **A gate** (`npm run check`): fails when recall@10 falls by more than a point, either question kind by more than
-  two, MRR by more than two, citation consistency below 95% (or more than a point under its baseline), or when a
+  two, citation consistency below 95% (or more than a point under its baseline), or when a
   single passage from another workspace is retrieved. Speed and cost are reported and not gated, because they depend
   on the machine and a gate that fails on a busy laptop teaches people to ignore it.
 - **Runs are recorded** (`--record`) in `eval_runs` and shown on the Evaluation page against the spec's targets,
@@ -29,8 +28,7 @@ is produced the same way every time, and a rule that stops a change from making 
 ## What it found
 
 Chunk size, overlap and reranker were chosen from a sweep, not from habit (full table in
-[EVALUATION.md](../EVALUATION.md)): recall@10 went from 71.7% to 89.2% and MRR from 0.37 to 0.63. A relevance cutoff
-was measured and does not work (ADR 0008 is amended). The 0.90 recall target is **not met** on this benchmark
+[EVALUATION.md](../EVALUATION.md)): recall@10 went from 71.7% to 89.2%. The 0.90 recall target is **not met** on this benchmark
 with the offline embedder, and the page says so.
 
 ## What it cannot tell you

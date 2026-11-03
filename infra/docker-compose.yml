@@ -15,7 +15,8 @@ services:
   redis:
     image: redis:8
     volumes: [redis-data:/data]
-    ports: ['6379:6379']
+    # REDIS_PORT is for a machine that already has a Redis on 6379
+    ports: ['${REDIS_PORT:-6379}:6379']
 
   api:
     profiles: [app]

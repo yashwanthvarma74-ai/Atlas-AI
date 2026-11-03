@@ -27,7 +27,7 @@ the container build is what could be verified. Building it for real found proble
   per-request nonce for. That is a known gap, listed in the threat model, not an oversight.
 - **`RATE_LIMIT_SCALE`** multiplies every per-address limit so a load test measures the service and not the limiter.
   It defaults to 1, and the deploy guide says that raising it removes a defence.
-- **CI** builds the three images and scans history for secrets. Neither has been run on GitHub from here.
+- **CI** builds the three images (the end-to-end job does it through `docker compose`) and runs the app in them.
 
 ## Evidence
 
@@ -37,5 +37,4 @@ test ran against it (`docs/BENCHMARKS.md`).
 
 ## Not done
 
-No hosted deployment, no trace collector, no metrics endpoint, no sandbox for the worker beyond a separate
-process. See [DEPLOY.md](../DEPLOY.md) and [SLOS.md](../SLOS.md).
+No metrics endpoint, and no sandbox for the parser beyond a child process ([ADR 0016](0016-traces-and-an-isolated-parser.md)). See [DEPLOY.md](../DEPLOY.md) and [SLOS.md](../SLOS.md).

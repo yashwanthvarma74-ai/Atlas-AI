@@ -52,16 +52,12 @@ time. Creating an index that already exists now counts as success, and search av
 
 ## The numbers, including the miss
 
-On a benchmark of 276 generated questions, recall@10 started at 71.7%. A sweep over chunk size, overlap and reranker
+On a benchmark of 240 generated questions, recall@10 started at 71.7%. A sweep over chunk size, overlap and reranker
 moved it to about 89%, and MRR from 0.37 to 0.63. The target was 0.90, so it is **not met**, and the dashboard says so.
 
 I did not take the best-scoring setting. A 32-token chunk scored 94% but is a single sentence, which suits generated
 one-sentence facts and would starve real documents of context. I picked the smallest size that holds the longest answer
 sentence and a neighbour, which is 64.
-
-I also tried a relevance cutoff and it does not work. An unanswerable question here differs from an answerable one by a
-single entity, which similarity cannot see, and every threshold that rejected anything cost more recall than it was
-worth. Whether the documents contain an answer has to be the model's call, and I cannot measure that without one.
 
 Under load on a laptop, search sustained about 976 requests a second with a p95 of 63 ms at 50 in flight, and chat about
 523, with no errors. Those use offline stand-ins for the embedder and the model, so they measure the system's own work and

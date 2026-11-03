@@ -25,11 +25,14 @@ export default function AccountMenu({ user }: { user: SessionUser | null }) {
       <Menu.Trigger
         variant="ghost"
         size="sm"
-        aria-label={user ? `Account menu for ${user.name}` : 'Display settings'}
+        // with a name on screen the button is named by it, so what a person says matches what they see
+        aria-label={user ? undefined : 'Display settings'}
       >
         {user ? (
           <>
-            <Avatar name={user.name} size="sm" />
+            <span aria-hidden="true" className={styles.avatar}>
+              <Avatar name={user.name} size="sm" />
+            </span>
             <span className={styles.name}>{user.name}</span>
           </>
         ) : (

@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start --port 3002",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "size": "size-limit"
   },
   "dependencies": {
     "@atlas/shared": "*",
@@ -35,5 +36,13 @@
     "size-limit": "^11.2.0",
     "typescript": "^5.9.3",
     "vitest": "^5.0.3"
-  }
+  },
+  "size-limit": [
+    {
+      "name": "JavaScript the browser downloads (gzip)",
+      "path": ".next/static/chunks/**/*.js",
+      "limit": "400 kB",
+      "gzip": true
+    }
+  ]
 }

@@ -20,7 +20,9 @@
     "test:coverage": "npm run test:coverage -w @atlas/core -w @atlas/api",
     "eval": "npm run check -w @atlas/eval",
     "seed": "npm run seed -w @atlas/eval",
-    "explain": "npm run explain -w @atlas/eval"
+    "explain": "npm run explain -w @atlas/eval",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "lighthouse": "lhci autorun"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
