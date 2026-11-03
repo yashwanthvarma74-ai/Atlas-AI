@@ -40,6 +40,17 @@ tried. What it would need, from the code:
 5. `SITE_ORIGIN` must be the web app's public URL: writes naming any other origin are refused.
 6. `TRUST_PROXY_HOPS` must match the number of proxies in front of the API, or rate limits see the wrong address.
 
+## A free setup with no card
+
+`render.yaml` describes one free Render web service: the API with the ingest worker inside it (`INLINE_WORKER=true`).
+Around it, all on free plans that did not ask for a card when this was written: MongoDB Atlas M0 for the database,
+Upstash for Redis, Supabase Storage for files (it speaks S3: set `S3_ENDPOINT` to its `/storage/v1/s3` address and
+`S3_REGION` to the project's region), and Vercel Hobby for the web app, built with `API_URL` set to the Render address.
+`MONGODB_URI` must end in a database name, because the app uses the one in the address.
+
+The limits to expect: the Render service sleeps after 15 minutes without traffic, so the first visit afterwards waits
+for it to wake; the free Redis has a monthly command quota; and Supabase pauses a project after a week without use.
+
 ## Before pointing the public at it
 
 - Keep `RATE_LIMIT_SCALE` at 1.

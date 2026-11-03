@@ -1,0 +1,29 @@
+# One free web service: the API with the ingest worker inside it. Secrets are asked for when the blueprint is
+# applied, so none are in this file. See docs/DEPLOY.md.
+services:
+  - type: web
+    name: atlas-api
+    runtime: docker
+    plan: free
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: INLINE_WORKER, value: 'true' }
+      # the browser reaches the API through the web app's proxy, so there are two hops in front of it
+      - { key: TRUST_PROXY_HOPS, value: '2' }
+      # the web app's public address; writes naming any other origin are refused
+      - { key: SITE_ORIGIN, sync: false }
+      - { key: JWT_SECRET, generateValue: true }
+      # must end in a database name, for example .../atlas_ai?retryWrites=true&w=majority
+      - { key: MONGODB_URI, sync: false }
+      # the rediss:// address, with TLS
+      - { key: REDIS_URL, sync: false }
+      - { key: STORAGE_DRIVER, value: s3 }
+      - { key: S3_ENDPOINT, sync: false }
+      - { key: S3_REGION, sync: false }
+      - { key: S3_BUCKET, value: atlas-uploads }
+      - { key: S3_ACCESS_KEY_ID, sync: false }
+      - { key: S3_SECRET_ACCESS_KEY, sync: false }
