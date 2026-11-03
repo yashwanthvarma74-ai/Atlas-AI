@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import {
   IN_PROGRESS_STATUSES,
+  type UpdateConversationInput,
   type LoginInput,
   type MemberRole,
   type RegisterInput,
@@ -12,12 +13,15 @@ import {
 } from '@atlas/shared';
 import { api } from './api';
 
-const keys = {
+export const keys = {
   session: ['session'] as const,
   workspaces: ['workspaces'] as const,
   workspace: (id: string) => ['workspaces', id] as const,
   members: (id: string) => ['workspaces', id, 'members'] as const,
   documents: (id: string) => ['workspaces', id, 'documents'] as const,
+  conversations: (id: string) => ['workspaces', id, 'conversations'] as const,
+  conversation: (id: string, conversationId: string) =>
+    ['workspaces', id, 'conversations', conversationId] as const,
   passages: (id: string, documentId: string, page: number) =>
     ['workspaces', id, 'documents', documentId, 'passages', page] as const,
 };
@@ -179,5 +183,46 @@ export function usePassages(
     queryKey: keys.passages(workspaceId, documentId, page),
     queryFn: () => api.passages(workspaceId, documentId, page),
     enabled,
+  });
+}
+
+export function useConversations(workspaceId: string, search: string) {
+  return useQuery({
+    queryKey: [...keys.conversations(workspaceId), { search }],
+    queryFn: () => api.conversations(workspaceId, search || undefined),
+  });
+}
+
+export function useConversation(workspaceId: string, conversationId: string) {
+  return useQuery({
+    queryKey: keys.conversation(workspaceId, conversationId),
+    queryFn: () => api.conversation(workspaceId, conversationId),
+    retry: false,
+  });
+}
+
+export function useCreateConversation(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.createConversation(workspaceId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.conversations(workspaceId) }),
+  });
+}
+
+export function useUpdateConversation(workspaceId: string, conversationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (changes: UpdateConversationInput) =>
+      api.updateConversation(workspaceId, conversationId, changes),
+    // the conversation's own record holds the title and sharing, so both views need to hear about it
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.conversations(workspaceId) }),
+  });
+}
+
+export function useDeleteConversation(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => api.deleteConversation(workspaceId, conversationId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.conversations(workspaceId) }),
   });
 }

@@ -36,6 +36,23 @@ const envSchema = z.object({
   CHUNK_TARGET_TOKENS: z.coerce.number().int().positive().default(256),
   CHUNK_OVERLAP_TOKENS: z.coerce.number().int().min(0).default(32),
   // The longest any one ingest stage may run before the job is failed and retried.
+  // The model that writes answers. "extractive" needs no service and no key: it answers by quoting the
+  // passages it is given, which is enough to run and test the whole chat pipeline offline. Real answers
+  // need "openai", "anthropic" or "ollama".
+  LLM_PROVIDER: z.enum(['extractive', 'openai', 'anthropic', 'ollama']).default('extractive'),
+  // defaults per provider: gpt-4o-mini, claude-haiku-5-5, llama3.2
+  LLM_MODEL: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  // Only for the extractive provider: a pause between words, so streaming can be seen on screen.
+  EXTRACTIVE_DELAY_MS: z.coerce.number().int().min(0).default(0),
+
+  CHAT_MAX_OUTPUT_TOKENS: z.coerce.number().int().positive().default(1024),
+  // How many earlier messages go to the model, and to the question rewriter, with a follow-up.
+  CHAT_HISTORY_MESSAGES: z.coerce.number().int().min(0).default(6),
+  // The model has this long to start answering, and this long in all, before the answer is stopped.
+  CHAT_FIRST_TOKEN_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  CHAT_TOTAL_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
+
   // How many passages a question gets (S1 to S8) and how many candidates each search contributes first.
   RETRIEVAL_LIMIT: z.coerce.number().int().positive().default(8),
   RETRIEVAL_POOL: z.coerce.number().int().positive().default(30),

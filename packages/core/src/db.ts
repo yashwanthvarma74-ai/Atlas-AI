@@ -1,5 +1,12 @@
 import { MongoClient, type Collection, type Db, type ObjectId } from 'mongodb';
-import type { DocumentKind, DocumentStatus, Role } from '@atlas/shared';
+import type {
+  Citation,
+  ConversationVisibility,
+  DocumentKind,
+  DocumentStatus,
+  MessageStatus,
+  Role,
+} from '@atlas/shared';
 
 export interface UserDoc {
   _id: ObjectId;
@@ -60,6 +67,35 @@ export interface ChunkDoc {
   embeddingModel: string;
 }
 
+export interface ConversationDoc {
+  _id: ObjectId;
+  workspaceId: ObjectId;
+  // the author: the only person who can add to it, rename it, share it or delete it
+  userId: ObjectId;
+  title: string;
+  visibility: ConversationVisibility;
+  createdAt: Date;
+  // bumped by every message, so the history lists the live conversations first
+  updatedAt: Date;
+}
+
+export interface MessageDoc {
+  _id: ObjectId;
+  conversationId: ObjectId;
+  // repeated from the conversation so a message can be found or removed by workspace alone
+  workspaceId: ObjectId;
+  role: 'user' | 'assistant';
+  content: string;
+  status: MessageStatus;
+  error: string | null;
+  citations: Citation[];
+  usage: { inputTokens: number; outputTokens: number } | null;
+  latency: { retrievalMs: number; ttftMs: number | null; totalMs: number } | null;
+  // which model wrote it, for the cost and quality numbers in week 5
+  model: string | null;
+  createdAt: Date;
+}
+
 export interface Database {
   client: MongoClient;
   db: Db;
@@ -68,6 +104,8 @@ export interface Database {
   memberships: Collection<MembershipDoc>;
   documents: Collection<DocumentDoc>;
   chunks: Collection<ChunkDoc>;
+  conversations: Collection<ConversationDoc>;
+  messages: Collection<MessageDoc>;
 }
 
 export async function connect(uri: string): Promise<Database> {
@@ -82,6 +120,8 @@ export async function connect(uri: string): Promise<Database> {
     memberships: db.collection('memberships'),
     documents: db.collection('documents'),
     chunks: db.collection('chunks'),
+    conversations: db.collection('conversations'),
+    messages: db.collection('messages'),
   };
 }
 
@@ -106,6 +146,29 @@ export async function ensureIndexes(d: Database): Promise<void> {
 
     // a document's chunks in reading order, and removing them all when it is deleted or re-processed
     d.chunks.createIndex({ documentId: 1, ord: 1 }, { unique: true }),
+
+    // the history: this person's conversations, and the ones shared with the workspace, newest first
+    d.conversations.createIndex({ workspaceId: 1, userId: 1, updatedAt: -1 }),
+    d.conversations.createIndex({ workspaceId: 1, visibility: 1, updatedAt: -1 }),
+    d.conversations.createIndex({ workspaceId: 1, title: 'text' }),
+
+    // a conversation's messages in order, and searching what was said inside one workspace
+    d.messages.createIndex({ conversationId: 1, createdAt: 1, _id: 1 }),
+    d.messages.createIndex({ workspaceId: 1, content: 'text' }),
+    // at most one answer is being written per conversation: the database refuses a second one
+    d.messages.createIndex(
+      { conversationId: 1 },
+      {
+        unique: true,
+        partialFilterExpression: { status: 'streaming' },
+        name: 'one_streaming_answer',
+      },
+    ),
+    // the sweep that fails answers whose writer died
+    d.messages.createIndex(
+      { status: 1, createdAt: 1 },
+      { partialFilterExpression: { status: 'streaming' } },
+    ),
   ]);
 }
 

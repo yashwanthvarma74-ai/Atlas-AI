@@ -12,3 +12,5 @@ export const DOCUMENT_NAME_MAX_LENGTH = 200;
 
 export const QUESTION_MAX_LENGTH = 500;
 export const SEARCH_MAX_DOCUMENTS = 20;
+export const CONVERSATION_TITLE_MAX_LENGTH = 80;
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation';

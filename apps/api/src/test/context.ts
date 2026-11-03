@@ -1,3 +1,5 @@
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { pino } from 'pino';
 import request from 'supertest';
 import { createTestCore, type TestCore } from '@atlas/core/test';
@@ -13,6 +15,8 @@ export interface TestApp {
   browser(): Client;
   // a browser that has just registered a new account
   signUp(email: string, name?: string): Promise<Client>;
+  // the app on a real port, for tests that need a connection they can close part-way
+  serve(): Promise<{ url: string; close(): Promise<void> }>;
   destroy(): Promise<void>;
 }
 
@@ -33,6 +37,19 @@ export async function createTestApp(core?: TestCore): Promise<TestApp> {
       const client = browser();
       await client.post('/auth/register').send({ name, email, password: PASSWORD }).expect(201);
       return client;
+    },
+    async serve() {
+      const server = createServer(app);
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+      const { port } = server.address() as AddressInfo;
+      return {
+        url: `http://127.0.0.1:${port}`,
+        close: () =>
+          new Promise<void>((resolve) => {
+            server.closeAllConnections();
+            server.close(() => resolve());
+          }),
+      };
     },
     destroy: () => core.destroy(),
   };

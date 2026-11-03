@@ -51,6 +51,21 @@ needs an account, a network and credentials that a reviewer cloning the reposito
 - The whole test suite runs against Atlas Local on every change. The suite ran eight times in a row with no
   failures after the wait helper was fixed (see 0008 for what the flakes taught).
 
+## What running it for real caught (added in week 4)
+
+The first full run of the API and the worker together disabled search for the whole life of the API. Both
+processes start at once, both found no search indexes, both tried to create them, and the slower one was told the
+name was taken. The code treated any error as "this database cannot search", and that answer was remembered until
+restart. Two replicas starting together would do it every time.
+
+Two changes, each with a regression test that fails if it is reverted:
+
+- Creating an index that already exists counts as success (`createIfMissing`). Five concurrent starts all report
+  that search is available and leave exactly two indexes.
+- "Search is not available" is not permanent. `core.recheckSearch()` asks again, at most every ten seconds, the next
+  time a search is attempted. The search service of Atlas Local also finishes starting a few seconds after the
+  database does, so a restart should never be the cure.
+
 ## Alternatives
 
 - **Pinecone, Qdrant or pgvector for vectors.** Strong, and a second store to sync and a second place to enforce

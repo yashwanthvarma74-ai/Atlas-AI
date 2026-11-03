@@ -1,0 +1,6 @@
+.composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--mrd-space-3);
+}

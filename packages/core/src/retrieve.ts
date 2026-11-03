@@ -93,7 +93,7 @@ export async function retrieve(
   question: string,
   options: RetrieveOptions = {},
 ): Promise<Source[]> {
-  if (!core.searchAvailable) {
+  if (!core.searchAvailable && !(await core.recheckSearch())) {
     throw unavailable(
       'Search is not available on this database. Run MongoDB Atlas, or Atlas Local.',
     );

@@ -7,6 +7,22 @@ interface ExistingIndex {
   latestDefinition?: { fields?: { type: string; numDimensions?: number }[] };
 }
 
+// Two processes starting together (the API and the worker, or two replicas) both see "no index yet" and both
+// create it. The slower one is told the name is taken, which means the job is done, not that it failed.
+const isAlreadyThere = (error: unknown) =>
+  /duplicate index|already exists/i.test(error instanceof Error ? error.message : String(error));
+
+async function createIfMissing(
+  database: Database,
+  spec: Parameters<Database['chunks']['createSearchIndex']>[0],
+): Promise<void> {
+  try {
+    await database.chunks.createSearchIndex(spec);
+  } catch (error) {
+    if (!isAlreadyThere(error)) throw error;
+  }
+}
+
 export const VECTOR_INDEX = 'chunk_vectors';
 export const TEXT_INDEX = 'chunk_text';
 
@@ -46,7 +62,7 @@ export async function ensureSearchIndexes(
 
     const vector = byName.get(VECTOR_INDEX);
     if (!vector) {
-      await database.chunks.createSearchIndex({
+      await createIfMissing(database, {
         name: VECTOR_INDEX,
         type: 'vectorSearch',
         definition: vectorDefinition(dimensions),
@@ -66,7 +82,7 @@ export async function ensureSearchIndexes(
     }
 
     if (!byName.has(TEXT_INDEX)) {
-      await database.chunks.createSearchIndex({ name: TEXT_INDEX, definition: textDefinition });
+      await createIfMissing(database, { name: TEXT_INDEX, definition: textDefinition });
     }
     return true;
   } catch (error) {

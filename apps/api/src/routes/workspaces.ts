@@ -16,6 +16,7 @@ import {
   type Core,
 } from '@atlas/core';
 import { idParam, limit, parse, workspaceAccess } from '../http';
+import { conversationsRouter } from './conversations';
 import { documentsRouter } from './documents';
 import { searchRouter } from './search';
 import { requireUser } from '../middleware';
@@ -68,6 +69,7 @@ export function workspacesRouter(core: Core): Router {
 
   router.use('/:id/documents', documentsRouter(core));
   router.use('/:id/search', searchRouter(core));
+  router.use('/:id/conversations', conversationsRouter(core));
 
   return router;
 }

@@ -40,6 +40,9 @@ export default function WorkspaceView({ id }: { id: string }) {
       <div className={styles.heading}>
         <h1>{data.name}</h1>
         <Badge variant={data.role === 'owner' ? 'accent' : 'neutral'}>{data.role}</Badge>
+        <Link href={`/w/${data.id}/chat`} className={styles.chat}>
+          Conversations
+        </Link>
       </div>
       <DocumentLibrary workspaceId={data.id} role={data.role} />
       <SearchPanel workspaceId={data.id} />

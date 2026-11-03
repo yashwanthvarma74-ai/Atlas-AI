@@ -1,5 +1,8 @@
 import type {
   AddMemberInput,
+  Conversation,
+  Message,
+  UpdateConversationInput,
   CreateWorkspaceInput,
   DocumentSummary,
   LoginInput,
@@ -131,6 +134,41 @@ export const api = {
       )
     ).passages;
   },
+
+  // ---- conversations ----
+  async conversations(workspaceId: string, search?: string) {
+    const query = search ? `?q=${encodeURIComponent(search)}` : '';
+    return (
+      await request<{ conversations: Conversation[] }>(
+        `/workspaces/${workspaceId}/conversations${query}`,
+      )
+    ).conversations;
+  },
+  async conversation(workspaceId: string, id: string) {
+    return request<{ conversation: Conversation; messages: Message[] }>(
+      `/workspaces/${workspaceId}/conversations/${id}`,
+    );
+  },
+  async createConversation(workspaceId: string) {
+    return (
+      await request<{ conversation: Conversation }>(`/workspaces/${workspaceId}/conversations`, {
+        method: 'POST',
+      })
+    ).conversation;
+  },
+  async updateConversation(workspaceId: string, id: string, changes: UpdateConversationInput) {
+    return (
+      await request<{ conversation: Conversation }>(
+        `/workspaces/${workspaceId}/conversations/${id}`,
+        {
+          method: 'PATCH',
+          json: changes,
+        },
+      )
+    ).conversation;
+  },
+  deleteConversation: (workspaceId: string, id: string) =>
+    request(`/workspaces/${workspaceId}/conversations/${id}`, { method: 'DELETE' }),
 
   // ---- members ----
   async members(workspaceId: string) {

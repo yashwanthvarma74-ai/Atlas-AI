@@ -124,7 +124,7 @@ describe.skipIf(!SEARCH_TEST_URL)('retrieve', () => {
   });
 
   it('refuses, saying why, on a database with no Atlas Search', async () => {
-    const plain = { ...core, searchAvailable: false };
+    const plain = { ...core, searchAvailable: false, recheckSearch: async () => false };
     await expect(retrieve(plain, ws, 'anything')).rejects.toMatchObject({ status: 503 });
   });
 

@@ -8,3 +8,8 @@
   align-items: center;
   gap: var(--mrd-space-3);
 }
+
+.chat {
+  margin-left: auto;
+  font-weight: var(--mrd-font-weight-medium);
+}

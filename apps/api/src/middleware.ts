@@ -44,6 +44,12 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
   // Express recognises an error handler by its four parameters, so _next has to stay.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (error, _req, res, _next) => {
+    // a stream that has started cannot become an error response; the connection is simply closed
+    if (res.headersSent) {
+      logger.error({ err: error }, 'error after the response started');
+      res.end();
+      return;
+    }
     if (error instanceof HttpError) {
       res.status(error.status).json({ error: { code: error.code, message: error.message } });
       return;

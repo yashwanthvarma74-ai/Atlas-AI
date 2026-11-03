@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  CONVERSATION_TITLE_MAX_LENGTH,
   DOCUMENT_NAME_MAX_LENGTH,
   EMAIL_MAX_LENGTH,
   NAME_MAX_LENGTH,
@@ -175,3 +176,78 @@ export const passageSchema = z.object({
   text: z.string(),
 });
 export type Passage = z.infer<typeof passageSchema>;
+
+// ---- chat ----
+
+export const conversationVisibilitySchema = z.enum(['private', 'workspace']);
+export type ConversationVisibility = z.infer<typeof conversationVisibilitySchema>;
+
+export const conversationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  // private: only its author reads it. workspace: every member can read it; only the author can add to it.
+  visibility: conversationVisibilitySchema,
+  authorId: z.string(),
+  authorName: z.string(),
+  mine: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Conversation = z.infer<typeof conversationSchema>;
+
+export const updateConversationInputSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Enter a title.').max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
+    visibility: conversationVisibilitySchema.optional(),
+  })
+  .refine((input) => input.title !== undefined || input.visibility !== undefined, {
+    message: 'Nothing to change.',
+  });
+export type UpdateConversationInput = z.infer<typeof updateConversationInputSchema>;
+
+export const sendMessageInputSchema = z.object({
+  content: z
+    .string()
+    .trim()
+    .min(1, 'Ask a question.')
+    .max(QUESTION_MAX_LENGTH, `Use at most ${QUESTION_MAX_LENGTH} characters.`),
+});
+export type SendMessageInput = z.infer<typeof sendMessageInputSchema>;
+
+// streaming: being written now. stopped: the user pressed Stop; what arrived is kept. failed: see `error`.
+export const messageStatusSchema = z.enum(['streaming', 'complete', 'stopped', 'failed']);
+export type MessageStatus = z.infer<typeof messageStatusSchema>;
+
+export const citationSchema = z.object({
+  n: z.number(),
+  chunkId: z.string(),
+  documentId: z.string(),
+  documentName: z.string(),
+  page: z.number(),
+  quote: z.string(),
+});
+export type Citation = z.infer<typeof citationSchema>;
+
+export const messageSchema = z.object({
+  id: z.string(),
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+  status: messageStatusSchema,
+  error: z.string().nullable(),
+  citations: z.array(citationSchema),
+  usage: z.object({ inputTokens: z.number(), outputTokens: z.number() }).nullable(),
+  // where the time went: finding passages, waiting for the first word, and everything
+  latency: z
+    .object({ retrievalMs: z.number(), ttftMs: z.number().nullable(), totalMs: z.number() })
+    .nullable(),
+  createdAt: z.string(),
+});
+export type Message = z.infer<typeof messageSchema>;
+
+// What the server sends while an answer is written, as Server-Sent Events named after `type`.
+export type ChatStreamEvent =
+  | { type: 'start'; userMessageId: string; assistantMessageId: string }
+  | { type: 'sources'; sources: { n: number; documentName: string; page: number }[] }
+  | { type: 'token'; text: string }
+  // the finished message, whatever way it ended: complete, stopped or failed
+  | { type: 'done'; message: Message };

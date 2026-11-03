@@ -1,0 +1,30 @@
+.page {
+  display: grid;
+  gap: var(--mrd-space-4);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mrd-space-4);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--mrd-space-3);
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mrd-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.empty {
+  color: var(--mrd-color-text-secondary);
+}

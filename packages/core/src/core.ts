@@ -3,6 +3,7 @@ import { pino, type Logger } from 'pino';
 import type { Config } from './config';
 import { connect, ensureIndexes, type Database } from './db';
 import { createEmbedder, type Embedder } from './embeddings';
+import { createLlm, type LlmProvider } from './llm';
 import { createQueues, type Queues } from './queues';
 import { ensureSearchIndexes } from './search-indexes';
 import { createStorage, type Storage } from './storage';
@@ -13,17 +14,24 @@ export interface Core {
   database: Database;
   // false on a database with no Atlas Search service: documents still index, but searching is refused
   searchAvailable: boolean;
+  // Asks again whether search is there, at most every few seconds, and updates `searchAvailable`. A database
+  // can finish starting its search service after the app has started, and that must not need a restart.
+  recheckSearch(): Promise<boolean>;
   queues: Queues;
   storage: Storage;
   embedder: Embedder;
+  llm: LlmProvider;
   logger: Logger;
   close(): Promise<void>;
 }
+
+const SEARCH_RECHECK_MS = 10_000;
 
 export interface CoreOptions {
   logger?: Logger;
   storage?: Storage;
   embedder?: Embedder;
+  llm?: LlmProvider;
 }
 
 export async function createCore(config: Config, options: CoreOptions = {}): Promise<Core> {
@@ -40,13 +48,26 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
 
   const queues = createQueues(redis, config.REDIS_PREFIX, config.INGEST_BACKOFF_MS);
 
-  return {
+  let lastSearchCheck = Date.now();
+  const core: Core = {
     config,
     database,
     searchAvailable,
+    async recheckSearch() {
+      if (core.searchAvailable) return true;
+      if (Date.now() - lastSearchCheck < SEARCH_RECHECK_MS) return false;
+      lastSearchCheck = Date.now();
+      core.searchAvailable = await ensureSearchIndexes(
+        database,
+        config.EMBEDDING_DIMENSIONS,
+        logger,
+      );
+      return core.searchAvailable;
+    },
     queues,
     storage: options.storage ?? createStorage(config),
     embedder: options.embedder ?? createEmbedder(config),
+    llm: options.llm ?? createLlm(config),
     logger,
     close: async () => {
       await queues.close().catch(() => undefined);
@@ -54,6 +75,7 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
       await database.client.close();
     },
   };
+  return core;
 }
 
 // Waits for the first connection so the first command does not fail while it is still being made.

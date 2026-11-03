@@ -3,6 +3,7 @@ import { Redis } from 'ioredis';
 import { ObjectId } from 'mongodb';
 import type { Core } from './core';
 import { hex } from './ids';
+import { failAllStaleAnswers } from './answer';
 import { markFailed, PermanentIngestError, processDocument } from './ingest';
 import { enqueueIngest, INGEST_ATTEMPTS, type IngestJob } from './queues';
 import type { ParseDeps } from './parse';
@@ -55,7 +56,10 @@ export function startIngestWorker(core: Core, deps: ParseDeps = {}): IngestWorke
   });
   worker.on('error', (error) => log.error({ err: error.message }, 'worker error'));
 
-  const sweep = setInterval(() => void requeueStale(core).catch(() => undefined), SWEEP_EVERY_MS);
+  const sweep = setInterval(() => {
+    void requeueStale(core).catch(() => undefined);
+    void failAllStaleAnswers(core).catch(() => undefined);
+  }, SWEEP_EVERY_MS);
 
   return {
     async stop() {

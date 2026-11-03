@@ -155,7 +155,11 @@ describe.skipIf(!SEARCH_TEST_URL)('search API', () => {
 describe('search API without Atlas Search', () => {
   it('says so with 503 instead of failing', async () => {
     // whatever the test database is, behave as if it had no search service
-    const t = await createTestApp({ ...(await createTestCore()), searchAvailable: false });
+    const t = await createTestApp({
+      ...(await createTestCore()),
+      searchAvailable: false,
+      recheckSearch: async () => false,
+    });
     try {
       const owner = await t.signUp('owner@plain.test');
       const id = await workspaceWith(owner);
