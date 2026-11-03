@@ -1,3 +1,4 @@
+/* global __ENV, open */
 // Load test for the API: search, then chat, at 1, 10 and 50 requests in flight.
 //
 //   docker run --rm -i -v "$PWD:/work" -w /work/infra/k6 -e BASE_URL=http://host.docker.internal:4002 grafana/k6 run atlas.js
