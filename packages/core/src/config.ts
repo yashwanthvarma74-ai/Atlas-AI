@@ -33,6 +33,9 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   // Any service that speaks the OpenAI API can stand in for OpenAI, for chat and for embeddings.
   OPENAI_BASE_URL: z.string().default('https://api.openai.com/v1'),
+  // How much a reasoning model may think before it answers, for services that accept the setting. Unset sends
+  // nothing. Thinking time counts towards the wait for the first word.
+  LLM_REASONING_EFFORT: z.enum(['none', 'minimal', 'low', 'medium', 'high']).optional(),
 
   // Chunk size in tokens (estimated at four characters each) and how much neighbouring chunks share. The defaults
   // come from the evaluation sweep, with the reasoning in docs/EVALUATION.md and ADR 0005.

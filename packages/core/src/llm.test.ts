@@ -56,6 +56,17 @@ describe('OpenAI provider', () => {
     expect(fetch.mock.calls[0]![0]).toBe('https://models.example.test/v1/chat/completions');
   });
 
+  it('passes the reasoning effort along only when one is set', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => streamOf(chunks));
+    await collect(createOpenAI('k', 'm', undefined, 'low').stream(request()));
+    await collect(createOpenAI('k', 'm').stream(request()));
+    const [withEffort, without] = fetch.mock.calls.map(([, init]) =>
+      JSON.parse(init!.body as string),
+    );
+    expect(withEffort.reasoning_effort).toBe('low');
+    expect(without).not.toHaveProperty('reasoning_effort');
+  });
+
   it('streams the text and reports the token counts', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
     const events = await collect(createOpenAI('sk-test', 'gpt-test').stream(request()));

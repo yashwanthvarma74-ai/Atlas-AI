@@ -83,6 +83,7 @@ export function createOpenAI(
   apiKey: string,
   model: string,
   baseUrl = 'https://api.openai.com/v1',
+  reasoningEffort?: string,
 ): LlmProvider {
   return {
     provider: 'openai',
@@ -96,6 +97,7 @@ export function createOpenAI(
           // asks for a final chunk with the token counts
           stream_options: { include_usage: true },
           max_completion_tokens: maxTokens,
+          ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
           messages: [{ role: 'system', content: system }, ...messages],
         },
         { Authorization: `Bearer ${apiKey}` },
@@ -281,7 +283,12 @@ export function createLlm(config: Config): LlmProvider {
     case 'openai':
       if (!config.OPENAI_API_KEY)
         throw new Error('OPENAI_API_KEY is required for LLM_PROVIDER=openai.');
-      return createOpenAI(config.OPENAI_API_KEY, model ?? 'gpt-4o-mini', config.OPENAI_BASE_URL);
+      return createOpenAI(
+        config.OPENAI_API_KEY,
+        model ?? 'gpt-4o-mini',
+        config.OPENAI_BASE_URL,
+        config.LLM_REASONING_EFFORT,
+      );
     case 'anthropic':
       if (!config.ANTHROPIC_API_KEY)
         throw new Error('ANTHROPIC_API_KEY is required for LLM_PROVIDER=anthropic.');
