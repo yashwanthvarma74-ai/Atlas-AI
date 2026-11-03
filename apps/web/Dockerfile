@@ -1,7 +1,7 @@
 # Build from the repository root:  docker build -f apps/web/Dockerfile -t atlas-web .
 # API_URL is where /api/* is proxied to. Next compiles rewrites into the build, so it is a build argument and
 # changing it means building the image again.
-FROM node:22-slim AS build
+FROM node:26-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/core/package.json ./packages/core/package.json
@@ -17,7 +17,7 @@ ARG API_URL=http://api:4002
 ENV API_URL=$API_URL
 RUN npm run build -w @atlas/web && npm prune --omit=dev
 
-FROM node:22-slim
+FROM node:26-slim
 WORKDIR /app/apps/web
 ENV NODE_ENV=production
 COPY --from=build /app/node_modules /app/node_modules
