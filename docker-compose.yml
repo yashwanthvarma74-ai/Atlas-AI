@@ -24,7 +24,9 @@ services:
       COOKIE_SECURE: 'false'
       MONGODB_URI: mongodb://mongo:27017/atlas_ai?directConnection=true
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET (see the comment at the top of this file)}
+      # not ${JWT_SECRET:?}: compose checks that for every service, profile or not, so it broke the backing-services
+      # line above. Unset, the API gets an empty secret and refuses to start (config wants 32+ characters).
+      JWT_SECRET: ${JWT_SECRET:-}
       SITE_ORIGIN: http://localhost:3002
       STORAGE_DRIVER: local
       UPLOAD_DIR: /data/uploads
