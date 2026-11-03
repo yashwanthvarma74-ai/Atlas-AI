@@ -4,6 +4,7 @@ import {
   DEFAULT_CONVERSATION_TITLE,
   type Conversation,
   type Message,
+  type ToolCall,
   type UpdateConversationInput,
 } from '@atlas/shared';
 import type { WorkspaceAccess } from './access';
@@ -11,6 +12,7 @@ import type { Core } from './core';
 import type { ConversationDoc, MessageDoc } from './db';
 import { forbidden, notFound } from './errors';
 import { hex } from './ids';
+import { listConversationToolCalls } from './tools';
 
 const LIST_LIMIT = 50;
 
@@ -22,6 +24,7 @@ export const toMessage = (doc: MessageDoc): Message => ({
   error: doc.error,
   citations: doc.citations,
   usage: doc.usage,
+  costUsd: doc.costUsd,
   latency: doc.latency,
   createdAt: doc.createdAt.toISOString(),
 });
@@ -141,7 +144,7 @@ export async function getConversation(
   core: Core,
   access: WorkspaceAccess,
   id: ObjectId,
-): Promise<{ conversation: Conversation; messages: Message[] }> {
+): Promise<{ conversation: Conversation; messages: Message[]; toolCalls: ToolCall[] }> {
   const doc = await loadConversation(core, access, id, 'read');
   const messages = await core.database.messages
     .find({ conversationId: doc._id, workspaceId: access.workspaceId })
@@ -150,6 +153,7 @@ export async function getConversation(
   return {
     conversation: (await toConversations(core, access, [doc]))[0]!,
     messages: messages.map(toMessage),
+    toolCalls: await listConversationToolCalls(core, access, doc._id),
   };
 }
 

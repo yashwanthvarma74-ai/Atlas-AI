@@ -2,12 +2,12 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChatStreamEvent, Conversation, Message } from '@atlas/shared';
+import type { ChatStreamEvent, Conversation, Message, ToolCall } from '@atlas/shared';
 import { ApiError } from './api';
 import { keys } from './queries';
 import { streamChat } from './stream';
 
-type Cached = { conversation: Conversation; messages: Message[] };
+type Cached = { conversation: Conversation; messages: Message[]; toolCalls: ToolCall[] };
 
 // The answer being written right now. It lives here, outside the query cache, because it is changing
 // several times a second and is not saved yet.
@@ -80,7 +80,16 @@ export function useChat(workspaceId: string, conversationId: string): Chat {
             queryClient.setQueryData<Cached>(key, (cached) => {
               if (!cached) return cached;
               if (kind === 'regenerate') {
-                return { ...cached, messages: [...cached.messages.slice(0, -1), event.message] };
+                // the answer being replaced takes its requests with it
+                const replaced = cached.messages.at(-1)?.id;
+                return {
+                  ...cached,
+                  messages: [...cached.messages.slice(0, -1), event.message],
+                  toolCalls: [
+                    ...cached.toolCalls.filter((call) => call.messageId !== replaced),
+                    ...event.toolCalls,
+                  ],
+                };
               }
               const asked: Message = {
                 id: userMessageId ?? `local-${Date.now()}`,
@@ -90,10 +99,15 @@ export function useChat(workspaceId: string, conversationId: string): Chat {
                 error: null,
                 citations: [],
                 usage: null,
+                costUsd: null,
                 latency: null,
                 createdAt: new Date().toISOString(),
               };
-              return { ...cached, messages: [...cached.messages, asked, event.message] };
+              return {
+                ...cached,
+                messages: [...cached.messages, asked, event.message],
+                toolCalls: [...cached.toolCalls, ...event.toolCalls],
+              };
             });
             setPending(null);
             // the title may have been set by the first question, and the history is ordered by activity

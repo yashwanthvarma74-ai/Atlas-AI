@@ -1,0 +1,1938 @@
+{
+  "version": 1,
+  "seed": 20261103,
+  "questions": [
+    {
+      "id": "q001",
+      "text": "By how much did the Porto office increase shipping costs in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-25.txt",
+      "span": "In Q4 2025, the Porto office increased shipping costs by 24 percent after changing the opening hours."
+    },
+    {
+      "id": "q002",
+      "text": "By how much did the Malmo office increase printing volume in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-19.txt",
+      "span": "In Q4 2024, the Malmo office increased printing volume by 19 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q003",
+      "text": "By how much did the Lagos office increase printing volume in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q1 2025, the Lagos office increased printing volume by 31 percent after moving to a new building."
+    },
+    {
+      "id": "q004",
+      "text": "By how much did the Riga office increase training hours in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-06.txt",
+      "span": "In Q2 2024, the Riga office increased training hours by 31 percent after automating the approval workflow."
+    },
+    {
+      "id": "q005",
+      "text": "By how much did the Riga office reduce travel expenses in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-21.txt",
+      "span": "In Q3 2025, the Riga office reduced travel expenses by 30 percent after seasonal demand."
+    },
+    {
+      "id": "q006",
+      "text": "By how much did the Austin office reduce printing volume in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q3 2025, the Austin office reduced printing volume by 11 percent after an internal audit."
+    },
+    {
+      "id": "q007",
+      "text": "By how much did the Riga office reduce meeting room bookings in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-19.txt",
+      "span": "In Q4 2024, the Riga office reduced meeting room bookings by 9 percent after automating the approval workflow."
+    },
+    {
+      "id": "q008",
+      "text": "What notice period does the contract with Vandelay require?",
+      "kind": "lexical",
+      "document": "ops-notes-07.txt",
+      "span": "The contract with Vandelay requires a notice period of 90 days."
+    },
+    {
+      "id": "q009",
+      "text": "By how much did the Osaka office increase shipping costs in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "In Q3 2025, the Osaka office increased shipping costs by 36 percent after a regional promotion."
+    },
+    {
+      "id": "q010",
+      "text": "By how much did the Quito office increase printing volume in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-22.txt",
+      "span": "In Q3 2024, the Quito office increased printing volume by 26 percent after an internal audit."
+    },
+    {
+      "id": "q011",
+      "text": "By how much did the Hanoi office reduce energy consumption in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "In Q3 2024, the Hanoi office reduced energy consumption by 3 percent after moving to a new building."
+    },
+    {
+      "id": "q012",
+      "text": "By how much did the Turin office reduce energy consumption in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q2 2025, the Turin office reduced energy consumption by 34 percent after moving to a new building."
+    },
+    {
+      "id": "q013",
+      "text": "What is the recovery time objective of the Payroll service?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "The Payroll service has a recovery time objective of 9 minutes."
+    },
+    {
+      "id": "q014",
+      "text": "By how much did the Kyoto office increase printing volume in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-06.txt",
+      "span": "In Q4 2025, the Kyoto office increased printing volume by 33 percent after a new vendor agreement."
+    },
+    {
+      "id": "q015",
+      "text": "By how much did the Hanoi office increase shipping costs in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-02.txt",
+      "span": "In Q3 2024, the Hanoi office increased shipping costs by 21 percent after changing the opening hours."
+    },
+    {
+      "id": "q016",
+      "text": "By how much did the Austin office increase staff turnover in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q4 2024, the Austin office increased staff turnover by 10 percent after automating the approval workflow."
+    },
+    {
+      "id": "q017",
+      "text": "By how much did the Lisbon office reduce packaging waste in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-28.txt",
+      "span": "In Q3 2025, the Lisbon office reduced packaging waste by 33 percent after moving to a new building."
+    },
+    {
+      "id": "q018",
+      "text": "By how much did the Porto office reduce travel expenses in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-15.txt",
+      "span": "In Q2 2025, the Porto office reduced travel expenses by 23 percent after an internal audit."
+    },
+    {
+      "id": "q019",
+      "text": "By how much did the Leeds office increase cloud spending in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-28.txt",
+      "span": "In Q2 2024, the Leeds office increased cloud spending by 24 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q020",
+      "text": "How many days does the Sessions service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "The Sessions service keeps its backups for 330 days."
+    },
+    {
+      "id": "q021",
+      "text": "By how much did the Accra office reduce staff turnover in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-24.txt",
+      "span": "In Q4 2024, the Accra office reduced staff turnover by 13 percent after changing the opening hours."
+    },
+    {
+      "id": "q022",
+      "text": "By how much did the Riga office increase shipping costs in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-03.txt",
+      "span": "In Q1 2025, the Riga office increased shipping costs by 10 percent after an internal audit."
+    },
+    {
+      "id": "q023",
+      "text": "By how much did the Cairo office increase cloud spending in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-10.txt",
+      "span": "In Q1 2024, the Cairo office increased cloud spending by 24 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q024",
+      "text": "How many days does the Recommender service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-22.txt",
+      "span": "The Recommender service keeps its backups for 171 days."
+    },
+    {
+      "id": "q025",
+      "text": "What is the recovery time objective of the Inventory service?",
+      "kind": "lexical",
+      "document": "ops-notes-10.txt",
+      "span": "The Inventory service has a recovery time objective of 216 minutes."
+    },
+    {
+      "id": "q026",
+      "text": "By how much did the Accra office increase staff turnover in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-07.txt",
+      "span": "In Q1 2025, the Accra office increased staff turnover by 16 percent after moving to a new building."
+    },
+    {
+      "id": "q027",
+      "text": "Who owns the Uploads runbook?",
+      "kind": "lexical",
+      "document": "ops-notes-27.txt",
+      "span": "Lucia owns the Uploads runbook."
+    },
+    {
+      "id": "q028",
+      "text": "Who owns the Metrics runbook?",
+      "kind": "lexical",
+      "document": "ops-notes-23.txt",
+      "span": "Ingrid owns the Metrics runbook."
+    },
+    {
+      "id": "q029",
+      "text": "By how much did the Kyoto office increase staff turnover in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "In Q3 2024, the Kyoto office increased staff turnover by 2 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q030",
+      "text": "When is the Payroll on-call engineer paged?",
+      "kind": "lexical",
+      "document": "ops-notes-30.txt",
+      "span": "The Payroll on-call engineer is paged every Saturday at 2 o'clock."
+    },
+    {
+      "id": "q031",
+      "text": "By how much did the Dhaka office increase cloud spending in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-13.txt",
+      "span": "In Q2 2025, the Dhaka office increased cloud spending by 26 percent after a regional promotion."
+    },
+    {
+      "id": "q032",
+      "text": "By how much did the Prague office reduce printing volume in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-04.txt",
+      "span": "In Q1 2025, the Prague office reduced printing volume by 8 percent after seasonal demand."
+    },
+    {
+      "id": "q033",
+      "text": "By how much did the Toronto office increase energy consumption in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-17.txt",
+      "span": "In Q1 2024, the Toronto office increased energy consumption by 36 percent after an internal audit."
+    },
+    {
+      "id": "q034",
+      "text": "By how much did the Warsaw office increase meeting room bookings in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-28.txt",
+      "span": "In Q1 2025, the Warsaw office increased meeting room bookings by 5 percent after moving to a new building."
+    },
+    {
+      "id": "q035",
+      "text": "By how much did the Lima office increase printing volume in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q2 2025, the Lima office increased printing volume by 37 percent after a regional promotion."
+    },
+    {
+      "id": "q036",
+      "text": "By how much did the Dhaka office reduce packaging waste in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-20.txt",
+      "span": "In Q4 2025, the Dhaka office reduced packaging waste by 12 percent after an internal audit."
+    },
+    {
+      "id": "q037",
+      "text": "By how much did the Lisbon office increase printing volume in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-14.txt",
+      "span": "In Q1 2024, the Lisbon office increased printing volume by 10 percent after changing the opening hours."
+    },
+    {
+      "id": "q038",
+      "text": "By how much did the Malmo office increase training hours in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q2 2025, the Malmo office increased training hours by 21 percent after moving to a new building."
+    },
+    {
+      "id": "q039",
+      "text": "By how much did the Oslo office increase printing volume in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q1 2024, the Oslo office increased printing volume by 7 percent after a new vendor agreement."
+    },
+    {
+      "id": "q040",
+      "text": "By how much did the Warsaw office increase printing volume in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-13.txt",
+      "span": "In Q3 2024, the Warsaw office increased printing volume by 25 percent after automating the approval workflow."
+    },
+    {
+      "id": "q041",
+      "text": "What notice period does the contract with Wonka require?",
+      "kind": "lexical",
+      "document": "ops-notes-01.txt",
+      "span": "The contract with Wonka requires a notice period of 75 days."
+    },
+    {
+      "id": "q042",
+      "text": "By how much did the Hanoi office reduce training hours in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-09.txt",
+      "span": "In Q1 2024, the Hanoi office reduced training hours by 18 percent after an internal audit."
+    },
+    {
+      "id": "q043",
+      "text": "By how much did the Basel office increase shipping costs in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-19.txt",
+      "span": "In Q3 2024, the Basel office increased shipping costs by 6 percent after automating the approval workflow."
+    },
+    {
+      "id": "q044",
+      "text": "By how much did the Quito office increase cloud spending in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-27.txt",
+      "span": "In Q2 2025, the Quito office increased cloud spending by 10 percent after a new vendor agreement."
+    },
+    {
+      "id": "q045",
+      "text": "By how much did the Denver office reduce meeting room bookings in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-27.txt",
+      "span": "In Q4 2024, the Denver office reduced meeting room bookings by 2 percent after a regional promotion."
+    },
+    {
+      "id": "q046",
+      "text": "How many days does the Messaging service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-09.txt",
+      "span": "The Messaging service keeps its backups for 84 days."
+    },
+    {
+      "id": "q047",
+      "text": "By how much did the Riga office reduce training hours in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-06.txt",
+      "span": "In Q4 2025, the Riga office reduced training hours by 14 percent after changing the opening hours."
+    },
+    {
+      "id": "q048",
+      "text": "What is the recovery time objective of the Loyalty service?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "The Loyalty service has a recovery time objective of 189 minutes."
+    },
+    {
+      "id": "q049",
+      "text": "Who owns the Calendar runbook?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "Marcus owns the Calendar runbook."
+    },
+    {
+      "id": "q050",
+      "text": "What is the recovery time objective of the Payments service?",
+      "kind": "lexical",
+      "document": "ops-notes-26.txt",
+      "span": "The Payments service has a recovery time objective of 159 minutes."
+    },
+    {
+      "id": "q051",
+      "text": "By how much did the Basel office reduce packaging waste in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-12.txt",
+      "span": "In Q3 2024, the Basel office reduced packaging waste by 38 percent after a new vendor agreement."
+    },
+    {
+      "id": "q052",
+      "text": "When is the Shipping on-call engineer paged?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "The Shipping on-call engineer is paged every Saturday at 6 o'clock."
+    },
+    {
+      "id": "q053",
+      "text": "Who owns the Warehouse runbook?",
+      "kind": "lexical",
+      "document": "ops-notes-25.txt",
+      "span": "Tomas owns the Warehouse runbook."
+    },
+    {
+      "id": "q054",
+      "text": "By how much did the Perth office increase energy consumption in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-18.txt",
+      "span": "In Q1 2025, the Perth office increased energy consumption by 11 percent after automating the approval workflow."
+    },
+    {
+      "id": "q055",
+      "text": "By how much did the Lagos office reduce support tickets in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-24.txt",
+      "span": "In Q2 2025, the Lagos office reduced support tickets by 11 percent after a new vendor agreement."
+    },
+    {
+      "id": "q056",
+      "text": "By how much did the Warsaw office reduce shipping costs in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-24.txt",
+      "span": "In Q3 2024, the Warsaw office reduced shipping costs by 5 percent after a regional promotion."
+    },
+    {
+      "id": "q057",
+      "text": "Who owns the Returns runbook?",
+      "kind": "lexical",
+      "document": "ops-notes-15.txt",
+      "span": "Yara owns the Returns runbook."
+    },
+    {
+      "id": "q058",
+      "text": "How many days does the Calendar service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-04.txt",
+      "span": "The Calendar service keeps its backups for 173 days."
+    },
+    {
+      "id": "q059",
+      "text": "By how much did the Prague office increase staff turnover in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-13.txt",
+      "span": "In Q1 2025, the Prague office increased staff turnover by 23 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q060",
+      "text": "When does the contract with Monarch renew?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "The contract with Monarch renews on April 19, 2026."
+    },
+    {
+      "id": "q061",
+      "text": "What is the recovery time objective of the Fraud service?",
+      "kind": "lexical",
+      "document": "ops-notes-17.txt",
+      "span": "The Fraud service has a recovery time objective of 228 minutes."
+    },
+    {
+      "id": "q062",
+      "text": "By how much did the Warsaw office increase meeting room bookings in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-28.txt",
+      "span": "In Q3 2025, the Warsaw office increased meeting room bookings by 33 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q063",
+      "text": "How many days does the Metrics service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "The Metrics service keeps its backups for 31 days."
+    },
+    {
+      "id": "q064",
+      "text": "By how much did the Cairo office increase travel expenses in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-25.txt",
+      "span": "In Q4 2025, the Cairo office increased travel expenses by 3 percent after automating the approval workflow."
+    },
+    {
+      "id": "q065",
+      "text": "When is the Metrics on-call engineer paged?",
+      "kind": "lexical",
+      "document": "ops-notes-09.txt",
+      "span": "The Metrics on-call engineer is paged every Sunday at 1 o'clock."
+    },
+    {
+      "id": "q066",
+      "text": "When does the contract with Massive renew?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "The contract with Massive renews on July 19, 2028."
+    },
+    {
+      "id": "q067",
+      "text": "By how much did the Vienna office reduce packaging waste in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-01.txt",
+      "span": "In Q4 2024, the Vienna office reduced packaging waste by 34 percent after changing the opening hours."
+    },
+    {
+      "id": "q068",
+      "text": "What is the recovery time objective of the Reports service?",
+      "kind": "lexical",
+      "document": "ops-notes-12.txt",
+      "span": "The Reports service has a recovery time objective of 228 minutes."
+    },
+    {
+      "id": "q069",
+      "text": "What is the recovery time objective of the Gateway service?",
+      "kind": "lexical",
+      "document": "ops-notes-20.txt",
+      "span": "The Gateway service has a recovery time objective of 69 minutes."
+    },
+    {
+      "id": "q070",
+      "text": "By how much did the Malmo office increase packaging waste in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-06.txt",
+      "span": "In Q3 2025, the Malmo office increased packaging waste by 16 percent after a regional promotion."
+    },
+    {
+      "id": "q071",
+      "text": "By how much did the Seoul office reduce support tickets in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-11.txt",
+      "span": "In Q4 2025, the Seoul office reduced support tickets by 24 percent after moving to a new building."
+    },
+    {
+      "id": "q072",
+      "text": "By how much did the Leeds office increase shipping costs in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-13.txt",
+      "span": "In Q3 2025, the Leeds office increased shipping costs by 9 percent after an internal audit."
+    },
+    {
+      "id": "q073",
+      "text": "By how much did the Riga office reduce meeting room bookings in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "In Q2 2025, the Riga office reduced meeting room bookings by 18 percent after a new vendor agreement."
+    },
+    {
+      "id": "q074",
+      "text": "How many days does the Inventory service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-25.txt",
+      "span": "The Inventory service keeps its backups for 234 days."
+    },
+    {
+      "id": "q075",
+      "text": "By how much did the Perth office reduce cloud spending in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-09.txt",
+      "span": "In Q1 2024, the Perth office reduced cloud spending by 32 percent after changing the opening hours."
+    },
+    {
+      "id": "q076",
+      "text": "How many days does the Scheduler service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-03.txt",
+      "span": "The Scheduler service keeps its backups for 9 days."
+    },
+    {
+      "id": "q077",
+      "text": "What notice period does the contract with Kitchen require?",
+      "kind": "lexical",
+      "document": "ops-notes-20.txt",
+      "span": "The contract with Kitchen requires a notice period of 60 days."
+    },
+    {
+      "id": "q078",
+      "text": "By how much did the Quito office reduce meeting room bookings in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "In Q4 2024, the Quito office reduced meeting room bookings by 14 percent after a regional promotion."
+    },
+    {
+      "id": "q079",
+      "text": "By how much did the Quito office reduce staff turnover in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-01.txt",
+      "span": "In Q2 2024, the Quito office reduced staff turnover by 36 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q080",
+      "text": "By how much did the Lima office reduce meeting room bookings in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-09.txt",
+      "span": "In Q2 2025, the Lima office reduced meeting room bookings by 11 percent after a regional promotion."
+    },
+    {
+      "id": "q081",
+      "text": "By how much did the Vienna office reduce support tickets in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-01.txt",
+      "span": "In Q2 2025, the Vienna office reduced support tickets by 4 percent after changing the opening hours."
+    },
+    {
+      "id": "q082",
+      "text": "What notice period does the contract with Soylent require?",
+      "kind": "lexical",
+      "document": "ops-notes-18.txt",
+      "span": "The contract with Soylent requires a notice period of 120 days."
+    },
+    {
+      "id": "q083",
+      "text": "How many days does the Coupons service keep its backups?",
+      "kind": "lexical",
+      "document": "ops-notes-07.txt",
+      "span": "The Coupons service keeps its backups for 29 days."
+    },
+    {
+      "id": "q084",
+      "text": "By how much did the Lisbon office reduce packaging waste in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-03.txt",
+      "span": "In Q4 2025, the Lisbon office reduced packaging waste by 15 percent after moving to a new building."
+    },
+    {
+      "id": "q085",
+      "text": "By how much did the Bogota office reduce support tickets in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-21.txt",
+      "span": "In Q1 2024, the Bogota office reduced support tickets by 26 percent after an internal audit."
+    },
+    {
+      "id": "q086",
+      "text": "By how much did the Vienna office increase shipping costs in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "In Q1 2025, the Vienna office increased shipping costs by 26 percent after changing the opening hours."
+    },
+    {
+      "id": "q087",
+      "text": "By how much did the Porto office reduce support tickets in Q1 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-09.txt",
+      "span": "In Q1 2025, the Porto office reduced support tickets by 27 percent after moving to a new building."
+    },
+    {
+      "id": "q088",
+      "text": "By how much did the Basel office increase travel expenses in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-06.txt",
+      "span": "In Q4 2024, the Basel office increased travel expenses by 33 percent after changing the opening hours."
+    },
+    {
+      "id": "q089",
+      "text": "By how much did the Porto office reduce training hours in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "In Q4 2024, the Porto office reduced training hours by 28 percent after seasonal demand."
+    },
+    {
+      "id": "q090",
+      "text": "Who owns the Catalog runbook?",
+      "kind": "lexical",
+      "document": "ops-notes-28.txt",
+      "span": "Samuel owns the Catalog runbook."
+    },
+    {
+      "id": "q091",
+      "text": "What notice period does the contract with Wayne require?",
+      "kind": "lexical",
+      "document": "ops-notes-12.txt",
+      "span": "The contract with Wayne requires a notice period of 105 days."
+    },
+    {
+      "id": "q092",
+      "text": "By how much did the Denver office reduce energy consumption in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-26.txt",
+      "span": "In Q2 2024, the Denver office reduced energy consumption by 23 percent after changing the opening hours."
+    },
+    {
+      "id": "q093",
+      "text": "By how much did the Lima office increase travel expenses in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-07.txt",
+      "span": "In Q2 2024, the Lima office increased travel expenses by 34 percent after an internal audit."
+    },
+    {
+      "id": "q094",
+      "text": "When does the contract with Waystar renew?",
+      "kind": "lexical",
+      "document": "ops-notes-08.txt",
+      "span": "The contract with Waystar renews on December 15, 2027."
+    },
+    {
+      "id": "q095",
+      "text": "By how much did the Cairo office reduce cloud spending in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-15.txt",
+      "span": "In Q3 2025, the Cairo office reduced cloud spending by 9 percent after changing the opening hours."
+    },
+    {
+      "id": "q096",
+      "text": "By how much did the Lagos office reduce energy consumption in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-21.txt",
+      "span": "In Q1 2024, the Lagos office reduced energy consumption by 38 percent after automating the approval workflow."
+    },
+    {
+      "id": "q097",
+      "text": "By how much did the Dublin office reduce support tickets in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-16.txt",
+      "span": "In Q4 2024, the Dublin office reduced support tickets by 9 percent after an internal audit."
+    },
+    {
+      "id": "q098",
+      "text": "By how much did the Prague office increase training hours in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-14.txt",
+      "span": "In Q1 2024, the Prague office increased training hours by 18 percent after a new vendor agreement."
+    },
+    {
+      "id": "q099",
+      "text": "By how much did the Lisbon office reduce packaging waste in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-19.txt",
+      "span": "In Q2 2025, the Lisbon office reduced packaging waste by 17 percent after changing the opening hours."
+    },
+    {
+      "id": "q100",
+      "text": "By how much did the Denver office increase packaging waste in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-15.txt",
+      "span": "In Q3 2024, the Denver office increased packaging waste by 15 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q101",
+      "text": "By how much did the Lima office increase printing volume in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-11.txt",
+      "span": "In Q3 2025, the Lima office increased printing volume by 24 percent after an internal audit."
+    },
+    {
+      "id": "q102",
+      "text": "By how much did the Austin office reduce cloud spending in Q4 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-12.txt",
+      "span": "In Q4 2024, the Austin office reduced cloud spending by 39 percent after seasonal demand."
+    },
+    {
+      "id": "q103",
+      "text": "By how much did the Seoul office increase travel expenses in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-04.txt",
+      "span": "In Q2 2025, the Seoul office increased travel expenses by 8 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q104",
+      "text": "By how much did the Bogota office increase support tickets in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-08.txt",
+      "span": "In Q2 2024, the Bogota office increased support tickets by 4 percent after changing the opening hours."
+    },
+    {
+      "id": "q105",
+      "text": "By how much did the Osaka office increase packaging waste in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-15.txt",
+      "span": "In Q2 2025, the Osaka office increased packaging waste by 36 percent after moving to a new building."
+    },
+    {
+      "id": "q106",
+      "text": "By how much did the Lagos office increase support tickets in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-07.txt",
+      "span": "In Q2 2024, the Lagos office increased support tickets by 34 percent after a regional promotion."
+    },
+    {
+      "id": "q107",
+      "text": "By how much did the Toronto office increase support tickets in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-01.txt",
+      "span": "In Q2 2024, the Toronto office increased support tickets by 33 percent after moving to a new building."
+    },
+    {
+      "id": "q108",
+      "text": "By how much did the Prague office reduce staff turnover in Q3 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-18.txt",
+      "span": "In Q3 2024, the Prague office reduced staff turnover by 28 percent after a new vendor agreement."
+    },
+    {
+      "id": "q109",
+      "text": "By how much did the Basel office increase staff turnover in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-03.txt",
+      "span": "In Q2 2025, the Basel office increased staff turnover by 32 percent after changing the opening hours."
+    },
+    {
+      "id": "q110",
+      "text": "By how much did the Osaka office reduce shipping costs in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-22.txt",
+      "span": "In Q2 2025, the Osaka office reduced shipping costs by 8 percent after automating the approval workflow."
+    },
+    {
+      "id": "q111",
+      "text": "By how much did the Porto office reduce travel expenses in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-08.txt",
+      "span": "In Q1 2024, the Porto office reduced travel expenses by 12 percent after a regional promotion."
+    },
+    {
+      "id": "q112",
+      "text": "By how much did the Nairobi office increase travel expenses in Q3 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-07.txt",
+      "span": "In Q3 2025, the Nairobi office increased travel expenses by 14 percent after a new vendor agreement."
+    },
+    {
+      "id": "q113",
+      "text": "By how much did the Lagos office reduce travel expenses in Q4 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-30.txt",
+      "span": "In Q4 2025, the Lagos office reduced travel expenses by 39 percent after moving to a new building."
+    },
+    {
+      "id": "q114",
+      "text": "By how much did the Lisbon office increase training hours in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-20.txt",
+      "span": "In Q2 2024, the Lisbon office increased training hours by 4 percent after an internal audit."
+    },
+    {
+      "id": "q115",
+      "text": "By how much did the Austin office reduce packaging waste in Q2 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-20.txt",
+      "span": "In Q2 2024, the Austin office reduced packaging waste by 33 percent after a new vendor agreement."
+    },
+    {
+      "id": "q116",
+      "text": "What notice period does the contract with Gekko require?",
+      "kind": "lexical",
+      "document": "ops-notes-08.txt",
+      "span": "The contract with Gekko requires a notice period of 90 days."
+    },
+    {
+      "id": "q117",
+      "text": "When does the contract with Initech renew?",
+      "kind": "lexical",
+      "document": "ops-notes-05.txt",
+      "span": "The contract with Initech renews on August 2, 2026."
+    },
+    {
+      "id": "q118",
+      "text": "By how much did the Nairobi office increase meeting room bookings in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-29.txt",
+      "span": "In Q1 2024, the Nairobi office increased meeting room bookings by 30 percent after a new vendor agreement."
+    },
+    {
+      "id": "q119",
+      "text": "By how much did the Leeds office increase cloud spending in Q1 2024?",
+      "kind": "lexical",
+      "document": "ops-notes-21.txt",
+      "span": "In Q1 2024, the Leeds office increased cloud spending by 39 percent after automating the approval workflow."
+    },
+    {
+      "id": "q120",
+      "text": "By how much did the Oslo office increase packaging waste in Q2 2025?",
+      "kind": "lexical",
+      "document": "ops-notes-22.txt",
+      "span": "In Q2 2025, the Oslo office increased packaging waste by 13 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q121",
+      "text": "What was the change in customer complaints at the Dhaka branch during Q4 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-02.txt",
+      "span": "In Q4 2025, the Dhaka office reduced support tickets by 19 percent after changing the opening hours."
+    },
+    {
+      "id": "q122",
+      "text": "For how long are copies of the Notifier system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-22.txt",
+      "span": "The Notifier service keeps its backups for 195 days."
+    },
+    {
+      "id": "q123",
+      "text": "What was the change in hosting bills at the Riga branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-27.txt",
+      "span": "In Q1 2025, the Riga office reduced cloud spending by 11 percent after seasonal demand."
+    },
+    {
+      "id": "q124",
+      "text": "For how long are copies of the Payroll system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-23.txt",
+      "span": "The Payroll service keeps its backups for 298 days."
+    },
+    {
+      "id": "q125",
+      "text": "What was the change in employee attrition at the Basel branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-14.txt",
+      "span": "In Q2 2024, the Basel office reduced staff turnover by 3 percent after an internal audit."
+    },
+    {
+      "id": "q126",
+      "text": "What was the change in business trip costs at the Prague branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-03.txt",
+      "span": "In Q2 2024, the Prague office increased travel expenses by 25 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q127",
+      "text": "For how long are copies of the Onboarding system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-04.txt",
+      "span": "The Onboarding service keeps its backups for 249 days."
+    },
+    {
+      "id": "q128",
+      "text": "How many minutes may the Ledger platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "The Ledger service has a recovery time objective of 81 minutes."
+    },
+    {
+      "id": "q129",
+      "text": "What was the change in paper output at the Leeds branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-17.txt",
+      "span": "In Q1 2024, the Leeds office increased printing volume by 12 percent after a regional promotion."
+    },
+    {
+      "id": "q130",
+      "text": "How many minutes may the Imports platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-23.txt",
+      "span": "The Imports service has a recovery time objective of 174 minutes."
+    },
+    {
+      "id": "q131",
+      "text": "What was the change in business trip costs at the Berlin branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-15.txt",
+      "span": "In Q3 2025, the Berlin office increased travel expenses by 15 percent after changing the opening hours."
+    },
+    {
+      "id": "q132",
+      "text": "What was the change in customer complaints at the Lisbon branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-07.txt",
+      "span": "In Q2 2024, the Lisbon office reduced support tickets by 2 percent after an internal audit."
+    },
+    {
+      "id": "q133",
+      "text": "At what time of the week is the duty technician for Returns alerted?",
+      "kind": "paraphrase",
+      "document": "ops-notes-15.txt",
+      "span": "The Returns on-call engineer is paged every Tuesday at 1 o'clock."
+    },
+    {
+      "id": "q134",
+      "text": "For how long are copies of the Loyalty system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "The Loyalty service keeps its backups for 184 days."
+    },
+    {
+      "id": "q135",
+      "text": "What was the change in conference space reservations at the Dublin branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-24.txt",
+      "span": "In Q4 2024, the Dublin office reduced meeting room bookings by 28 percent after changing the opening hours."
+    },
+    {
+      "id": "q136",
+      "text": "What was the change in learning time at the Accra branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-21.txt",
+      "span": "In Q1 2024, the Accra office reduced training hours by 20 percent after changing the opening hours."
+    },
+    {
+      "id": "q137",
+      "text": "What was the change in business trip costs at the Berlin branch during Q4 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-28.txt",
+      "span": "In Q4 2025, the Berlin office reduced travel expenses by 12 percent after seasonal demand."
+    },
+    {
+      "id": "q138",
+      "text": "Which person is responsible for the operating guide of the Tokens service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-24.txt",
+      "span": "Mei owns the Tokens runbook."
+    },
+    {
+      "id": "q139",
+      "text": "What was the change in business trip costs at the Dublin branch during Q2 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-03.txt",
+      "span": "In Q2 2025, the Dublin office increased travel expenses by 33 percent after automating the approval workflow."
+    },
+    {
+      "id": "q140",
+      "text": "What was the change in employee attrition at the Warsaw branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-25.txt",
+      "span": "In Q1 2025, the Warsaw office reduced staff turnover by 21 percent after seasonal demand."
+    },
+    {
+      "id": "q141",
+      "text": "On which date is the agreement with Aperture extended?",
+      "kind": "paraphrase",
+      "document": "ops-notes-27.txt",
+      "span": "The contract with Aperture renews on May 12, 2028."
+    },
+    {
+      "id": "q142",
+      "text": "What was the change in business trip costs at the Warsaw branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-11.txt",
+      "span": "In Q3 2025, the Warsaw office reduced travel expenses by 27 percent after seasonal demand."
+    },
+    {
+      "id": "q143",
+      "text": "Which person is responsible for the operating guide of the Profiles service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-09.txt",
+      "span": "Noor owns the Profiles runbook."
+    },
+    {
+      "id": "q144",
+      "text": "What was the change in paper output at the Bogota branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-20.txt",
+      "span": "In Q2 2024, the Bogota office increased printing volume by 7 percent after moving to a new building."
+    },
+    {
+      "id": "q145",
+      "text": "For how long are copies of the Directory system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-17.txt",
+      "span": "The Directory service keeps its backups for 147 days."
+    },
+    {
+      "id": "q146",
+      "text": "What was the change in customer complaints at the Accra branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-17.txt",
+      "span": "In Q2 2024, the Accra office increased support tickets by 36 percent after a new vendor agreement."
+    },
+    {
+      "id": "q147",
+      "text": "What was the change in box refuse at the Nairobi branch during Q2 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-09.txt",
+      "span": "In Q2 2025, the Nairobi office reduced packaging waste by 2 percent after seasonal demand."
+    },
+    {
+      "id": "q148",
+      "text": "What was the change in freight spending at the Bogota branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-23.txt",
+      "span": "In Q4 2024, the Bogota office increased shipping costs by 33 percent after seasonal demand."
+    },
+    {
+      "id": "q149",
+      "text": "On which date is the agreement with Globex extended?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "The contract with Globex renews on December 21, 2027."
+    },
+    {
+      "id": "q150",
+      "text": "What was the change in paper output at the Accra branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-12.txt",
+      "span": "In Q4 2024, the Accra office increased printing volume by 19 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q151",
+      "text": "At what time of the week is the duty technician for Uploads alerted?",
+      "kind": "paraphrase",
+      "document": "ops-notes-08.txt",
+      "span": "The Uploads on-call engineer is paged every Tuesday at 3 o'clock."
+    },
+    {
+      "id": "q152",
+      "text": "What was the change in business trip costs at the Toronto branch during Q2 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-25.txt",
+      "span": "In Q2 2025, the Toronto office reduced travel expenses by 16 percent after moving to a new building."
+    },
+    {
+      "id": "q153",
+      "text": "For how long are copies of the Catalog system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-26.txt",
+      "span": "The Catalog service keeps its backups for 184 days."
+    },
+    {
+      "id": "q154",
+      "text": "How many minutes may the Warehouse platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-05.txt",
+      "span": "The Warehouse service has a recovery time objective of 208 minutes."
+    },
+    {
+      "id": "q155",
+      "text": "What was the change in freight spending at the Lima branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-30.txt",
+      "span": "In Q1 2024, the Lima office reduced shipping costs by 2 percent after a regional promotion."
+    },
+    {
+      "id": "q156",
+      "text": "What was the change in customer complaints at the Kyoto branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-11.txt",
+      "span": "In Q2 2024, the Kyoto office increased support tickets by 7 percent after changing the opening hours."
+    },
+    {
+      "id": "q157",
+      "text": "What was the change in employee attrition at the Denver branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-06.txt",
+      "span": "In Q3 2025, the Denver office reduced staff turnover by 23 percent after automating the approval workflow."
+    },
+    {
+      "id": "q158",
+      "text": "What was the change in customer complaints at the Turin branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-06.txt",
+      "span": "In Q3 2025, the Turin office reduced support tickets by 17 percent after moving to a new building."
+    },
+    {
+      "id": "q159",
+      "text": "How many minutes may the Search platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-25.txt",
+      "span": "The Search service has a recovery time objective of 217 minutes."
+    },
+    {
+      "id": "q160",
+      "text": "What was the change in freight spending at the Perth branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-22.txt",
+      "span": "In Q3 2025, the Perth office increased shipping costs by 33 percent after changing the opening hours."
+    },
+    {
+      "id": "q161",
+      "text": "What was the change in power usage at the Accra branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-20.txt",
+      "span": "In Q1 2024, the Accra office increased energy consumption by 29 percent after a regional promotion."
+    },
+    {
+      "id": "q162",
+      "text": "What was the change in customer complaints at the Quito branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-22.txt",
+      "span": "In Q4 2024, the Quito office reduced support tickets by 6 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q163",
+      "text": "Which person is responsible for the operating guide of the Imports service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-05.txt",
+      "span": "Yara owns the Imports runbook."
+    },
+    {
+      "id": "q164",
+      "text": "What was the change in box refuse at the Basel branch during Q2 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-11.txt",
+      "span": "In Q2 2025, the Basel office reduced packaging waste by 31 percent after seasonal demand."
+    },
+    {
+      "id": "q165",
+      "text": "At what time of the week is the duty technician for Pricing alerted?",
+      "kind": "paraphrase",
+      "document": "ops-notes-06.txt",
+      "span": "The Pricing on-call engineer is paged every Wednesday at 5 o'clock."
+    },
+    {
+      "id": "q166",
+      "text": "What was the change in conference space reservations at the Berlin branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-02.txt",
+      "span": "In Q1 2025, the Berlin office reduced meeting room bookings by 38 percent after changing the opening hours."
+    },
+    {
+      "id": "q167",
+      "text": "What was the change in power usage at the Leeds branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-19.txt",
+      "span": "In Q3 2025, the Leeds office reduced energy consumption by 23 percent after a regional promotion."
+    },
+    {
+      "id": "q168",
+      "text": "What was the change in customer complaints at the Kyoto branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-19.txt",
+      "span": "In Q4 2024, the Kyoto office increased support tickets by 22 percent after a new vendor agreement."
+    },
+    {
+      "id": "q169",
+      "text": "How many minutes may the Alerts platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-15.txt",
+      "span": "The Alerts service has a recovery time objective of 10 minutes."
+    },
+    {
+      "id": "q170",
+      "text": "How many minutes may the Audit platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-01.txt",
+      "span": "The Audit service has a recovery time objective of 230 minutes."
+    },
+    {
+      "id": "q171",
+      "text": "Which person is responsible for the operating guide of the Sessions service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-29.txt",
+      "span": "Jonas owns the Sessions runbook."
+    },
+    {
+      "id": "q172",
+      "text": "What was the change in freight spending at the Osaka branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-08.txt",
+      "span": "In Q2 2024, the Osaka office reduced shipping costs by 38 percent after an internal audit."
+    },
+    {
+      "id": "q173",
+      "text": "For how long are copies of the Ratings system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-22.txt",
+      "span": "The Ratings service keeps its backups for 279 days."
+    },
+    {
+      "id": "q174",
+      "text": "How many days of advance warning does the agreement with Initech demand?",
+      "kind": "paraphrase",
+      "document": "ops-notes-02.txt",
+      "span": "The contract with Initech requires a notice period of 30 days."
+    },
+    {
+      "id": "q175",
+      "text": "Which person is responsible for the operating guide of the Fraud service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-29.txt",
+      "span": "Idris owns the Fraud runbook."
+    },
+    {
+      "id": "q176",
+      "text": "What was the change in conference space reservations at the Dhaka branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "In Q2 2024, the Dhaka office reduced meeting room bookings by 24 percent after an internal audit."
+    },
+    {
+      "id": "q177",
+      "text": "What was the change in conference space reservations at the Vienna branch during Q4 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-19.txt",
+      "span": "In Q4 2025, the Vienna office reduced meeting room bookings by 28 percent after automating the approval workflow."
+    },
+    {
+      "id": "q178",
+      "text": "At what time of the week is the duty technician for Calendar alerted?",
+      "kind": "paraphrase",
+      "document": "ops-notes-19.txt",
+      "span": "The Calendar on-call engineer is paged every Tuesday at 9 o'clock."
+    },
+    {
+      "id": "q179",
+      "text": "What was the change in hosting bills at the Berlin branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-11.txt",
+      "span": "In Q1 2025, the Berlin office reduced cloud spending by 11 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q180",
+      "text": "How many minutes may the Catalog platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-01.txt",
+      "span": "The Catalog service has a recovery time objective of 221 minutes."
+    },
+    {
+      "id": "q181",
+      "text": "What was the change in freight spending at the Oslo branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-28.txt",
+      "span": "In Q2 2024, the Oslo office reduced shipping costs by 27 percent after an internal audit."
+    },
+    {
+      "id": "q182",
+      "text": "What was the change in freight spending at the Seoul branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-21.txt",
+      "span": "In Q3 2025, the Seoul office increased shipping costs by 39 percent after moving to a new building."
+    },
+    {
+      "id": "q183",
+      "text": "What was the change in conference space reservations at the Basel branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-07.txt",
+      "span": "In Q1 2025, the Basel office reduced meeting room bookings by 22 percent after automating the approval workflow."
+    },
+    {
+      "id": "q184",
+      "text": "On which date is the agreement with Bluth extended?",
+      "kind": "paraphrase",
+      "document": "ops-notes-12.txt",
+      "span": "The contract with Bluth renews on December 3, 2027."
+    },
+    {
+      "id": "q185",
+      "text": "What was the change in freight spending at the Denver branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-27.txt",
+      "span": "In Q1 2025, the Denver office increased shipping costs by 15 percent after seasonal demand."
+    },
+    {
+      "id": "q186",
+      "text": "What was the change in customer complaints at the Lisbon branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-16.txt",
+      "span": "In Q4 2024, the Lisbon office reduced support tickets by 5 percent after moving to a new building."
+    },
+    {
+      "id": "q187",
+      "text": "What was the change in freight spending at the Malmo branch during Q3 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-11.txt",
+      "span": "In Q3 2024, the Malmo office reduced shipping costs by 9 percent after a new vendor agreement."
+    },
+    {
+      "id": "q188",
+      "text": "For how long are copies of the Imports system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-05.txt",
+      "span": "The Imports service keeps its backups for 87 days."
+    },
+    {
+      "id": "q189",
+      "text": "What was the change in power usage at the Warsaw branch during Q4 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-30.txt",
+      "span": "In Q4 2025, the Warsaw office increased energy consumption by 38 percent after a new vendor agreement."
+    },
+    {
+      "id": "q190",
+      "text": "What was the change in learning time at the Perth branch during Q3 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "In Q3 2024, the Perth office reduced training hours by 28 percent after automating the approval workflow."
+    },
+    {
+      "id": "q191",
+      "text": "Which person is responsible for the operating guide of the Directory service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-11.txt",
+      "span": "Rafael owns the Directory runbook."
+    },
+    {
+      "id": "q192",
+      "text": "Which person is responsible for the operating guide of the Scheduler service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "Hassan owns the Scheduler runbook."
+    },
+    {
+      "id": "q193",
+      "text": "How many minutes may the Tokens platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-01.txt",
+      "span": "The Tokens service has a recovery time objective of 235 minutes."
+    },
+    {
+      "id": "q194",
+      "text": "What was the change in business trip costs at the Austin branch during Q2 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-15.txt",
+      "span": "In Q2 2025, the Austin office reduced travel expenses by 5 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q195",
+      "text": "What was the change in hosting bills at the Lisbon branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-18.txt",
+      "span": "In Q1 2024, the Lisbon office increased cloud spending by 16 percent after moving to a new building."
+    },
+    {
+      "id": "q196",
+      "text": "What was the change in learning time at the Perth branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-24.txt",
+      "span": "In Q2 2024, the Perth office increased training hours by 16 percent after a regional promotion."
+    },
+    {
+      "id": "q197",
+      "text": "What was the change in hosting bills at the Malmo branch during Q4 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-18.txt",
+      "span": "In Q4 2025, the Malmo office reduced cloud spending by 25 percent after changing the opening hours."
+    },
+    {
+      "id": "q198",
+      "text": "At what time of the week is the duty technician for Inventory alerted?",
+      "kind": "paraphrase",
+      "document": "ops-notes-28.txt",
+      "span": "The Inventory on-call engineer is paged every Thursday at 3 o'clock."
+    },
+    {
+      "id": "q199",
+      "text": "On which date is the agreement with Northwind extended?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "The contract with Northwind renews on May 13, 2026."
+    },
+    {
+      "id": "q200",
+      "text": "What was the change in employee attrition at the Seoul branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-18.txt",
+      "span": "In Q2 2024, the Seoul office increased staff turnover by 18 percent after seasonal demand."
+    },
+    {
+      "id": "q201",
+      "text": "What was the change in customer complaints at the Turin branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-06.txt",
+      "span": "In Q2 2024, the Turin office reduced support tickets by 15 percent after automating the approval workflow."
+    },
+    {
+      "id": "q202",
+      "text": "What was the change in conference space reservations at the Malmo branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "In Q4 2024, the Malmo office reduced meeting room bookings by 7 percent after seasonal demand."
+    },
+    {
+      "id": "q203",
+      "text": "What was the change in hosting bills at the Prague branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-18.txt",
+      "span": "In Q3 2025, the Prague office reduced cloud spending by 20 percent after moving to a new building."
+    },
+    {
+      "id": "q204",
+      "text": "What was the change in freight spending at the Cairo branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-03.txt",
+      "span": "In Q1 2025, the Cairo office reduced shipping costs by 29 percent after an internal audit."
+    },
+    {
+      "id": "q205",
+      "text": "For how long are copies of the Invoicing system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "The Invoicing service keeps its backups for 224 days."
+    },
+    {
+      "id": "q206",
+      "text": "How many days of advance warning does the agreement with Vehement demand?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "The contract with Vehement requires a notice period of 75 days."
+    },
+    {
+      "id": "q207",
+      "text": "What was the change in power usage at the Turin branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-07.txt",
+      "span": "In Q4 2024, the Turin office reduced energy consumption by 20 percent after moving to a new building."
+    },
+    {
+      "id": "q208",
+      "text": "What was the change in customer complaints at the Seoul branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-09.txt",
+      "span": "In Q1 2024, the Seoul office increased support tickets by 5 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q209",
+      "text": "What was the change in paper output at the Berlin branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-17.txt",
+      "span": "In Q4 2024, the Berlin office increased printing volume by 33 percent after changing the opening hours."
+    },
+    {
+      "id": "q210",
+      "text": "What was the change in freight spending at the Oslo branch during Q3 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-22.txt",
+      "span": "In Q3 2024, the Oslo office reduced shipping costs by 23 percent after a new vendor agreement."
+    },
+    {
+      "id": "q211",
+      "text": "What was the change in freight spending at the Prague branch during Q4 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-21.txt",
+      "span": "In Q4 2025, the Prague office increased shipping costs by 33 percent after seasonal demand."
+    },
+    {
+      "id": "q212",
+      "text": "For how long are copies of the Alerts system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-03.txt",
+      "span": "The Alerts service keeps its backups for 137 days."
+    },
+    {
+      "id": "q213",
+      "text": "What was the change in conference space reservations at the Perth branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-04.txt",
+      "span": "In Q2 2024, the Perth office reduced meeting room bookings by 10 percent after a regional promotion."
+    },
+    {
+      "id": "q214",
+      "text": "What was the change in power usage at the Turin branch during Q3 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-26.txt",
+      "span": "In Q3 2024, the Turin office increased energy consumption by 27 percent after a regional promotion."
+    },
+    {
+      "id": "q215",
+      "text": "What was the change in box refuse at the Cairo branch during Q2 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-09.txt",
+      "span": "In Q2 2025, the Cairo office reduced packaging waste by 27 percent after seasonal demand."
+    },
+    {
+      "id": "q216",
+      "text": "For how long are copies of the Storage system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-29.txt",
+      "span": "The Storage service keeps its backups for 77 days."
+    },
+    {
+      "id": "q217",
+      "text": "What was the change in power usage at the Osaka branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-02.txt",
+      "span": "In Q3 2025, the Osaka office increased energy consumption by 5 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q218",
+      "text": "What was the change in paper output at the Hanoi branch during Q4 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "In Q4 2024, the Hanoi office reduced printing volume by 14 percent after a new vendor agreement."
+    },
+    {
+      "id": "q219",
+      "text": "What was the change in box refuse at the Vienna branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-08.txt",
+      "span": "In Q2 2024, the Vienna office reduced packaging waste by 20 percent after a new vendor agreement."
+    },
+    {
+      "id": "q220",
+      "text": "What was the change in employee attrition at the Quito branch during Q1 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-15.txt",
+      "span": "In Q1 2024, the Quito office reduced staff turnover by 35 percent after renegotiating the supplier contract."
+    },
+    {
+      "id": "q221",
+      "text": "How many minutes may the Uploads platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-07.txt",
+      "span": "The Uploads service has a recovery time objective of 57 minutes."
+    },
+    {
+      "id": "q222",
+      "text": "What was the change in business trip costs at the Oslo branch during Q2 2024?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "In Q2 2024, the Oslo office increased travel expenses by 25 percent after changing the opening hours."
+    },
+    {
+      "id": "q223",
+      "text": "Which person is responsible for the operating guide of the Ratings service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-04.txt",
+      "span": "Marcus owns the Ratings runbook."
+    },
+    {
+      "id": "q224",
+      "text": "What was the change in conference space reservations at the Tunis branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-17.txt",
+      "span": "In Q1 2025, the Tunis office increased meeting room bookings by 20 percent after automating the approval workflow."
+    },
+    {
+      "id": "q225",
+      "text": "What was the change in conference space reservations at the Dublin branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-27.txt",
+      "span": "In Q3 2025, the Dublin office reduced meeting room bookings by 35 percent after a regional promotion."
+    },
+    {
+      "id": "q226",
+      "text": "What was the change in customer complaints at the Kyoto branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-08.txt",
+      "span": "In Q3 2025, the Kyoto office increased support tickets by 33 percent after seasonal demand."
+    },
+    {
+      "id": "q227",
+      "text": "How many days of advance warning does the agreement with Tyrell demand?",
+      "kind": "paraphrase",
+      "document": "ops-notes-04.txt",
+      "span": "The contract with Tyrell requires a notice period of 120 days."
+    },
+    {
+      "id": "q228",
+      "text": "How many days of advance warning does the agreement with Waystar demand?",
+      "kind": "paraphrase",
+      "document": "ops-notes-17.txt",
+      "span": "The contract with Waystar requires a notice period of 90 days."
+    },
+    {
+      "id": "q229",
+      "text": "Which person is responsible for the operating guide of the Courier service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-03.txt",
+      "span": "Idris owns the Courier runbook."
+    },
+    {
+      "id": "q230",
+      "text": "What was the change in learning time at the Malmo branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-18.txt",
+      "span": "In Q3 2025, the Malmo office reduced training hours by 18 percent after changing the opening hours."
+    },
+    {
+      "id": "q231",
+      "text": "On which date is the agreement with Vehement extended?",
+      "kind": "paraphrase",
+      "document": "ops-notes-06.txt",
+      "span": "The contract with Vehement renews on December 19, 2028."
+    },
+    {
+      "id": "q232",
+      "text": "What was the change in customer complaints at the Accra branch during Q1 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-05.txt",
+      "span": "In Q1 2025, the Accra office increased support tickets by 18 percent after moving to a new building."
+    },
+    {
+      "id": "q233",
+      "text": "Which person is responsible for the operating guide of the Payroll service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-01.txt",
+      "span": "Jonas owns the Payroll runbook."
+    },
+    {
+      "id": "q234",
+      "text": "What was the change in employee attrition at the Basel branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-02.txt",
+      "span": "In Q3 2025, the Basel office increased staff turnover by 23 percent after a regional promotion."
+    },
+    {
+      "id": "q235",
+      "text": "Which person is responsible for the operating guide of the Audit service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-10.txt",
+      "span": "Hassan owns the Audit runbook."
+    },
+    {
+      "id": "q236",
+      "text": "Which person is responsible for the operating guide of the Loyalty service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-04.txt",
+      "span": "Idris owns the Loyalty runbook."
+    },
+    {
+      "id": "q237",
+      "text": "For how long are copies of the Search system's data retained?",
+      "kind": "paraphrase",
+      "document": "ops-notes-29.txt",
+      "span": "The Search service keeps its backups for 271 days."
+    },
+    {
+      "id": "q238",
+      "text": "What was the change in business trip costs at the Tunis branch during Q3 2025?",
+      "kind": "paraphrase",
+      "document": "ops-notes-22.txt",
+      "span": "In Q3 2025, the Tunis office increased travel expenses by 35 percent after automating the approval workflow."
+    },
+    {
+      "id": "q239",
+      "text": "How many minutes may the Ratings platform stay down before it must be restored?",
+      "kind": "paraphrase",
+      "document": "ops-notes-09.txt",
+      "span": "The Ratings service has a recovery time objective of 124 minutes."
+    },
+    {
+      "id": "q240",
+      "text": "Which person is responsible for the operating guide of the Search service?",
+      "kind": "paraphrase",
+      "document": "ops-notes-13.txt",
+      "span": "Priya owns the Search runbook."
+    },
+    {
+      "id": "u001",
+      "text": "By how much did the Reykjavik office reduce staff turnover in Q2 2024?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u002",
+      "text": "By how much did the Tallinn office reduce packaging waste in Q4 2024?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u003",
+      "text": "By how much did the Bergen office reduce shipping costs in Q1 2025?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u004",
+      "text": "By how much did the Valletta office reduce staff turnover in Q2 2024?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u005",
+      "text": "By how much did the Zagreb office reduce packaging waste in Q2 2024?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u006",
+      "text": "By how much did the Windhoek office reduce energy consumption in Q2 2024?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u007",
+      "text": "What is the recovery time objective of the Hologram service?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u008",
+      "text": "Who owns the Hologram runbook?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u009",
+      "text": "What is the recovery time objective of the Teleport service?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u010",
+      "text": "Who owns the Teleport runbook?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u011",
+      "text": "What is the recovery time objective of the Almanac service?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u012",
+      "text": "Who owns the Almanac runbook?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u013",
+      "text": "What is the recovery time objective of the Sundial service?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u014",
+      "text": "Who owns the Sundial runbook?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u015",
+      "text": "What is the recovery time objective of the Lantern service?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u016",
+      "text": "Who owns the Lantern runbook?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u017",
+      "text": "What is the recovery time objective of the Compass service?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u018",
+      "text": "Who owns the Compass runbook?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u019",
+      "text": "When does the contract with Quillfeather renew?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u020",
+      "text": "What notice period does the contract with Quillfeather require?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u021",
+      "text": "When does the contract with Brightwater renew?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u022",
+      "text": "What notice period does the contract with Brightwater require?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u023",
+      "text": "When does the contract with Ironpetal renew?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u024",
+      "text": "What notice period does the contract with Ironpetal require?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u025",
+      "text": "When does the contract with Saltmarsh renew?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u026",
+      "text": "What notice period does the contract with Saltmarsh require?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u027",
+      "text": "When does the contract with Coppergate renew?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u028",
+      "text": "What notice period does the contract with Coppergate require?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u029",
+      "text": "When does the contract with Hollowell renew?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u030",
+      "text": "What notice period does the contract with Hollowell require?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u031",
+      "text": "What is the cafeteria menu for next Tuesday?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u032",
+      "text": "Who won last year's company chess tournament?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u033",
+      "text": "What colour is the lobby carpet?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u034",
+      "text": "How many parking spaces does the Reykjavik site have?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u035",
+      "text": "Which charity did the company sponsor in the spring?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    },
+    {
+      "id": "u036",
+      "text": "What is the guest wifi password at the Oslo office?",
+      "kind": "unanswerable",
+      "document": null,
+      "span": null
+    }
+  ]
+}

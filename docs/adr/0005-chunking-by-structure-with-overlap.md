@@ -1,6 +1,6 @@
 # 0005. Chunking by structure, with a little overlap
 
-Status: accepted (the sizes are a starting point; the evaluation in week 5 decides them)
+Status: accepted. Sizes decided in week 5 from the evaluation (amended below).
 
 ## Context
 
@@ -33,7 +33,16 @@ and whether a cited page is the page the words are on.
 - Unit tests cover paragraph before sentence, heading starts a unit, overlap repeats the previous tail, no overlap
   when asked, a single enormous word, and that pages never mix.
 
-## What is not decided
+## Decided by the evaluation (week 5)
+
+The defaults changed from 256 tokens with 32 overlap to **64 tokens with no overlap**. On the benchmark that raised
+recall@10 from 71.7% to 89.2%. 32 tokens scored higher (94.2%) and was rejected: a chunk is then one sentence, which
+suits generated one-sentence facts and starves real documents of context. 24 tokens collapsed (53.8%) because chunks
+shorter than the answer cut it in two. The rule used is the smallest size that holds the longest answer sentence plus
+a neighbour. Overlap did not help at any size. Full table: [EVALUATION.md](../EVALUATION.md). Re-run the sweep
+(`npm run sweep -w @atlas/eval`) after changing the embedder, because the best size depends on it.
+
+## What was not decided before
 
 256 and 32 are common defaults, not measured ones. The spec is explicit that "the numbers decide": week 5 builds
 the labelled question set and compares sizes on Recall@10. This ADR is updated then, with the table.

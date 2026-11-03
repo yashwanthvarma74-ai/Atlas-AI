@@ -1,0 +1,25 @@
+{
+  "name": "@atlas/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The evaluation harness: a labelled benchmark, the run that scores retrieval and citations, and the gate that compares runs.",
+  "scripts": {
+    "generate": "tsx src/generate.ts",
+    "run": "tsx --env-file-if-exists=../../.env src/cli.ts run",
+    "check": "tsx --env-file-if-exists=../../.env src/cli.ts check",
+    "sweep": "tsx --env-file-if-exists=../../.env src/cli.ts sweep",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@atlas/core": "*",
+    "mongodb": "^7.0.0",
+    "pino": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "vitest": "^5.0.3"
+  }
+}

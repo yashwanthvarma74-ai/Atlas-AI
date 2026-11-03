@@ -6,11 +6,11 @@ can check.
 Built by [Yashwanth Varma](https://github.com/yashwanthvarma74-ai) with the
 [Meridian design system](https://github.com/yashwanthvarma74-ai/designSystem).
 
-> **Status: week 4 of 6 (chat).** Accounts, workspaces, roles, tenant isolation, the upload-to-indexed pipeline,
-> hybrid search, server-owned citations and streaming chat (stop, regenerate, history, sharing) are built and
-> tested. Evaluation, cost numbers and agents are **not built yet**; they are drawn dashed below and each is marked
-> with the week it lands. It is **not deployed** and the **demo video is not recorded**. The hosted model providers
-> have **not been run against their live services** (no key was available); see [ADR 0012](docs/adr/0012-the-model-is-behind-an-interface-and-everything-it-sees-or-says-is-untrusted.md).
+> **Status: week 5 of 6 (measure).** Everything through streaming chat is built, plus an evaluation harness with a
+> gate, cost per answer, an approval flow for the assistant's tool requests with an audit trail, and a red-team
+> suite. Deployment, the benchmark report and the demo video are **not done**. The hosted model providers have
+> **not been run against their live services** (no key was available), and the numbers below come from an offline
+> embedder and answer model: see [docs/EVALUATION.md](docs/EVALUATION.md) before quoting any of them.
 
 ## Try it
 
@@ -116,7 +116,7 @@ with their `workspaceId`, and the search indexes filter on it inside the query.
 | 2    | Ingest     | Not started. Storage, BullMQ queue, parsing, chunking, embeddings, live status.                                                                                                                                                       |
 | 3    | Retrieval  | Not started. Hybrid search, tenant filter, citations.                                                                                                                                                                                 |
 | 4    | Chat       | **Done.** Streaming over SSE, Stop that saves the partial answer, Regenerate and Retry, follow-up rewriting, saved and searchable history, sharing with the workspace, time to first word shown, safe Markdown with error boundaries. |
-| 5    | Measure    | Not started. Eval harness, red-team cases, cost tracking, tool approval.                                                                                                                                                              |
+| 5    | Measure    | **Mostly done.** Benchmark of 276 questions, scored runs and a CI gate, an evaluation dashboard, cost per answer, tool approval with an audit trail, a red-team suite. Not yet: a real-model run, an LLM judge, the benchmark report. |
 | 6    | Show       | Not started. Hardening, deploy, benchmark report, demo video.                                                                                                                                                                         |
 
 ### Numbers
@@ -126,15 +126,15 @@ Measured on the development laptop (macOS, Node 22, MongoDB Atlas Local 8.3, Red
 latency are measured in the week 6 benchmark against a real embedding model, because the hash embedder would
 flatter them.
 
-| What                 | Result                                                                                                     |
-| -------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Tests                | 355 passing against Atlas Local (shared 25, core 209, API 67, web 54); 4 more run in CI against an S3 mock |
-| Without Atlas Search | 319 pass and the 40 search tests are skipped, never faked, on a plain `mongod`                             |
-| Coverage, core       | 93% statements, 85% branches                                                                               |
-| Coverage, API        | 96% statements, 88% branches                                                                               |
-| Cross-workspace hits | 0, in the adversarial suite (each search stage alone, 9 attack queries, 40 random property runs)           |
-| Streaming            | 20 chunks over 1.1 s through the Next proxy (extractive model at 60 ms a word), uncompressed               |
-| Strict TypeScript    | `noUncheckedIndexedAccess`, no `any` (lint-enforced)                                                       |
+| What                 | Result                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Tests                | 479 passing against Atlas Local (shared 34, core 287, API 83, web 66, eval 9); 4 more run in CI against an S3 mock |
+| Without Atlas Search | 319 pass and the 40 search tests are skipped, never faked, on a plain `mongod`                                     |
+| Coverage, core       | 93% statements, 86% branches                                                                                       |
+| Coverage, API        | 96% statements, 88% branches                                                                                       |
+| Cross-workspace hits | 0, in the adversarial suite (each search stage alone, 9 attack queries, 40 random property runs)                   |
+| Streaming            | 20 chunks over 1.1 s through the Next proxy (extractive model at 60 ms a word), uncompressed                       |
+| Strict TypeScript    | `noUncheckedIndexedAccess`, no `any` (lint-enforced)                                                               |
 
 The streaming row measures the transport, not a model: it proves words arrive as they are written and are not held
 back. Time to first word, tokens and total time are recorded on every saved answer, and published against a real
@@ -180,9 +180,26 @@ atlas-ai/
 - [0009. Citations are owned by the server](docs/adr/0009-citations-are-owned-by-the-server.md)
 - [0010. Answers stream over Server-Sent Events, and Stop means "save what you have"](docs/adr/0010-answers-stream-over-sse-and-stop-means-save.md)
 - [0011. Conversations are private until their author shares them](docs/adr/0011-conversations-are-private-until-shared.md)
+- [0013. Quality is a number, and a change that lowers it does not merge](docs/adr/0013-quality-is-a-number-and-a-gate.md)
+- [0014. The assistant proposes, and a person approves](docs/adr/0014-the-assistant-proposes-and-a-person-approves.md)
 - [0012. The model is behind an interface, and everything it sees or says is untrusted](docs/adr/0012-the-model-is-behind-an-interface-and-everything-it-sees-or-says-is-untrusted.md)
 
 The threat model is in [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md).
+
+## Evaluation results (offline embedder and model)
+
+Recall@10 is about **89%** on the benchmark (88.7% to 89.2% between runs, because the vector search is approximate; 92% for questions in the document's words, 86% paraphrased), MRR 0.63, with
+**0** cross-workspace retrievals. The 0.90 target is not met. Before tuning it was 71.7%; the chunk size, overlap and
+reranker were chosen from a sweep ([EVALUATION.md](docs/EVALUATION.md)). A relevance cutoff was tried and does not
+help. Citation consistency is 100% but means little for a model that only quotes. The red-team cases are in
+[docs/RED-TEAM.md](docs/RED-TEAM.md). Run it: `docker compose up -d`, then `npm run eval`.
+
+## Known limits of week 5
+
+- **Not met:** recall@10 0.90; and no real model or embedder has been measured. The harness records which was used.
+- **Answerability** (saying "the documents do not say") is the model's job and is unmeasured without one.
+- **Tool approval covers one tool** that writes a note; more tools need their own review.
+- **The CI workflow, including the evaluation step, has not been run.**
 
 ## Known limits of week 4
 

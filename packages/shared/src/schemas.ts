@@ -236,6 +236,8 @@ export const messageSchema = z.object({
   error: z.string().nullable(),
   citations: z.array(citationSchema),
   usage: z.object({ inputTokens: z.number(), outputTokens: z.number() }).nullable(),
+  // dollars for this answer; null when the model's price is not known
+  costUsd: z.number().nullable(),
   // where the time went: finding passages, waiting for the first word, and everything
   latency: z
     .object({ retrievalMs: z.number(), ttftMs: z.number().nullable(), totalMs: z.number() })
@@ -244,10 +246,50 @@ export const messageSchema = z.object({
 });
 export type Message = z.infer<typeof messageSchema>;
 
+// ---- tool calls ----
+
+// proposed: waiting for a person. executed, rejected and failed are final. invalid: the model asked for something
+// that does not exist or has the wrong arguments, so nobody was asked. expired: nobody decided in time.
+export const toolCallStatusSchema = z.enum([
+  'proposed',
+  'executing',
+  'executed',
+  'rejected',
+  'failed',
+  'invalid',
+  'expired',
+]);
+export type ToolCallStatus = z.infer<typeof toolCallStatusSchema>;
+
+export const toolCallSchema = z.object({
+  id: z.string(),
+  conversationId: z.string(),
+  messageId: z.string(),
+  tool: z.string(),
+  // what the model sent, shown to the person exactly as it will be used
+  args: z.record(z.string(), z.unknown()),
+  // one line saying what approving it will do
+  description: z.string(),
+  status: toolCallStatusSchema,
+  proposedBy: z.string(),
+  proposedByName: z.string(),
+  decidedBy: z.string().nullable(),
+  decidedByName: z.string().nullable(),
+  decidedAt: z.string().nullable(),
+  result: z.object({ summary: z.string(), documentId: z.string().optional() }).nullable(),
+  error: z.string().nullable(),
+  createdAt: z.string(),
+  expiresAt: z.string(),
+});
+export type ToolCall = z.infer<typeof toolCallSchema>;
+
+export const toolDecisionSchema = z.object({ decision: z.enum(['approve', 'reject']) });
+export type ToolDecision = z.infer<typeof toolDecisionSchema>;
+
 // What the server sends while an answer is written, as Server-Sent Events named after `type`.
 export type ChatStreamEvent =
   | { type: 'start'; userMessageId: string; assistantMessageId: string }
   | { type: 'sources'; sources: { n: number; documentName: string; page: number }[] }
   | { type: 'token'; text: string }
   // the finished message, whatever way it ended: complete, stopped or failed
-  | { type: 'done'; message: Message };
+  | { type: 'done'; message: Message; toolCalls: ToolCall[] };

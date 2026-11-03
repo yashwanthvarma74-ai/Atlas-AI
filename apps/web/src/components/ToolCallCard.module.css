@@ -1,0 +1,62 @@
+.card {
+  display: grid;
+  gap: var(--mrd-space-3);
+  padding: var(--mrd-space-4);
+  border: var(--mrd-border-width-thin) solid var(--mrd-color-warning-border);
+  border-radius: var(--mrd-radius-lg);
+  background: var(--mrd-color-warning-subtle);
+  list-style: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mrd-space-3);
+}
+
+.title {
+  overflow-wrap: anywhere;
+}
+
+.args {
+  display: grid;
+  gap: var(--mrd-space-2);
+  margin: 0;
+}
+
+.arg {
+  display: grid;
+  gap: var(--mrd-space-1);
+}
+
+.arg dt {
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
+  text-transform: capitalize;
+}
+
+.arg dd {
+  max-height: 10rem;
+  margin: 0;
+  overflow: auto;
+  padding: var(--mrd-space-2) var(--mrd-space-3);
+  border-radius: var(--mrd-radius-md);
+  background: var(--mrd-color-bg-surface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.outcome,
+.problem {
+  margin: 0;
+}
+
+.problem {
+  color: var(--mrd-color-danger-text);
+}
+
+.actions {
+  display: flex;
+  gap: var(--mrd-space-2);
+}

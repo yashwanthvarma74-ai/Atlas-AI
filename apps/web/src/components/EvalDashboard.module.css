@@ -1,0 +1,45 @@
+.page {
+  display: grid;
+  gap: var(--mrd-space-4);
+}
+
+.note {
+  margin: 0;
+  color: var(--mrd-color-text-secondary);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--mrd-font-size-sm);
+  background: var(--mrd-color-bg-surface);
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.table th,
+.table td {
+  padding: var(--mrd-space-3) var(--mrd-space-4);
+  text-align: left;
+  border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+}
+
+.table thead th {
+  color: var(--mrd-color-text-secondary);
+  font-weight: var(--mrd-font-weight-medium);
+}
+
+.trend {
+  width: 15rem;
+  color: var(--mrd-color-accent-default);
+}

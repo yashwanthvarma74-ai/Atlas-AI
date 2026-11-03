@@ -1,7 +1,13 @@
 import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { formatSse, type ChatStreamEvent, type Conversation, type Message } from '@atlas/shared';
+import {
+  formatSse,
+  type ChatStreamEvent,
+  type Conversation,
+  type Message,
+  type ToolCall,
+} from '@atlas/shared';
 import { expectNoAxeViolations, json, renderWithProviders } from '@/test/render';
 import ChatThread from './ChatThread';
 
@@ -37,12 +43,13 @@ const message = (fields: Partial<Message>): Message => ({
     },
   ],
   usage: { inputTokens: 100, outputTokens: 12 },
+  costUsd: 0.0003,
   latency: { retrievalMs: 80, ttftMs: 410, totalMs: 1900 },
   createdAt: '2026-11-03T00:00:00.000Z',
   ...fields,
 });
 const asked = (content: string, id = 'q1'): Message =>
-  message({ id, role: 'user', content, citations: [], usage: null, latency: null });
+  message({ id, role: 'user', content, citations: [], usage: null, costUsd: null, latency: null });
 
 // A streaming response the test feeds by hand, so it can look at the screen between two words.
 function liveStream() {
@@ -60,18 +67,47 @@ function liveStream() {
 interface Setup {
   conversation?: Conversation;
   messages?: Message[];
+  toolCalls?: ToolCall[];
+  role?: 'owner' | 'editor' | 'viewer';
   onPost?: (url: string, init: RequestInit) => Response | Promise<Response>;
+  onDecide?: (decision: 'approve' | 'reject') => Response | Promise<Response>;
 }
 
 // Routes the few requests a thread makes. The conversation is a mutable value, so a refetch after a Stop
 // can return what "the server" saved in the meantime.
-function setup({ messages = [], ...rest }: Setup = {}) {
-  const state = { conversation: rest.conversation ?? conversation(), messages };
+const proposal = (fields: Partial<ToolCall> = {}): ToolCall => ({
+  id: 't1',
+  conversationId: 'c1',
+  messageId: 'm1',
+  tool: 'save_note',
+  args: { title: 'Q3 summary', text: 'Revenue grew 14 percent.' },
+  description: 'Save a note called "Q3 summary" in this workspace',
+  status: 'proposed',
+  proposedBy: 'u1',
+  proposedByName: 'Olivia',
+  decidedBy: null,
+  decidedByName: null,
+  decidedAt: null,
+  result: null,
+  error: null,
+  createdAt: '2026-11-03T00:00:00.000Z',
+  expiresAt: '2026-11-03T01:00:00.000Z',
+  ...fields,
+});
+
+function setup({ messages = [], toolCalls = [], role = 'owner', ...rest }: Setup = {}) {
+  const state = { conversation: rest.conversation ?? conversation(), messages, toolCalls };
   const calls: { url: string; init?: RequestInit }[] = [];
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
     const url = String(input);
     calls.push({ url, init });
     if (url.endsWith('/auth/me')) return json(200, { user: me });
+    if (init?.method === 'POST' && /\/tool-calls\//.test(url)) {
+      const { decision } = JSON.parse(init.body as string);
+      return rest.onDecide?.(decision) ?? json(500);
+    }
+    if (/\/workspaces\/w1$/.test(url))
+      return json(200, { workspace: { id: 'w1', name: 'W', role, createdAt: '' } });
     if (init?.method === 'POST' && /\/(messages|regenerate)$/.test(url)) {
       return rest.onPost?.(url, init) ?? json(500);
     }
@@ -82,7 +118,11 @@ function setup({ messages = [], ...rest }: Setup = {}) {
     }
     if (init?.method === 'DELETE') return json(204);
     if (url.includes('/passages')) return json(200, { passages: [] });
-    return json(200, { conversation: state.conversation, messages: state.messages });
+    return json(200, {
+      conversation: state.conversation,
+      messages: state.messages,
+      toolCalls: state.toolCalls,
+    });
   });
   const view = renderWithProviders(<ChatThread workspaceId="w1" conversationId="c1" />);
   return { state, calls, ...view };
@@ -98,7 +138,9 @@ describe('ChatThread', () => {
     expect(
       screen.getByRole('button', { name: 'Source S1: report.pdf, page 3' }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/First word in 410 ms · 1\.9 s · 12 tokens/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/First word in 410 ms · 1\.9 s · 12 tokens · \$0\.0003/),
+    ).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 
@@ -131,7 +173,7 @@ describe('ChatThread', () => {
     state.messages = [asked('How did revenue grow?', 'q9'), final];
     act(() => {
       live.send({ type: 'token', text: ' [S1].' });
-      live.send({ type: 'done', message: final });
+      live.send({ type: 'done', message: final, toolCalls: [] });
       live.close();
     });
 
@@ -316,5 +358,135 @@ describe('ChatThread', () => {
     expect(screen.getByText('first question')).toBeInTheDocument();
     expect(screen.getByText('second question')).toBeInTheDocument();
     spy.mockRestore();
+  });
+
+  describe('requests from the assistant', () => {
+    const saved = [asked('save that'), message({})];
+
+    it('shows exactly what will be done, and waits for a decision', async () => {
+      const { container } = setup({ messages: saved, toolCalls: [proposal()] });
+
+      expect(
+        await screen.findByText('Save a note called "Q3 summary" in this workspace'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Waiting for you')).toBeInTheDocument();
+      expect(screen.getByText('Revenue grew 14 percent.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+      await expectNoAxeViolations(container);
+    });
+
+    it('approves it, then shows how it ended', async () => {
+      const { calls } = setup({
+        messages: saved,
+        toolCalls: [proposal()],
+        onDecide: () =>
+          json(200, {
+            toolCall: proposal({
+              status: 'executed',
+              decidedByName: 'Olivia',
+              result: { summary: 'Saved as "Q3 summary.md"' },
+            }),
+          }),
+      });
+      await userEvent.click(await screen.findByRole('button', { name: 'Approve' }));
+
+      expect(await screen.findByText(/Saved as "Q3 summary\.md" by Olivia/)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+      const post = calls.find((c) => c.url.endsWith('/tool-calls/t1'))!;
+      expect(JSON.parse(post.init!.body as string)).toEqual({ decision: 'approve' });
+    });
+
+    it('rejects it, and says that nothing was changed', async () => {
+      setup({
+        messages: saved,
+        toolCalls: [proposal()],
+        onDecide: () =>
+          json(200, { toolCall: proposal({ status: 'rejected', decidedByName: 'Olivia' }) }),
+      });
+      await userEvent.click(await screen.findByRole('button', { name: 'Reject' }));
+      expect(
+        await screen.findByText(/Rejected by Olivia\. Nothing was changed\./),
+      ).toBeInTheDocument();
+    });
+
+    it('shows the reason when somebody else decided first', async () => {
+      setup({
+        messages: saved,
+        toolCalls: [proposal()],
+        onDecide: () =>
+          json(409, {
+            error: { code: 'conflict', message: 'That request has already been decided.' },
+          }),
+      });
+      await userEvent.click(await screen.findByRole('button', { name: 'Approve' }));
+      expect(await screen.findByText('That request has already been decided.')).toBeInTheDocument();
+    });
+
+    it('gives no buttons to someone who cannot decide it', async () => {
+      setup({
+        conversation: conversation({ mine: false, authorName: 'Eddie', visibility: 'workspace' }),
+        messages: saved,
+        toolCalls: [proposal()],
+      });
+      expect(await screen.findByText('Waiting for you')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Approve|Reject/ })).not.toBeInTheDocument();
+      expect(screen.getByText('Only the person who asked can approve this.')).toBeInTheDocument();
+    });
+
+    it('gives no buttons to a viewer, whose role cannot use the tool', async () => {
+      setup({ messages: saved, toolCalls: [proposal()], role: 'viewer' });
+      expect(await screen.findByText('Waiting for you')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    });
+
+    it('shows a request that was refused as refused, with why, and nothing to approve', async () => {
+      setup({
+        messages: saved,
+        toolCalls: [
+          proposal({
+            status: 'invalid',
+            tool: 'drop_database',
+            description: '',
+            args: {},
+            error: 'There is no tool called "drop_database".',
+          }),
+        ],
+      });
+      expect(
+        await screen.findByText('There is no tool called "drop_database".'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Not valid')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    });
+
+    it('shows what a model wrote as text, even if it looks like markup', async () => {
+      const { container } = setup({
+        messages: saved,
+        toolCalls: [
+          proposal({
+            args: { title: '<img src=x onerror=alert(1)>', text: '<script>alert(1)</script>' },
+          }),
+        ],
+      });
+      expect(await screen.findByText('<script>alert(1)</script>')).toBeInTheDocument();
+      expect(container.querySelector('img')).toBeNull();
+      expect(container.querySelector('script')).toBeNull();
+    });
+
+    it('hides a request that is still arriving, and the request itself, from the words', async () => {
+      const live = liveStream();
+      setup({ onPost: () => live.response });
+      await screen.findByLabelText('Your question');
+      await userEvent.type(screen.getByLabelText('Your question'), 'save that{Enter}');
+      await screen.findByText('Searching your documents…');
+
+      act(() => {
+        live.send({ type: 'start', userMessageId: 'q9', assistantMessageId: 'a9' });
+        live.send({ type: 'sources', sources: [] });
+        live.send({ type: 'token', text: 'Saving it. <tool_call>{"tool":"save_not' });
+      });
+      expect(await screen.findByText('Saving it.')).toBeInTheDocument();
+      expect(screen.queryByText(/tool_call|save_not/)).not.toBeInTheDocument();
+    });
   });
 });

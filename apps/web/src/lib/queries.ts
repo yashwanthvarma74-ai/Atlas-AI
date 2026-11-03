@@ -9,6 +9,8 @@ import {
   type LoginInput,
   type MemberRole,
   type RegisterInput,
+  type ToolCall,
+  type ToolDecision,
   type SessionUser,
 } from '@atlas/shared';
 import { api } from './api';
@@ -20,6 +22,7 @@ export const keys = {
   members: (id: string) => ['workspaces', id, 'members'] as const,
   documents: (id: string) => ['workspaces', id, 'documents'] as const,
   conversations: (id: string) => ['workspaces', id, 'conversations'] as const,
+  audit: (id: string) => ['workspaces', id, 'audit'] as const,
   conversation: (id: string, conversationId: string) =>
     ['workspaces', id, 'conversations', conversationId] as const,
   passages: (id: string, documentId: string, page: number) =>
@@ -225,4 +228,46 @@ export function useDeleteConversation(workspaceId: string) {
     mutationFn: (conversationId: string) => api.deleteConversation(workspaceId, conversationId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.conversations(workspaceId) }),
   });
+}
+
+type ConversationData = Awaited<ReturnType<typeof api.conversation>>;
+
+// Approves or rejects a request. The answer is the request as the server now has it, which replaces the one
+// on screen, so the card shows what really happened (including that it failed) without a refetch.
+export function useDecideToolCall(workspaceId: string, conversationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { id: string; decision: ToolDecision['decision'] }) =>
+      api.decideToolCall(workspaceId, vars.id, vars.decision),
+    onSuccess: (updated: ToolCall) => {
+      queryClient.setQueryData<ConversationData>(
+        keys.conversation(workspaceId, conversationId),
+        (cached) =>
+          cached && {
+            ...cached,
+            toolCalls: cached.toolCalls.map((call) => (call.id === updated.id ? updated : call)),
+          },
+      );
+      // an approved note is a new document, and the audit trail has a new entry
+      void queryClient.invalidateQueries({ queryKey: keys.documents(workspaceId) });
+      void queryClient.invalidateQueries({ queryKey: keys.audit(workspaceId) });
+    },
+    // a 409 means somebody decided first: show how it ended instead of an error that no longer applies
+    onError: () =>
+      void queryClient.invalidateQueries({
+        queryKey: keys.conversation(workspaceId, conversationId),
+      }),
+  });
+}
+
+export function useAuditTrail(workspaceId: string) {
+  return useQuery({
+    queryKey: keys.audit(workspaceId),
+    queryFn: () => api.auditTrail(workspaceId),
+    retry: false,
+  });
+}
+
+export function useEvalRuns() {
+  return useQuery({ queryKey: ['eval', 'runs'], queryFn: api.evalRuns, retry: false });
 }

@@ -1,0 +1,9 @@
+Operations notes 10
+
+The contract with Vehement requires a notice period of 75 days. The contract with Contoso renews on January 21, 2027. Hassan owns the Audit runbook. In Q1 2025, the Malmo office increased training hours by 2 percent after automating the approval workflow.
+
+The Coupons service has a recovery time objective of 193 minutes. In Q3 2024, the Seoul office increased training hours by 33 percent after a regional promotion. The contract with Zorg requires a notice period of 45 days. In Q2 2024, the Austin office increased training hours by 3 percent after automating the approval workflow.The contract with Northwind renews on May 13, 2026. The Identity service keeps its backups for 252 days. The contract with Globex renews on December 21, 2027. The Ledger service has a recovery time objective of 81 minutes.
+
+In Q4 2025, the Prague office reduced staff turnover by 31 percent after a new vendor agreement. In Q2 2025, the Dhaka office increased staff turnover by 21 percent after a new vendor agreement. In Q4 2025, the Leeds office reduced printing volume by 39 percent after an internal audit. The Invoicing service keeps its backups for 224 days.In Q1 2025, the Malmo office increased printing volume by 30 percent after an internal audit. The Inventory service has a recovery time objective of 216 minutes. Hassan owns the Scheduler runbook. In Q3 2024, the Lima office reduced travel expenses by 30 percent after a regional promotion.
+
+In Q2 2024, the Lima office reduced energy consumption by 18 percent after renegotiating the supplier contract. The contract with Cyberdyne requires a notice period of 15 days. In Q1 2024, the Cairo office increased cloud spending by 24 percent after renegotiating the supplier contract. In Q4 2025, the Quito office reduced shipping costs by 3 percent after changing the opening hours.

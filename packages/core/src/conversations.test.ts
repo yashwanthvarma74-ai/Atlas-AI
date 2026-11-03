@@ -38,6 +38,7 @@ async function say(conversationId: string, text: string, role: 'user' | 'assista
     error: null,
     citations: [],
     usage: null,
+    costUsd: null,
     latency: null,
     model: null,
     createdAt: new Date(),

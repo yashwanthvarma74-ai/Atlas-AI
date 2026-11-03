@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import type { WorkspaceAccess } from '../access';
 import { uploadDocument } from '../documents';
 import { processDocument } from '../ingest';
-import { TEXT_INDEX, VECTOR_INDEX } from '../search-indexes';
+import { waitForSearchIndexes } from '../search-indexes';
 import { createTestCore, type TestCore } from './context';
 
 // Search tests need a database with Atlas Search next to it: Atlas Local, or an Atlas cluster. Point this at
@@ -57,47 +57,7 @@ export async function indexText(
   return new ObjectId(doc.id);
 }
 
-// Waits until both search indexes hold every chunk the workspace has in the database. They sync on
-// their own schedules, and a test that reads while one is behind sees a different ranking, not an error.
-export async function waitForIndexes(core: TestCore, access: WorkspaceAccess): Promise<void> {
-  const { workspaceId } = access;
-  await eventually(async () => {
-    const expected = await core.database.chunks.countDocuments({ workspaceId });
-
-    // any direction will do: with limit and numCandidates above the chunk count, it returns every chunk
-    // the vector index holds for this workspace
-    const [vector] = await core.embedder.embed(['count']);
-    const inVectorIndex = await core.database.chunks
-      .aggregate([
-        {
-          $vectorSearch: {
-            index: VECTOR_INDEX,
-            path: 'embedding',
-            queryVector: vector!.some((x) => x !== 0) ? vector : [1, ...vector!.slice(1)],
-            numCandidates: Math.max(expected * 10, 100),
-            limit: Math.max(expected, 1),
-            filter: { workspaceId },
-          },
-        },
-        { $count: 'n' },
-      ])
-      .toArray();
-    const inTextIndex = await core.database.chunks
-      .aggregate([
-        {
-          $searchMeta: {
-            index: TEXT_INDEX,
-            count: { type: 'total' },
-            equals: { path: 'workspaceId', value: workspaceId },
-          },
-        },
-      ])
-      .toArray();
-
-    const vectors = (inVectorIndex[0]?.n as number | undefined) ?? 0;
-    const texts = (inTextIndex[0]?.count?.total as number | undefined) ?? 0;
-    if (vectors !== expected || texts !== expected) {
-      throw new Error(`indexes hold ${vectors} and ${texts} of ${expected} chunks`);
-    }
-  });
-}
+// Waits until both search indexes hold every chunk the workspace has in the database. They sync on their own
+// schedules, and a test that reads while one is behind sees a different ranking, not an error.
+export const waitForIndexes = (core: TestCore, access: WorkspaceAccess): Promise<void> =>
+  waitForSearchIndexes(core, access.workspaceId);

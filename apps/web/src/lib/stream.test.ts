@@ -11,6 +11,7 @@ const message: Message = {
   error: null,
   citations: [],
   usage: null,
+  costUsd: null,
   latency: null,
   createdAt: '2026-11-03T00:00:00.000Z',
 };
@@ -20,7 +21,7 @@ const events: ChatStreamEvent[] = [
   { type: 'sources', sources: [{ n: 1, documentName: 'a.pdf', page: 2 }] },
   { type: 'token', text: 'Hi ' },
   { type: 'token', text: '[S1].' },
-  { type: 'done', message },
+  { type: 'done', message, toolCalls: [] },
 ];
 
 // a response that delivers the wire text in the given pieces

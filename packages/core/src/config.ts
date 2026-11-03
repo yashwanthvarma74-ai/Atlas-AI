@@ -32,9 +32,10 @@ const envSchema = z.object({
   OLLAMA_URL: z.string().default('http://127.0.0.1:11434'),
   OPENAI_API_KEY: z.string().optional(),
 
-  // Chunk size in tokens (estimated at four characters each) and how much neighbouring chunks share.
-  CHUNK_TARGET_TOKENS: z.coerce.number().int().positive().default(256),
-  CHUNK_OVERLAP_TOKENS: z.coerce.number().int().min(0).default(32),
+  // Chunk size in tokens (estimated at four characters each) and how much neighbouring chunks share. The defaults
+  // come from the evaluation sweep, with the reasoning in docs/EVALUATION.md and ADR 0005.
+  CHUNK_TARGET_TOKENS: z.coerce.number().int().positive().default(64),
+  CHUNK_OVERLAP_TOKENS: z.coerce.number().int().min(0).default(0),
   // The longest any one ingest stage may run before the job is failed and retried.
   // The model that writes answers. "extractive" needs no service and no key: it answers by quoting the
   // passages it is given, which is enough to run and test the whole chat pipeline offline. Real answers
@@ -43,8 +44,20 @@ const envSchema = z.object({
   // defaults per provider: gpt-4o-mini, claude-haiku-5-5, llama3.2
   LLM_MODEL: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  // What the model costs, in dollars per million tokens. Needed for any provider whose price is not built in;
+  // without both, the cost of an answer is recorded as unknown.
+  LLM_PRICE_INPUT_PER_MTOK: z.coerce.number().min(0).optional(),
+  LLM_PRICE_OUTPUT_PER_MTOK: z.coerce.number().min(0).optional(),
   // Only for the extractive provider: a pause between words, so streaming can be seen on screen.
   EXTRACTIVE_DELAY_MS: z.coerce.number().int().min(0).default(0),
+
+  // Lets the model ask to use tools (today: save a note), each one waiting for a person to approve it.
+  TOOLS_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
+  // How long a proposed tool call waits for a decision before it lapses.
+  TOOL_CALL_TTL_MINUTES: z.coerce.number().int().positive().default(60),
 
   CHAT_MAX_OUTPUT_TOKENS: z.coerce.number().int().positive().default(1024),
   // How many earlier messages go to the model, and to the question rewriter, with a follow-up.
@@ -56,9 +69,12 @@ const envSchema = z.object({
   // How many passages a question gets (S1 to S8) and how many candidates each search contributes first.
   RETRIEVAL_LIMIT: z.coerce.number().int().positive().default(8),
   RETRIEVAL_POOL: z.coerce.number().int().positive().default(30),
+  // Drops passages whose vector similarity is below this, from 0 to 1. Unset keeps everything. Chosen from the
+  // evaluation in `apps/eval`, not guessed: see docs/EVALUATION.md.
+  RETRIEVAL_MIN_SCORE: z.coerce.number().min(0).max(1).optional(),
   // "none" keeps the fused order; "coverage" boosts passages that contain the question's own words.
-  // Off until the evaluation in week 5 shows it helps.
-  RERANKER: z.enum(['none', 'coverage']).default('none'),
+  // On by default: the evaluation shows it raises recall@10 at every chunk size (docs/EVALUATION.md).
+  RERANKER: z.enum(['none', 'coverage']).default('coverage'),
 
   // The first retry waits this long; each one after waits twice as long as the one before.
   INGEST_BACKOFF_MS: z.coerce.number().int().positive().default(2000),

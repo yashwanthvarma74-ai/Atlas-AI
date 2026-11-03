@@ -25,9 +25,11 @@ import {
   useDeleteConversation,
   useRequireUser,
   useUpdateConversation,
+  useWorkspace,
 } from '@/lib/queries';
 import { useChat } from '@/lib/useChat';
 import { AssistantMessage, PendingAnswer, UserMessage } from './ChatMessage';
+import ToolCallCard from './ToolCallCard';
 import ChatComposer from './ChatComposer';
 import MessageBoundary from './MessageBoundary';
 import PassageDialog from './PassageDialog';
@@ -58,6 +60,7 @@ export default function ChatThread({
   const router = useRouter();
   const { loading: signingIn } = useRequireUser();
   const conversation = useConversation(workspaceId, conversationId);
+  const workspace = useWorkspace(workspaceId);
   const update = useUpdateConversation(workspaceId, conversationId);
   const remove = useDeleteConversation(workspaceId);
   const chat = useChat(workspaceId, conversationId);
@@ -112,7 +115,10 @@ export default function ChatThread({
     );
   }
 
-  const { conversation: info } = conversation.data;
+  const { conversation: info, toolCalls } = conversation.data;
+  // approving needs the conversation to be yours and a role that may use the tool; the server checks both again
+  const mayApprove =
+    info.mine && (workspace.data?.role === 'editor' || workspace.data?.role === 'owner');
   const lastIndex = messages.length - 1;
   // while a regenerate is running the old answer is hidden, and its replacement shown as pending
   const shown = pending && pending.question === null ? messages.slice(0, -1) : messages;
@@ -167,6 +173,17 @@ export default function ChatThread({
                   onOpen={(citation) => setOpened(asSource(citation))}
                 />
               )}
+              {toolCalls
+                .filter((call) => call.messageId === message.id)
+                .map((call) => (
+                  <ToolCallCard
+                    key={call.id}
+                    call={call}
+                    workspaceId={workspaceId}
+                    conversationId={conversationId}
+                    canDecide={mayApprove}
+                  />
+                ))}
             </MessageBoundary>
           ))}
           {pending?.question && <UserMessage content={pending.question} />}

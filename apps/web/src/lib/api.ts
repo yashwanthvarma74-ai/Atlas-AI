@@ -1,7 +1,10 @@
 import type {
   AddMemberInput,
   Conversation,
+  EvalRun,
   Message,
+  ToolCall,
+  ToolDecision,
   UpdateConversationInput,
   CreateWorkspaceInput,
   DocumentSummary,
@@ -145,7 +148,7 @@ export const api = {
     ).conversations;
   },
   async conversation(workspaceId: string, id: string) {
-    return request<{ conversation: Conversation; messages: Message[] }>(
+    return request<{ conversation: Conversation; messages: Message[]; toolCalls: ToolCall[] }>(
       `/workspaces/${workspaceId}/conversations/${id}`,
     );
   },
@@ -169,6 +172,25 @@ export const api = {
   },
   deleteConversation: (workspaceId: string, id: string) =>
     request(`/workspaces/${workspaceId}/conversations/${id}`, { method: 'DELETE' }),
+
+  // ---- tool requests ----
+  async decideToolCall(workspaceId: string, id: string, decision: ToolDecision['decision']) {
+    return (
+      await request<{ toolCall: ToolCall }>(`/workspaces/${workspaceId}/tool-calls/${id}`, {
+        method: 'POST',
+        json: { decision },
+      })
+    ).toolCall;
+  },
+  async auditTrail(workspaceId: string) {
+    return (await request<{ toolCalls: ToolCall[] }>(`/workspaces/${workspaceId}/tool-calls`))
+      .toolCalls;
+  },
+
+  // ---- evaluation ----
+  async evalRuns() {
+    return (await request<{ runs: (EvalRun & { id: string })[] }>('/eval/runs')).runs;
+  },
 
   // ---- members ----
   async members(workspaceId: string) {

@@ -7,6 +7,7 @@ import { createLlm, type LlmProvider } from './llm';
 import { createQueues, type Queues } from './queues';
 import { ensureSearchIndexes } from './search-indexes';
 import { createStorage, type Storage } from './storage';
+import { defaultTools, type ToolRegistry } from './tools';
 
 // Everything the domain code needs, created once per process and passed around explicitly.
 export interface Core {
@@ -21,6 +22,7 @@ export interface Core {
   storage: Storage;
   embedder: Embedder;
   llm: LlmProvider;
+  tools: ToolRegistry;
   logger: Logger;
   close(): Promise<void>;
 }
@@ -32,6 +34,7 @@ export interface CoreOptions {
   storage?: Storage;
   embedder?: Embedder;
   llm?: LlmProvider;
+  tools?: ToolRegistry;
 }
 
 export async function createCore(config: Config, options: CoreOptions = {}): Promise<Core> {
@@ -68,6 +71,7 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
     storage: options.storage ?? createStorage(config),
     embedder: options.embedder ?? createEmbedder(config),
     llm: options.llm ?? createLlm(config),
+    tools: options.tools ?? defaultTools,
     logger,
     close: async () => {
       await queues.close().catch(() => undefined);

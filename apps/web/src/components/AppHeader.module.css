@@ -29,3 +29,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--mrd-space-4);
+}

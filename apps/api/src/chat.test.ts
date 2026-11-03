@@ -199,6 +199,7 @@ describe('conversations over HTTP', () => {
       error: null,
       citations: [],
       usage: null,
+      costUsd: null,
       latency: null,
       model: null,
       createdAt: new Date(),

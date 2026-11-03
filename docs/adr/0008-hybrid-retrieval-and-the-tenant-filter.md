@@ -19,7 +19,7 @@ Keyword search is the reverse. The spec asks for both, merged, with the workspac
 3. Merge the two ranked lists with **reciprocal rank fusion** (k = 60). It needs no score scaling, which is the point:
    a cosine similarity and a keyword relevance score cannot be added.
 4. Optionally **rerank** (`RERANKER`). `none` keeps the fused order; `coverage` boosts passages that contain the
-   question's own terms. The default is `none` until the week 5 evaluation shows the reranker earns its place.
+   question's own terms. The default is now `coverage`: the week 5 sweep showed it raising recall@10 at every chunk size.
 5. Keep the top 8 (`RETRIEVAL_LIMIT`), look up each document's name, and number them **S1 to S8**.
 
 **The tenant filter has three layers, and each is tested on its own:**
@@ -67,7 +67,7 @@ rule in step 1 is for.
 
 ## Consequences
 
-- **There is no relevance cutoff.** Nearest-neighbour search always returns neighbours, so a question the documents
+- **There is no relevance cutoff, and week 5 found that none works.** An unanswerable question differs from an answerable one by one entity, which similarity cannot see: the threshold that rejected 11% of unanswerable questions cost 28 points of recall (see [EVALUATION.md](../EVALUATION.md)). `RETRIEVAL_MIN_SCORE` exists and is off. Original note: Nearest-neighbour search always returns neighbours, so a question the documents
   cannot answer still gets 8 passages (fewer in a small workspace). A threshold has to be calibrated against real
   embeddings, and the evaluation set in week 5 is where that happens. Until then the answer step must not treat
   "got sources" as "has an answer".

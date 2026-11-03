@@ -5,6 +5,7 @@ import { pinoHttp } from 'pino-http';
 import { notFound, type Core } from '@atlas/core';
 import { errorHandler, loadUser, sameOrigin } from './middleware';
 import { authRouter } from './routes/auth';
+import { evalRunsRouter } from './routes/evalRuns';
 import { workspacesRouter } from './routes/workspaces';
 
 export function createApp(core: Core, logger: Logger): Express {
@@ -28,6 +29,7 @@ export function createApp(core: Core, logger: Logger): Express {
   });
 
   app.use('/auth', authRouter(core));
+  app.use('/eval/runs', evalRunsRouter(core));
   app.use('/workspaces', workspacesRouter(core));
 
   app.use((_req, _res, next) => next(notFound('That page')));

@@ -47,6 +47,10 @@ jobs:
         run: npm run typecheck
       - name: Tests with coverage
         run: npm run test:coverage
+      - name: Evaluation gate (retrieval quality, citations, tenant isolation)
+        run: npm run check -w @atlas/eval
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/?directConnection=true
       - name: Audit dependencies
         run: npm audit --audit-level=high --omit=dev
 

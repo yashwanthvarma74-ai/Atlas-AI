@@ -230,13 +230,32 @@ export function createExtractive(delayMs = 0): LlmProvider {
         n: m[1]!,
         text: m[2]!.trim(),
       }));
-      const text =
+      const quoted =
         sources.length === 0
           ? 'The documents do not contain an answer to that.'
           : `From your documents: ${sources
               .slice(0, 2)
               .map((s) => `${s.text.split(/(?<=[.!?])\s+/)[0]} [S${s.n}]`)
               .join(' ')}`;
+
+      // Stands in for a model that can ask to use a tool, so the approval flow can be seen without one: a
+      // question that starts with "save" gets the quoted answer proposed as a note.
+      const question = /^Question: (.*)$/m.exec(prompt)?.[1] ?? '';
+      const wantsSave =
+        system.includes('<tool_call>') && /^\s*save\b/i.test(question) && sources.length > 0;
+      const note = quoted.replace(/\s*\[S\d+\]/g, '');
+      const title = question
+        .replace(
+          /^\s*save\s+(?:this|that|an?|the)?\s*(?:answer|note|summary)?\s*(?:as|called|titled)?\s*/i,
+          '',
+        )
+        .trim();
+      const text = wantsSave
+        ? `${quoted}\n\nI can save that as a note. <tool_call>${JSON.stringify({
+            tool: 'save_note',
+            args: { title: title || 'Note from chat', text: note },
+          })}</tool_call>`
+        : quoted;
 
       for (const word of text.split(/(?<=\s)/)) {
         if (signal.aborted) return;

@@ -11,10 +11,11 @@ export const REWRITE_SYSTEM = `Rewrite the final question so it can be understoo
 Replace pronouns and omissions with what they refer to. If it already stands alone, return it unchanged.
 Reply with only the question.`;
 
-// A passage must not be able to close the <sources> block and write its own instructions after it.
+// A passage must not be able to close the <sources> block and write its own instructions after it, and must
+// not be able to write a tool call that a model quoting it would then repeat as its own.
 const escapeSource = (source: Source): Source => ({
   ...source,
-  text: source.text.replace(/<\/?\s*sources\s*>/gi, (tag) => tag.replace('<', '<\\')),
+  text: source.text.replace(/<\/?\s*(?:sources|tool_call)\s*>/gi, (tag) => tag.replace('<', '<\\')),
 });
 
 // The numbers in an earlier answer belonged to that answer's sources. In a new answer they would point at
@@ -39,9 +40,11 @@ export function buildAnswerPrompt(
   question: string,
   sources: Source[],
   history: { role: 'user' | 'assistant'; content: string }[],
+  // appended to the instructions, for what only some deployments have, such as tools
+  extraInstructions = '',
 ): { system: string; messages: ChatMessage[] } {
   return {
-    system: ANSWER_SYSTEM,
+    system: ANSWER_SYSTEM + extraInstructions,
     messages: [
       ...historyMessages(history),
       {

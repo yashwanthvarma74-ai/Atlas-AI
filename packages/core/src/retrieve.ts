@@ -120,9 +120,22 @@ export async function retrieve(
     keywordSearch(core, access, question, pool, options.documentIds),
   ]);
 
-  const fused = reciprocalRankFusion([semantic, lexical], (hit) => hex(hit._id)).map(
+  let fused = reciprocalRankFusion([semantic, lexical], (hit) => hex(hit._id)).map(
     ({ item, score }) => ({ ...item, score }),
   );
+
+  // Optionally drop passages that are not close enough to the question in meaning. A keyword match alone is
+  // not enough to keep one: a question about "the Oslo office" matches every passage about any office.
+  const { RETRIEVAL_MIN_SCORE: minScore } = core.config;
+  if (minScore !== undefined && hasDirection) {
+    const similarity = await similarities(
+      core,
+      access,
+      fused.map((hit) => hit._id),
+      vector,
+    );
+    fused = fused.filter((hit) => (similarity.get(hex(hit._id)) ?? -1) >= minScore);
+  }
   const ranked = RERANKERS[core.config.RERANKER](question, fused).slice(0, limit);
 
   // Names come from a second lookup that repeats the workspace filter, so a chunk can never be shown
@@ -152,4 +165,26 @@ export async function retrieve(
       },
     ];
   });
+}
+
+// Cosine similarity between the question and each of these passages, by id. The vector search reports a score
+// only for the passages it found, so the keyword-only ones are measured here, from their stored vectors.
+async function similarities(
+  core: Core,
+  access: WorkspaceAccess,
+  ids: ObjectId[],
+  query: number[],
+): Promise<Map<string, number>> {
+  const norm = Math.hypot(...query);
+  const chunks = await core.database.chunks
+    .find({ _id: { $in: ids }, workspaceId: access.workspaceId })
+    .project<Pick<ChunkDoc, '_id' | 'embedding'>>({ embedding: 1 })
+    .toArray();
+  return new Map(
+    chunks.map(({ _id, embedding }) => {
+      const dot = embedding.reduce((sum, x, i) => sum + x * query[i]!, 0);
+      const length = Math.hypot(...embedding);
+      return [hex(_id), length === 0 ? 0 : dot / (length * norm)] as const;
+    }),
+  );
 }

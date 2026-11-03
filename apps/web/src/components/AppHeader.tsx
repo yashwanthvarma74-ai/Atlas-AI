@@ -14,7 +14,10 @@ export default function AppHeader() {
         <Link href={user ? '/workspaces' : '/'} className={styles.brand}>
           Atlas AI
         </Link>
-        <AccountMenu user={user ?? null} />
+        <div className={styles.right}>
+          {user && <Link href="/eval">Evaluation</Link>}
+          <AccountMenu user={user ?? null} />
+        </div>
       </div>
     </header>
   );

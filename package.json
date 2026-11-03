@@ -16,8 +16,9 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "npm run typecheck -ws --if-present",
-    "test": "npm run test -w @atlas/shared -w @atlas/core -w @atlas/api -w @atlas/web",
-    "test:coverage": "npm run test:coverage -w @atlas/core -w @atlas/api"
+    "test": "npm run test -w @atlas/shared -w @atlas/core -w @atlas/api -w @atlas/web -w @atlas/eval",
+    "test:coverage": "npm run test:coverage -w @atlas/core -w @atlas/api",
+    "eval": "npm run check -w @atlas/eval"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

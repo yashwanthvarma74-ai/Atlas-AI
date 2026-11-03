@@ -1,11 +1,13 @@
 import { MongoClient, type Collection, type Db, type ObjectId } from 'mongodb';
 import type {
   Citation,
+  EvalRun,
   ConversationVisibility,
   DocumentKind,
   DocumentStatus,
   MessageStatus,
   Role,
+  ToolCallStatus,
 } from '@atlas/shared';
 
 export interface UserDoc {
@@ -90,11 +92,36 @@ export interface MessageDoc {
   error: string | null;
   citations: Citation[];
   usage: { inputTokens: number; outputTokens: number } | null;
+  // in dollars; null when the model's price is not known
+  costUsd: number | null;
   latency: { retrievalMs: number; ttftMs: number | null; totalMs: number } | null;
   // which model wrote it, for the cost and quality numbers in week 5
   model: string | null;
   createdAt: Date;
 }
+
+export interface ToolCallDoc {
+  _id: ObjectId;
+  workspaceId: ObjectId;
+  conversationId: ObjectId;
+  // the answer that asked for it
+  messageId: ObjectId;
+  tool: string;
+  args: Record<string, unknown>;
+  // one line saying what approving it will do, written when it was proposed
+  description: string;
+  status: ToolCallStatus;
+  // whose conversation it came from: the person the assistant was working for
+  proposedBy: ObjectId;
+  decidedBy: ObjectId | null;
+  decidedAt: Date | null;
+  result: { summary: string; documentId?: string } | null;
+  error: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+export type EvalRunDoc = EvalRun & { _id: ObjectId };
 
 export interface Database {
   client: MongoClient;
@@ -106,6 +133,8 @@ export interface Database {
   chunks: Collection<ChunkDoc>;
   conversations: Collection<ConversationDoc>;
   messages: Collection<MessageDoc>;
+  toolCalls: Collection<ToolCallDoc>;
+  evalRuns: Collection<EvalRunDoc>;
 }
 
 export async function connect(uri: string): Promise<Database> {
@@ -122,6 +151,8 @@ export async function connect(uri: string): Promise<Database> {
     chunks: db.collection('chunks'),
     conversations: db.collection('conversations'),
     messages: db.collection('messages'),
+    toolCalls: db.collection('tool_calls'),
+    evalRuns: db.collection('eval_runs'),
   };
 }
 
@@ -164,6 +195,14 @@ export async function ensureIndexes(d: Database): Promise<void> {
         name: 'one_streaming_answer',
       },
     ),
+    // the cards in a conversation, and the audit trail: every call the assistant asked for, newest first
+    d.toolCalls.createIndex({ conversationId: 1, createdAt: 1 }),
+    d.toolCalls.createIndex({ workspaceId: 1, createdAt: -1 }),
+    d.toolCalls.createIndex({ workspaceId: 1, proposedBy: 1, createdAt: -1 }),
+
+    // the dashboard: evaluation runs, newest first
+    d.evalRuns.createIndex({ createdAt: -1 }),
+
     // the sweep that fails answers whose writer died
     d.messages.createIndex(
       { status: 1, createdAt: 1 },

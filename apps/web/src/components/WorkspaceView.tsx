@@ -43,6 +43,9 @@ export default function WorkspaceView({ id }: { id: string }) {
         <Link href={`/w/${data.id}/chat`} className={styles.chat}>
           Conversations
         </Link>
+        {(data.role === 'owner' || data.role === 'editor') && (
+          <Link href={`/w/${data.id}/audit`}>Audit trail</Link>
+        )}
       </div>
       <DocumentLibrary workspaceId={data.id} role={data.role} />
       <SearchPanel workspaceId={data.id} />

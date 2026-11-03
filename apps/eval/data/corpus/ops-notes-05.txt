@@ -1,0 +1,9 @@
+Operations notes 5
+
+In Q4 2025, the Toronto office reduced travel expenses by 31 percent after a regional promotion. The Shipping on-call engineer is paged every Saturday at 6 o'clock. In Q3 2024, the Kyoto office increased staff turnover by 2 percent after renegotiating the supplier contract. The contract with Rekall requires a notice period of 15 days.
+
+In Q1 2024, the Vienna office increased printing volume by 12 percent after changing the opening hours. The Imports service keeps its backups for 87 days. The Payroll service has a recovery time objective of 9 minutes. In Q4 2024, the Porto office reduced training hours by 28 percent after seasonal demand.The contract with Initech renews on August 2, 2026. In Q3 2024, the Bogota office increased packaging waste by 21 percent after moving to a new building. The Settings service keeps its backups for 271 days. Lena owns the Checkout runbook.
+
+In Q1 2025, the Accra office increased support tickets by 18 percent after moving to a new building. The Warehouse service has a recovery time objective of 208 minutes. The Metrics service keeps its backups for 31 days. The contract with Monarch renews on April 19, 2026.In Q2 2025, the Riga office reduced meeting room bookings by 18 percent after a new vendor agreement. In Q3 2024, the Lisbon office reduced packaging waste by 2 percent after a regional promotion. Yara owns the Imports runbook. In Q4 2025, the Malmo office reduced meeting room bookings by 31 percent after changing the opening hours.
+
+In Q3 2025, the Oslo office reduced travel expenses by 21 percent after a new vendor agreement. In Q3 2024, the Hanoi office reduced energy consumption by 3 percent after moving to a new building. In Q1 2024, the Austin office reduced printing volume by 30 percent after a regional promotion. The Checkout service has a recovery time objective of 169 minutes.

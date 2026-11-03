@@ -1,0 +1,61 @@
+.page {
+  display: grid;
+  gap: var(--mrd-space-4);
+}
+
+.note {
+  margin: 0;
+  color: var(--mrd-color-text-secondary);
+}
+
+.scroll {
+  overflow-x: auto;
+  border: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+  border-radius: var(--mrd-radius-lg);
+  background: var(--mrd-color-bg-surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--mrd-font-size-sm);
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.table th,
+.table td {
+  padding: var(--mrd-space-3) var(--mrd-space-4);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  color: var(--mrd-color-text-secondary);
+  font-weight: var(--mrd-font-weight-medium);
+  border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-default);
+}
+
+.table tbody tr + tr td {
+  border-top: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+}
+
+.error,
+.result {
+  display: block;
+  margin-top: var(--mrd-space-1);
+}
+
+.error {
+  color: var(--mrd-color-danger-text);
+}
+
+.result {
+  color: var(--mrd-color-text-secondary);
+}

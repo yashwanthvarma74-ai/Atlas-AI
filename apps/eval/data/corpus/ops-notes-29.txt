@@ -1,0 +1,9 @@
+Operations notes 29
+
+The Invoicing on-call engineer is paged every Thursday at 10 o'clock. In Q1 2024, the Nairobi office increased meeting room bookings by 30 percent after a new vendor agreement. Jonas owns the Sessions runbook. In Q3 2024, the Tunis office increased support tickets by 39 percent after automating the approval workflow.
+
+In Q1 2025, the Osaka office increased meeting room bookings by 29 percent after changing the opening hours. The contract with Dunder requires a notice period of 15 days. The Sessions service keeps its backups for 330 days. In Q2 2024, the Dublin office increased cloud spending by 33 percent after a new vendor agreement.The Payments service keeps its backups for 257 days. In Q4 2025, the Hanoi office increased energy consumption by 38 percent after an internal audit. The contract with Massive requires a notice period of 120 days. In Q3 2025, the Osaka office increased shipping costs by 36 percent after a regional promotion.
+
+The Search service keeps its backups for 271 days. The contract with Moxie renews on August 18, 2026. The Storage service keeps its backups for 77 days. The contract with Massive renews on July 19, 2028.Idris owns the Fraud runbook. In Q1 2024, the Malmo office reduced meeting room bookings by 13 percent after a new vendor agreement. In Q3 2024, the Turin office reduced packaging waste by 22 percent after a new vendor agreement. Marcus owns the Calendar runbook.
+
+In Q1 2025, the Vienna office increased shipping costs by 26 percent after changing the opening hours. In Q4 2024, the Quito office reduced meeting room bookings by 14 percent after a regional promotion. The Ratings on-call engineer is paged every Tuesday at 11 o'clock. The contract with Contoso requires a notice period of 15 days.

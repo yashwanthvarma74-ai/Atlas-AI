@@ -17,3 +17,5 @@ decision, the evidence, the consequences and the alternatives that were rejected
 | 0010 | [Answers stream over Server-Sent Events, and Stop means "save what you have"](0010-answers-stream-over-sse-and-stop-means-save.md)                                    | accepted |
 | 0011 | [Conversations are private until their author shares them](0011-conversations-are-private-until-shared.md)                                                            | accepted |
 | 0012 | [The model is behind an interface, and everything it sees or says is untrusted](0012-the-model-is-behind-an-interface-and-everything-it-sees-or-says-is-untrusted.md) | accepted |
+| 0013 | [Quality is a number, and a change that lowers it does not merge](0013-quality-is-a-number-and-a-gate.md)                                                             | accepted |
+| 0014 | [The assistant proposes, and a person approves](0014-the-assistant-proposes-and-a-person-approves.md)                                                                 | accepted |

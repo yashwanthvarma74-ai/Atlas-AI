@@ -1,0 +1,9 @@
+Operations notes 27
+
+In Q4 2024, the Nairobi office reduced support tickets by 13 percent after renegotiating the supplier contract. The contract with Krusty renews on May 11, 2028. In Q1 2025, the Quito office reduced shipping costs by 26 percent after an internal audit. The Reviews service keeps its backups for 133 days.
+
+The Shipping service has a recovery time objective of 78 minutes. In Q2 2025, the Quito office increased cloud spending by 10 percent after a new vendor agreement. In Q1 2025, the Riga office reduced cloud spending by 11 percent after seasonal demand. The Coupons on-call engineer is paged every Friday at 9 o'clock.In Q1 2024, the Riga office reduced support tickets by 20 percent after a new vendor agreement. In Q4 2024, the Riga office increased travel expenses by 17 percent after an internal audit. In Q3 2024, the Berlin office reduced packaging waste by 32 percent after moving to a new building. In Q3 2025, the Dublin office reduced meeting room bookings by 35 percent after a regional promotion.
+
+The Directory on-call engineer is paged every Tuesday at 1 o'clock. In Q4 2024, the Denver office reduced meeting room bookings by 2 percent after a regional promotion. The contract with Aperture renews on May 12, 2028. In Q4 2025, the Basel office increased printing volume by 10 percent after automating the approval workflow.In Q4 2024, the Basel office reduced training hours by 11 percent after moving to a new building. In Q2 2024, the Malmo office increased shipping costs by 21 percent after a regional promotion. In Q1 2025, the Denver office increased shipping costs by 15 percent after seasonal demand. The contract with Prestige renews on October 2, 2026.
+
+Tomas owns the Messaging runbook. Lucia owns the Uploads runbook. The contract with Duff requires a notice period of 105 days. In Q2 2024, the Dhaka office reduced travel expenses by 5 percent after automating the approval workflow.

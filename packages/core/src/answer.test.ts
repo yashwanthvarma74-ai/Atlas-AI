@@ -69,6 +69,28 @@ describe('a finished answer', () => {
     ]);
   });
 
+  it('works out what the answer cost from the tokens and the configured price', async () => {
+    const priced = {
+      config: { ...core.config, LLM_PRICE_INPUT_PER_MTOK: 1, LLM_PRICE_OUTPUT_PER_MTOK: 2 },
+    };
+    const { message } = await ask(
+      scripted(['Fine [S1].'], { usage: { inputTokens: 1000, outputTokens: 500 } }),
+      found(source(1)),
+      'q',
+      { overrides: priced },
+    );
+    // 1,000 x $1/M + 500 x $2/M
+    expect(message.costUsd).toBeCloseTo(0.002, 10);
+  });
+
+  it('records the cost as unknown, not zero, when the model has no known price', async () => {
+    const { message } = await ask(
+      scripted(['Fine.'], { usage: { inputTokens: 10, outputTokens: 5 } }),
+      found(source(1)),
+    );
+    expect(message.costUsd).toBeNull();
+  });
+
   it('records where the time went', async () => {
     const { message } = await ask(scripted(['ok']), found(source(1)));
     expect(message.latency).toEqual({
@@ -148,6 +170,109 @@ describe('a finished answer', () => {
     );
     expect(message.status).toBe('complete');
     expect((await getConversation(core, ws, conversation._id)).messages).toHaveLength(2);
+  });
+});
+
+const askToSave =
+  '<tool_call>{"tool":"save_note","args":{"title":"Summary","text":"Revenue grew."}}</tool_call>';
+
+describe('tool requests', () => {
+  it('takes the request out of the words, and saves it as waiting for a person', async () => {
+    const llm = scripted(['Revenue grew [S1]. I can save that. ', askToSave]);
+    const { message, events } = await ask(llm, found(source(1)));
+
+    expect(message.content).toBe('Revenue grew [S1]. I can save that.');
+    const done = events.find((e) => e.type === 'done');
+    expect(done?.type === 'done' && done.toolCalls).toEqual([
+      expect.objectContaining({
+        tool: 'save_note',
+        status: 'proposed',
+        description: 'Save a note called "Summary" in this workspace',
+      }),
+    ]);
+    // nothing has run: it is waiting
+    expect(await core.database.documents.countDocuments({ name: 'Summary.md' })).toBe(0);
+  });
+
+  it('keeps the request with the conversation, so it is still there on reload', async () => {
+    const { conversation } = await ask(scripted(['Done. ', askToSave]), found(source(1)));
+    const { toolCalls } = await getConversation(core, ws, conversation._id);
+    expect(toolCalls.map((c) => [c.tool, c.status])).toEqual([['save_note', 'proposed']]);
+  });
+
+  it('does not act on an answer that was stopped, even if it had written a whole request', async () => {
+    const controller = new AbortController();
+    const llm = scripted(['Saving now. ', askToSave, ' and more'], {
+      beforeToken: (index) => {
+        if (index === 2) controller.abort();
+      },
+    });
+    const { message, conversation } = await ask(llm, found(source(1)), 'q', {
+      signal: controller.signal,
+    });
+
+    expect(message.status).toBe('stopped');
+    expect(message.content).toBe('Saving now.');
+    expect((await getConversation(core, ws, conversation._id)).toolCalls).toEqual([]);
+  });
+
+  it('does not act on an answer that failed part-way, and hides the half-written request', async () => {
+    const llm = scripted(['Saving. <tool_call>{"tool":"save_note","args":{"ti'], {
+      fail: new LlmError('down', false),
+    });
+    const { message, conversation } = await ask(llm, found(source(1)));
+
+    expect(message.status).toBe('failed');
+    expect(message.content).toBe('Saving.');
+    expect((await getConversation(core, ws, conversation._id)).toolCalls).toEqual([]);
+  });
+
+  it('records a request for something that does not exist, and offers nothing to approve', async () => {
+    const llm = scripted(['Ok. <tool_call>{"tool":"delete_everything","args":{}}</tool_call>']);
+    const { events } = await ask(llm, found(source(1)));
+    const done = events.find((e) => e.type === 'done');
+    expect(done?.type === 'done' && done.toolCalls[0]).toMatchObject({
+      tool: 'delete_everything',
+      status: 'invalid',
+    });
+  });
+
+  it('tells the model about the tools, and leaves them out when they are switched off', async () => {
+    const on = scripted(['x']);
+    await ask(on, found(source(1)));
+    expect(on.requests.at(-1)!.system).toContain('save_note');
+
+    const off = scripted([
+      'x <tool_call>{"tool":"save_note","args":{"title":"t","text":"x"}}</tool_call>',
+    ]);
+    const { message, conversation } = await ask(off, found(source(1)), 'q', {
+      overrides: { config: { ...core.config, TOOLS_ENABLED: false } },
+    });
+    expect(off.requests.at(-1)!.system).not.toContain('save_note');
+    // switched off means the text is just text: nothing is read as a request
+    expect(message.content).toContain('<tool_call>');
+    expect((await getConversation(core, ws, conversation._id)).toolCalls).toEqual([]);
+  });
+
+  it('lets the offline model show the flow: a question that starts with "save" proposes a note', async () => {
+    const llm = { ...createExtractive(), requests: [] };
+    const { message, events } = await ask(
+      llm,
+      found(source(1, 'Revenue grew 14 percent. It was Asia.')),
+      'save this answer as Q3 revenue',
+    );
+
+    expect(message.content).toContain('I can save that as a note.');
+    expect(message.content).not.toContain('<tool_call>');
+    const done = events.find((e) => e.type === 'done');
+    const call = done?.type === 'done' ? done.toolCalls[0] : undefined;
+    expect(call).toMatchObject({
+      tool: 'save_note',
+      status: 'proposed',
+      args: { title: 'Q3 revenue' },
+    });
+    // the saved text has the quoted answer without its citation numbers, which belong to this answer only
+    expect(call?.args.text).toBe('From your documents: Revenue grew 14 percent.');
   });
 });
 
@@ -327,6 +452,7 @@ describe('one answer at a time', () => {
       error: null,
       citations: [],
       usage: null,
+      costUsd: null,
       latency: null,
       model: null,
       createdAt: new Date(Date.now() - 10 * 60_000),
