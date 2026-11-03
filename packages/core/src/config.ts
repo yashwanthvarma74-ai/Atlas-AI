@@ -95,6 +95,12 @@ const envSchema = z.object({
   // Multiplies every per-address rate limit. Leave at 1. It exists so a load test can measure the service rather
   // than the limiter, and a deployment that raises it has removed a defence.
   RATE_LIMIT_SCALE: z.coerce.number().positive().default(1),
+  // Run the ingest worker inside the API process. For hosts that give one free service and no background workers;
+  // anywhere else, run the worker on its own so uploads and chat scale and fail separately.
+  INLINE_WORKER: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   // How long a guest account and its workspace live before the worker deletes them.
   GUEST_TTL_HOURS: z.coerce.number().positive().default(24),
   // How many proxies sit in front of the API (Vercel and Fly make two), so rate limits see the real visitor.

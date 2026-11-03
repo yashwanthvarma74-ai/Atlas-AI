@@ -1,17 +1,21 @@
 import { pino } from 'pino';
-import { createCore, loadConfig } from '@atlas/core';
+import { createCore, loadConfig, startIngestWorker } from '@atlas/core';
 import { createApp } from './app';
 
 const config = loadConfig();
 const logger = pino({ level: config.LOG_LEVEL });
 
 const core = await createCore(config, { logger });
-const server = createApp(core, logger).listen(config.API_PORT, () => {
-  logger.info(`API listening on port ${config.API_PORT}`);
+// hosts that assign the port say so in PORT
+const port = Number(process.env.PORT ?? config.API_PORT);
+const worker = config.INLINE_WORKER ? startIngestWorker(core) : undefined;
+const server = createApp(core, logger).listen(port, () => {
+  logger.info(`API listening on port ${port}${worker ? ', ingest worker inside' : ''}`);
 });
 
 async function shutdown() {
   server.close();
+  await worker?.stop();
   await core.close();
   process.exit(0);
 }
