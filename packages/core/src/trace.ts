@@ -35,17 +35,19 @@ export async function startTracing(serviceName: string): Promise<() => Promise<v
   const [
     { NodeTracerProvider },
     { BatchSpanProcessor },
-    { OTLPTraceExporter },
     { resourceFromAttributes },
+    { createOtlpExporter },
   ] = await Promise.all([
     import('@opentelemetry/sdk-trace-node'),
     import('@opentelemetry/sdk-trace-base'),
-    import('@opentelemetry/exporter-trace-otlp-http'),
     import('@opentelemetry/resources'),
+    import('./otlp'),
   ]);
   const provider = new NodeTracerProvider({
     resource: resourceFromAttributes({ 'service.name': serviceName }),
-    spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
+    spanProcessors: [
+      new BatchSpanProcessor(createOtlpExporter(process.env.OTEL_EXPORTER_OTLP_ENDPOINT)),
+    ],
   });
   provider.register();
   return () => provider.shutdown();

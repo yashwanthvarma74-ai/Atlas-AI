@@ -9,6 +9,8 @@ export default defineConfig({
     coverage: {
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.test.ts', 'src/test/**', 'src/index.ts'],
+      // the floor for the logic everything else stands on; a change that lowers coverage below it fails the build
+      thresholds: { statements: 85, lines: 85, functions: 85, branches: 80 },
     },
   },
 });

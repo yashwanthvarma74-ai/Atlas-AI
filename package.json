@@ -18,10 +18,15 @@
     "typecheck": "npm run typecheck -ws --if-present",
     "test": "npm run test -w @atlas/shared -w @atlas/core -w @atlas/api -w @atlas/web -w @atlas/eval",
     "test:coverage": "npm run test:coverage -w @atlas/core -w @atlas/api",
-    "eval": "npm run check -w @atlas/eval"
+    "eval": "npm run check -w @atlas/eval",
+    "seed": "npm run seed -w @atlas/eval",
+    "explain": "npm run explain -w @atlas/eval"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^9.0.0",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.64.1",
     "concurrently": "^9.0.0",
     "eslint": "^9.0.0",
     "eslint-plugin-jsx-a11y": "^6.10.0",
