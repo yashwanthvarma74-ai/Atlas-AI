@@ -18,7 +18,21 @@ export function createApp(core: Core, logger: Logger): Express {
   // behind the Next.js proxy and any load balancer, the client address is in X-Forwarded-For
   app.set('trust proxy', core.config.TRUST_PROXY_HOPS);
 
-  app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === '/health' } }));
+  app.use(
+    pinoHttp({
+      logger,
+      autoLogging: { ignore: (req) => req.url === '/health' },
+      // Headers carry the session cookie, so they are never logged. The default serialiser writes all of them.
+      serializers: {
+        req: (req: { id: unknown; method: string; url: string }) => ({
+          id: req.id,
+          method: req.method,
+          url: req.url,
+        }),
+        res: (res: { statusCode: number }) => ({ statusCode: res.statusCode }),
+      },
+    }),
+  );
   app.use(express.json({ limit: '16kb' }));
   app.use(cookieParser());
   app.use(sameOrigin(core.config.SITE_ORIGIN));
