@@ -37,16 +37,19 @@ function parseText(bytes: Uint8Array): Page[] {
 }
 
 async function parsePdf(bytes: Uint8Array): Promise<Page[]> {
+  // pdf.js 6 releases a document through its loading task, not the document
+  const task = getDocument({
+    // pdf.js copies the buffer's ownership, so hand it a copy and keep ours
+    data: new Uint8Array(bytes),
+    disableFontFace: true,
+    useSystemFonts: false,
+    verbosity: 0,
+  });
   let pdf;
   try {
-    pdf = await getDocument({
-      // pdf.js copies the buffer's ownership, so hand it a copy and keep ours
-      data: new Uint8Array(bytes),
-      disableFontFace: true,
-      useSystemFonts: false,
-      verbosity: 0,
-    }).promise;
+    pdf = await task.promise;
   } catch {
+    await task.destroy().catch(() => undefined);
     throw new ParseError('This PDF could not be read. It may be damaged or password protected.');
   }
 
@@ -66,7 +69,7 @@ async function parsePdf(bytes: Uint8Array): Promise<Page[]> {
     }
     return pages;
   } finally {
-    await pdf.destroy();
+    await task.destroy();
   }
 }
 
