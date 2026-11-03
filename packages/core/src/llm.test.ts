@@ -3,6 +3,7 @@ import { loadConfig } from './config';
 import {
   complete,
   createAnthropic,
+  createGemini,
   createExtractive,
   createLlm,
   createOllama,
@@ -49,23 +50,6 @@ describe('OpenAI provider', () => {
     'data: {"choices":[],"usage":{"prompt_tokens":120,"completion_tokens":7}}\n\n',
     'data: [DONE]\n\n',
   ];
-
-  it('talks to another OpenAI-compatible service when given its address', async () => {
-    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
-    await collect(createOpenAI('k', 'm', 'https://models.example.test/v1').stream(request()));
-    expect(fetch.mock.calls[0]![0]).toBe('https://models.example.test/v1/chat/completions');
-  });
-
-  it('passes the reasoning effort along only when one is set', async () => {
-    const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => streamOf(chunks));
-    await collect(createOpenAI('k', 'm', undefined, 'low').stream(request()));
-    await collect(createOpenAI('k', 'm').stream(request()));
-    const [withEffort, without] = fetch.mock.calls.map(([, init]) =>
-      JSON.parse(init!.body as string),
-    );
-    expect(withEffort.reasoning_effort).toBe('low');
-    expect(without).not.toHaveProperty('reasoning_effort');
-  });
 
   it('streams the text and reports the token counts', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
@@ -117,6 +101,50 @@ describe('OpenAI provider', () => {
     ).catch((e) => e);
     expect(error).not.toBeInstanceOf(LlmError);
     expect(error.name).toBe('AbortError');
+  });
+});
+
+describe('Gemini provider', () => {
+  const chunks = [
+    'data: {"candidates":[{"content":{"parts":[{"text":"Costs ","thought":false}]}}],"usageMetadata":{"promptTokenCount":70,"candidatesTokenCount":2}}\n\n',
+    'data: {"candidates":[{"content":{"parts":[{"text":"weighing it up","thought":true},{"text":"fell [S2]."}]}}],"usageMetadata":{"promptTokenCount":70,"candidatesTokenCount":9}}\n\n',
+  ];
+
+  it('streams the answer, leaves out thoughts and reports the final token counts', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
+    const events = await collect(createGemini('gk-test', 'gemini-x').stream(request()));
+
+    expect(textOf(events)).toBe('Costs fell [S2].');
+    expect(events.at(-1)).toEqual({ type: 'usage', inputTokens: 70, outputTokens: 9 });
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-x:streamGenerateContent?alt=sse',
+    );
+    // the key travels in a header, never in the address, where it would end up in logs
+    expect(String(url)).not.toContain('gk-test');
+    expect(init!.headers).toMatchObject({ 'x-goog-api-key': 'gk-test' });
+    expect(JSON.parse(init!.body as string)).toEqual({
+      systemInstruction: { parts: [{ text: 'You answer from sources.' }] },
+      contents: [{ role: 'user', parts: [{ text: 'What happened?' }] }],
+      generationConfig: { maxOutputTokens: 100 },
+    });
+  });
+
+  it('calls the assistant side "model" when sending earlier turns', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
+    await collect(
+      createGemini('k', 'm').stream(
+        request({
+          messages: [
+            { role: 'user', content: 'hi' },
+            { role: 'assistant', content: 'hello' },
+            { role: 'user', content: 'and now?' },
+          ],
+        }),
+      ),
+    );
+    const body = JSON.parse(fetch.mock.calls[0]![1]!.body as string);
+    expect(body.contents.map((c: { role: string }) => c.role)).toEqual(['user', 'model', 'user']);
   });
 });
 

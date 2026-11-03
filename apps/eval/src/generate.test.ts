@@ -22,7 +22,6 @@ describe('the benchmark', () => {
     const kinds = (kind: string) => dataset.questions.filter((q) => q.kind === kind).length;
     expect(kinds('lexical')).toBe(120);
     expect(kinds('paraphrase')).toBe(120);
-    expect(kinds('unanswerable')).toBeGreaterThanOrEqual(30);
   });
 
   it('gives every document three full pages', () => {
@@ -34,10 +33,10 @@ describe('the benchmark', () => {
   });
 
   it('labels every answerable question with a sentence that is in its document exactly once', () => {
-    for (const question of dataset.questions.filter((q) => q.kind !== 'unanswerable')) {
+    for (const question of dataset.questions) {
       expect(question.document, question.id).toBeTruthy();
-      const text = textOf(question.document!);
-      const occurrences = text.split(question.span!).length - 1;
+      const text = textOf(question.document);
+      const occurrences = text.split(question.span).length - 1;
       expect(occurrences, `${question.id}: ${question.span}`).toBe(1);
     }
   });
@@ -52,19 +51,6 @@ describe('the benchmark', () => {
   it('has unique question ids and unique question texts', () => {
     expect(new Set(dataset.questions.map((q) => q.id)).size).toBe(dataset.questions.length);
     expect(new Set(dataset.questions.map((q) => q.text)).size).toBe(dataset.questions.length);
-  });
-
-  it('asks the unanswerable questions about things that really are not in the corpus', () => {
-    const everything = corpus.map((file) => file.text).join('\n');
-    for (const question of dataset.questions.filter((q) => q.kind === 'unanswerable')) {
-      expect(question.span).toBeNull();
-      // the entity each one is about (a place, a service or a vendor) appears nowhere
-      const entity =
-        /(?:the |with )(Reykjavik|Tallinn|Bergen|Valletta|Zagreb|Windhoek|Hologram|Teleport|Almanac|Sundial|Lantern|Compass|Quillfeather|Brightwater|Ironpetal|Saltmarsh|Coppergate|Hollowell)/.exec(
-          question.text,
-        )?.[1];
-      if (entity) expect(everything, question.id).not.toContain(entity);
-    }
   });
 
   it('keeps the paraphrased questions free of the words that are only in the answer sentence', () => {

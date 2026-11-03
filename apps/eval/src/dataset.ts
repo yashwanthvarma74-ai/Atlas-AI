@@ -2,16 +2,16 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-export type QuestionKind = 'lexical' | 'paraphrase' | 'unanswerable';
+export type QuestionKind = 'lexical' | 'paraphrase';
 
 export interface Question {
   id: string;
   text: string;
   kind: QuestionKind;
   // where the answer is: a document, and the exact sentence in it. Labels name text, not chunks, so the same
-  // dataset stays valid whatever the chunk size is. Null for a question the corpus cannot answer.
-  document: string | null;
-  span: string | null;
+  // dataset stays valid whatever the chunk size is.
+  document: string;
+  span: string;
 }
 
 export interface Dataset {

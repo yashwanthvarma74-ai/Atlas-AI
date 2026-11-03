@@ -123,18 +123,6 @@ describe.skipIf(!SEARCH_TEST_URL)('retrieve', () => {
     expect(await retrieve(core, ws, '   ')).toEqual([]);
   });
 
-  it('drops passages that are not close in meaning when a minimum score is set', async () => {
-    const everything = await retrieve(core, ws, 'third quarter revenue Asia');
-    const strict = { ...core, config: { ...core.config, RETRIEVAL_MIN_SCORE: 0.4 } };
-    const kept = await retrieve(strict, ws, 'third quarter revenue Asia');
-
-    expect(kept.length).toBeGreaterThan(0);
-    expect(kept.length).toBeLessThan(everything.length);
-    expect(kept[0]?.documentName).toBe('finance.txt');
-    // a question about nothing in the documents gets nothing back, however many keywords it shares
-    expect(await retrieve(strict, ws, 'zebra giraffe elephant safari')).toEqual([]);
-  });
-
   it('refuses, saying why, on a database with no Atlas Search', async () => {
     const plain = { ...core, searchAvailable: false, recheckSearch: async () => false };
     await expect(retrieve(plain, ws, 'anything')).rejects.toMatchObject({ status: 503 });

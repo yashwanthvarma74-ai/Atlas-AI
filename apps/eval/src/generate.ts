@@ -14,7 +14,6 @@ const CITIES =
   'Berlin Lisbon Osaka Toronto Nairobi Lima Oslo Seoul Dublin Cairo Hanoi Prague Quito Tunis Vienna Warsaw Accra Bogota Riga Perth Austin Denver Leeds Porto Basel Malmo Turin Kyoto Lagos Dhaka'.split(
     ' ',
   );
-const UNKNOWN_CITIES = ['Reykjavik', 'Tallinn', 'Bergen', 'Valletta', 'Zagreb', 'Windhoek'];
 const QUARTERS = [
   'Q1 2024',
   'Q2 2024',
@@ -54,7 +53,6 @@ const SERVICES =
   'Billing Ledger Catalog Checkout Identity Notifier Reports Search Gateway Scheduler Inventory Pricing Shipping Returns Loyalty Payments Fraud Ratings Recommender Warehouse Courier Invoicing Payroll Onboarding Directory Calendar Messaging Storage Uploads Exports Imports Audit Metrics Alerts Sessions Tokens Profiles Settings Reviews Coupons'.split(
     ' ',
   );
-const UNKNOWN_SERVICES = ['Hologram', 'Teleport', 'Almanac', 'Sundial', 'Lantern', 'Compass'];
 const PEOPLE =
   'Priya Marcus Lena Tomas Amara Jonas Keiko Rafael Ingrid Samuel Noor Viktor Elena Hassan Mei Dmitri Chloe Arjun Sofia Mateo Yara Felix Nia Oskar Lucia Idris Hana Pavel Zara Anders'.split(
     ' ',
@@ -64,14 +62,6 @@ const VENDORS =
   'Northwind Contoso Fabrikam Initech Hooli Umbrella Globex Soylent Vandelay Stark Wayne Oscorp Aperture Cyberdyne Tyrell Wonka Massive Pied Gringotts Monarch Sterling Dunder Prestige Bluth Krusty Acme Duff Vehement Gekko Waystar Rekall Nakatomi Oceanic Bubba Genco Kitchen Lumon Mondo Zorg Moxie'.split(
     ' ',
   );
-const UNKNOWN_VENDORS = [
-  'Quillfeather',
-  'Brightwater',
-  'Ironpetal',
-  'Saltmarsh',
-  'Coppergate',
-  'Hollowell',
-];
 const MONTHS = [
   'January',
   'February',
@@ -153,39 +143,6 @@ function facts(random: () => number): Fact[] {
   return family;
 }
 
-// Questions the corpus cannot answer: the same shapes, about things that are not in it.
-function unanswerable(random: () => number): string[] {
-  const questions: string[] = [];
-  for (const city of UNKNOWN_CITIES) {
-    const metric = pick(METRICS, random);
-    questions.push(
-      `By how much did the ${city} office reduce ${metric.noun} in ${pick(QUARTERS, random)}?`,
-    );
-  }
-  for (const service of UNKNOWN_SERVICES) {
-    questions.push(
-      `What is the recovery time objective of the ${service} service?`,
-      `Who owns the ${service} runbook?`,
-    );
-  }
-  for (const vendor of UNKNOWN_VENDORS) {
-    questions.push(
-      `When does the contract with ${vendor} renew?`,
-      `What notice period does the contract with ${vendor} require?`,
-    );
-  }
-  // topics no document touches at all
-  questions.push(
-    'What is the cafeteria menu for next Tuesday?',
-    "Who won last year's company chess tournament?",
-    'What colour is the lobby carpet?',
-    'How many parking spaces does the Reykjavik site have?',
-    'Which charity did the company sponsor in the spring?',
-    'What is the guest wifi password at the Oslo office?',
-  );
-  return questions;
-}
-
 export function build(): { corpus: CorpusFile[]; dataset: Dataset } {
   const random = rng(SEED);
   const pool = shuffled(facts(random), random);
@@ -225,16 +182,6 @@ export function build(): { corpus: CorpusFile[]; dataset: Dataset } {
       span: fact.sentence,
     };
   });
-  unanswerable(random).forEach((text, i) =>
-    questions.push({
-      id: `u${String(i + 1).padStart(3, '0')}`,
-      text,
-      kind: 'unanswerable',
-      document: null,
-      span: null,
-    }),
-  );
-
   return { corpus, dataset: { version: 1, seed: SEED, questions } };
 }
 
@@ -247,6 +194,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const counts = (kind: string) => dataset.questions.filter((q) => q.kind === kind).length;
   console.log(
     `${corpus.length} documents, ${dataset.questions.length} questions ` +
-      `(${counts('lexical')} same words, ${counts('paraphrase')} paraphrased, ${counts('unanswerable')} unanswerable)`,
+      `(${counts('lexical')} same words, ${counts('paraphrase')} paraphrased)`,
   );
 }

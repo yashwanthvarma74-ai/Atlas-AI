@@ -11,6 +11,8 @@ import { costOf, priceFor } from './pricing';
 import { complete, LlmError } from './llm';
 import { buildAnswerPrompt, buildRewritePrompt } from './prompt';
 import { retrieve } from './retrieve';
+import { startSpan, withSpan } from './trace';
+import type { Span } from '@opentelemetry/api';
 import { proposeToolCalls, splitToolCalls, toolInstructions, toToolCall } from './tools';
 
 export const NO_ANSWER = 'I could not find anything in your documents that answers that.';
@@ -44,7 +46,7 @@ type History = { role: 'user' | 'assistant'; content: string }[];
 // Every way it can end is saved and reported the same way: complete, stopped (the signal fired: the Stop
 // button, or the browser going away) or failed. A stopped answer keeps the words that had arrived. Only
 // one answer per conversation can be in progress, which the database enforces.
-export async function answer(
+export function answer(
   core: Core,
   access: WorkspaceAccess,
   conversation: ConversationDoc,
@@ -52,6 +54,27 @@ export async function answer(
   signal: AbortSignal,
   emit: (event: ChatStreamEvent) => void,
   deps: AnswerDeps = { retrieve },
+): Promise<Message> {
+  return withSpan(
+    'chat.answer',
+    {
+      'atlas.workspace_id': hex(access.workspaceId),
+      'atlas.conversation_id': hex(conversation._id),
+      'atlas.model': `${core.llm.provider}:${core.llm.model}`,
+    },
+    (span) => writeAnswer(core, access, conversation, input, signal, emit, deps, span),
+  );
+}
+
+async function writeAnswer(
+  core: Core,
+  access: WorkspaceAccess,
+  conversation: ConversationDoc,
+  input: AnswerInput,
+  signal: AbortSignal,
+  emit: (event: ChatStreamEvent) => void,
+  deps: AnswerDeps,
+  span: Span,
 ): Promise<Message> {
   const { config, database } = core;
   const started = performance.now();
@@ -111,16 +134,23 @@ export async function answer(
   const limits = new AbortController();
   const totalTimer = setTimeout(() => limits.abort('total'), config.CHAT_TOTAL_TIMEOUT_MS);
   let firstTokenTimer: NodeJS.Timeout | undefined;
+  let modelSpan: Span | undefined;
   const combined = AbortSignal.any([signal, limits.signal]);
   // generous: a token is about four characters
   const maxCharacters = config.CHAT_MAX_OUTPUT_TOKENS * 8;
 
   try {
-    const standalone = await rewrite(core, question, history, signal);
+    const standalone = await withSpan('chat.rewrite', {}, () =>
+      rewrite(core, question, history, signal),
+    );
     if (signal.aborted) throw new DOMException('stopped', 'AbortError');
 
     const retrievalStart = performance.now();
-    sources = await deps.retrieve(core, access, standalone);
+    sources = await withSpan('chat.retrieve', {}, async (retrieving) => {
+      const found = await deps.retrieve(core, access, standalone);
+      retrieving.setAttribute('atlas.sources', found.length);
+      return found;
+    });
     retrievalMs = Math.round(performance.now() - retrievalStart);
     if (signal.aborted) throw new DOMException('stopped', 'AbortError');
     send({
@@ -139,6 +169,9 @@ export async function answer(
         history,
         config.TOOLS_ENABLED ? toolInstructions(core.tools) : '',
       );
+      modelSpan = startSpan('chat.model', {
+        'atlas.model': `${core.llm.provider}:${core.llm.model}`,
+      });
       firstTokenTimer = setTimeout(
         () => limits.abort('first-token'),
         config.CHAT_FIRST_TOKEN_TIMEOUT_MS,
@@ -187,6 +220,12 @@ export async function answer(
   } finally {
     clearTimeout(totalTimer);
     clearTimeout(firstTokenTimer);
+    modelSpan?.setAttributes({
+      'atlas.ttft_ms': ttftMs ?? -1,
+      'atlas.input_tokens': usage?.inputTokens ?? 0,
+      'atlas.output_tokens': usage?.outputTokens ?? 0,
+    });
+    modelSpan?.end();
   }
 
   // Tool calls are requests the model wrote into its answer. They are taken out of the words the person reads,
@@ -221,6 +260,13 @@ export async function answer(
       : [];
   const toolCalls = await Promise.all(proposals.map((doc) => toToolCall(core, doc)));
 
+  span.setAttributes({
+    'atlas.status': status,
+    'atlas.retrieval_ms': retrievalMs,
+    'atlas.ttft_ms': ttftMs ?? -1,
+    'atlas.total_ms': finished.latency?.totalMs ?? 0,
+    'atlas.cost_usd': finished.costUsd ?? -1,
+  });
   const message = toMessage(finished);
   send({ type: 'done', message, toolCalls });
   return message;

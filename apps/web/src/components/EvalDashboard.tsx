@@ -167,7 +167,6 @@ export default function EvalDashboard() {
                   <th scope="col">Commit</th>
                   <th scope="col">Chunks</th>
                   <th scope="col">Recall@10</th>
-                  <th scope="col">MRR</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,7 +179,6 @@ export default function EvalDashboard() {
                       {String(run.config.reranker)}
                     </td>
                     <td>{pct(run.metrics.recallAt10)}</td>
-                    <td>{run.metrics.mrr.toFixed(3)}</td>
                   </tr>
                 ))}
               </tbody>

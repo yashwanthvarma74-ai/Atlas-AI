@@ -14,7 +14,6 @@ import {
   loadConfig,
   loadConversation,
   mean,
-  meanReciprocalRank,
   percentile,
   processDocument,
   recallAt,
@@ -35,7 +34,6 @@ export interface RunOptions {
   overlapTokens: number;
   reranker: 'none' | 'coverage';
   // drop passages below this vector score; unset means no cutoff
-  minScore?: number;
   log?: (message: string) => void;
 }
 
@@ -103,7 +101,6 @@ export async function runEval(options: RunOptions): Promise<EvalRun> {
     CHUNK_TARGET_TOKENS: String(options.chunkTokens),
     CHUNK_OVERLAP_TOKENS: String(options.overlapTokens),
     RERANKER: options.reranker,
-    ...(options.minScore !== undefined ? { RETRIEVAL_MIN_SCORE: String(options.minScore) } : {}),
   });
   const core = await createCore(config, { logger: pino({ level: 'silent' }) });
 
@@ -146,7 +143,6 @@ export async function runEval(options: RunOptions): Promise<EvalRun> {
     const ranks: { question: Question; rank: number | null }[] = [];
     const retrievalMs: number[] = [];
     let crossWorkspaceHits = 0;
-    let rejected = 0;
 
     for (const question of dataset.questions) {
       const started = performance.now();
@@ -154,12 +150,8 @@ export async function runEval(options: RunOptions): Promise<EvalRun> {
       retrievalMs.push(performance.now() - started);
       crossWorkspaceHits += sources.filter((s) => !mine.has(s.documentId)).length;
 
-      if (question.kind === 'unanswerable') {
-        if (sources.length === 0) rejected++;
-        continue;
-      }
       const index = sources.findIndex(
-        (s) => s.documentName === question.document && s.text.includes(question.span!),
+        (s) => s.documentName === question.document && s.text.includes(question.span),
       );
       ranks.push({ question, rank: index === -1 ? null : index + 1 });
     }
@@ -226,18 +218,15 @@ export async function runEval(options: RunOptions): Promise<EvalRun> {
       p50: Math.round(percentile(values, 50)),
       p95: Math.round(percentile(values, 95)),
     });
-    const unanswerable = dataset.questions.filter((q) => q.kind === 'unanswerable').length;
     const metrics: EvalMetrics = {
-      questions: { answerable: ranks.length, unanswerable },
+      questions: ranks.length,
       recallAt1: recallAt(all, 1),
       recallAt5: recallAt(all, 5),
       recallAt10: recallAt(all, 10),
-      mrr: meanReciprocalRank(all),
       recallAt10ByKind: {
         lexical: recallAt(ofKind('lexical'), 10),
         paraphrase: recallAt(ofKind('paraphrase'), 10),
       },
-      rejectedUnanswerable: options.minScore === undefined ? null : rejected / unanswerable,
       citationConsistency: checked === 0 ? 1 : supported / checked,
       citationsChecked: checked,
       crossWorkspaceHits,
@@ -260,7 +249,6 @@ export async function runEval(options: RunOptions): Promise<EvalRun> {
         chunkTokens: options.chunkTokens,
         overlapTokens: options.overlapTokens,
         reranker: options.reranker,
-        minScore: options.minScore ?? null,
         embedder: `${core.embedder.provider}:${core.embedder.model}`,
         llm: `${core.llm.provider}:${core.llm.model}`,
         passages: chunkCount,

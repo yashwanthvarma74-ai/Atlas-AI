@@ -13,8 +13,6 @@ const { values, positionals } = parseArgs({
     chunk: { type: 'string' },
     overlap: { type: 'string' },
     reranker: { type: 'string' },
-    'min-score': { type: 'string' },
-    'min-scores': { type: 'string', default: '0,0.1,0.2,0.3,0.4,0.5,0.6,0.7' },
     chunks: { type: 'string', default: '64,128,256,512' },
     overlaps: { type: 'string', default: '0,32' },
     rerankers: { type: 'string', default: 'none,coverage' },
@@ -29,8 +27,6 @@ const optionsFrom = (): RunOptions => ({
   chunkTokens: Number(values.chunk ?? defaults.CHUNK_TARGET_TOKENS),
   overlapTokens: Number(values.overlap ?? defaults.CHUNK_OVERLAP_TOKENS),
   reranker: (values.reranker ?? defaults.RERANKER) as RunOptions['reranker'],
-  minScore:
-    values['min-score'] !== undefined ? Number(values['min-score']) : defaults.RETRIEVAL_MIN_SCORE,
   log: (message) => console.error(message),
 });
 
@@ -68,16 +64,18 @@ async function main() {
     const run = await runEval(optionsFrom());
     const baseline = readBaseline();
     console.log(formatRun(run));
-    if (baseline && baseline.datasetHash !== run.datasetHash) {
+    if (baseline && baseline.datasetHash !== run.datasetHash && !values['update-baseline']) {
       console.log(
         `\nThe baseline was scored on dataset ${baseline.datasetHash} and this run on ${run.datasetHash}. Regenerate the baseline with --update-baseline.`,
       );
       process.exitCode = 1;
       return;
     }
-    const comparison = compareRuns(run.metrics, baseline?.metrics ?? null);
+    // a different dataset has no comparable baseline, so an update starts from nothing
+    const comparable = baseline?.datasetHash === run.datasetHash ? baseline : null;
+    const comparison = compareRuns(run.metrics, comparable?.metrics ?? null);
     console.log(
-      `\nAgainst ${baseline ? `the baseline from commit ${baseline.commit}` : 'no baseline (first run)'}:\n${formatComparison(comparison)}`,
+      `\nAgainst ${comparable ? `the baseline from commit ${comparable.commit}` : 'no baseline (first run)'}:\n${formatComparison(comparison)}`,
     );
 
     if (values.record) await record(run);
@@ -120,24 +118,8 @@ async function main() {
     return;
   }
 
-  if (command === 'cutoff') {
-    // what each minimum similarity costs (answerable questions that lose their answer) and what it buys
-    // (unanswerable questions that correctly get nothing)
-    const lines = [`${'min score'.padEnd(11)}${'recall@10'.padEnd(12)}unanswerable rejected`];
-    for (const minScore of values['min-scores']!.split(',').map(Number)) {
-      console.error(`min score ${minScore}`);
-      const m = (await runEval({ ...optionsFrom(), minScore })).metrics;
-      const recall = `${(m.recallAt10 * 100).toFixed(1)}%`;
-      lines.push(
-        `${String(minScore).padEnd(11)}${recall.padEnd(12)}${((m.rejectedUnanswerable ?? 0) * 100).toFixed(1)}%`,
-      );
-    }
-    console.log(lines.join('\n'));
-    return;
-  }
-
   console.error(
-    'Usage: eval <run|check|sweep|cutoff> [--chunk N] [--overlap N] [--reranker none|coverage] [--min-score X] [--record]',
+    'Usage: eval <run|check|sweep> [--chunk N] [--overlap N] [--reranker none|coverage] [--record]',
   );
   process.exitCode = 2;
 }

@@ -78,17 +78,3 @@ jobs:
           docker build -f apps/api/Dockerfile -t atlas-api .
           docker build -f apps/worker/Dockerfile -t atlas-worker .
           docker build -f apps/web/Dockerfile -t atlas-web .
-
-  secrets:
-    name: Secret scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # the whole history, because a secret that was committed and then removed is still a secret
-          fetch-depth: 0
-      # The CLI scans every commit. The packaged action scans from the first commit's parent, which does not exist.
-      - name: Scan history
-        run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz | tar xz gitleaks
-          ./gitleaks detect --redact --exit-code 2

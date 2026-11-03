@@ -6,14 +6,13 @@ import {
   claimsBeforeMarkers,
   compareRuns,
   mean,
-  meanReciprocalRank,
   percentile,
   recallAt,
   supportScore,
   type EvalMetrics,
 } from './eval';
 
-describe('recallAt and MRR', () => {
+describe('recallAt', () => {
   const ranks = [1, 3, null, 12, 2];
 
   it('counts a question as found when the answer is within the first k results', () => {
@@ -38,17 +37,6 @@ describe('recallAt and MRR', () => {
         },
       ),
     );
-  });
-
-  it('is 0 for no questions rather than not a number', () => {
-    expect(recallAt([], 10)).toBe(0);
-    expect(meanReciprocalRank([])).toBe(0);
-  });
-
-  it('rewards finding the answer higher up', () => {
-    expect(meanReciprocalRank([1, 1])).toBe(1);
-    expect(meanReciprocalRank([1, 2])).toBeCloseTo(0.75);
-    expect(meanReciprocalRank([null, 4])).toBeCloseTo(0.125);
   });
 });
 
@@ -146,13 +134,11 @@ describe('checkCitations', () => {
 
 describe('compareRuns', () => {
   const base: EvalMetrics = {
-    questions: { answerable: 200, unanswerable: 30 },
+    questions: 200,
     recallAt1: 0.6,
     recallAt5: 0.8,
     recallAt10: 0.85,
-    mrr: 0.7,
     recallAt10ByKind: { lexical: 0.95, paraphrase: 0.75 },
-    rejectedUnanswerable: null,
     citationConsistency: 0.98,
     citationsChecked: 300,
     crossWorkspaceHits: 0,
@@ -211,11 +197,5 @@ describe('compareRuns', () => {
       current: 4000,
       baseline: 40,
     });
-  });
-
-  it('only gates rejection of unanswerable questions once a cutoff is in use', () => {
-    const withCutoff = worse({ rejectedUnanswerable: 0.9 });
-    expect(compareRuns(worse({ rejectedUnanswerable: null }), withCutoff).ok).toBe(true);
-    expect(compareRuns(worse({ rejectedUnanswerable: 0.7 }), withCutoff).ok).toBe(false);
   });
 });

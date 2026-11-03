@@ -4,7 +4,9 @@ import {
   createEmbedder,
   createHashEmbedder,
   createOllamaEmbedder,
+  createGeminiEmbedder,
   createOpenAIEmbedder,
+  createVoyageEmbedder,
   EmbeddingError,
 } from './embeddings';
 
@@ -101,6 +103,70 @@ describe('ollama embedder', () => {
       .embed(['a'])
       .catch((e) => e);
     expect(error).toMatchObject({ retryable: true });
+  });
+});
+
+describe('voyage embedder', () => {
+  it('authenticates, asks for the configured size and restores the input order', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      reply(200, {
+        data: [
+          { index: 1, embedding: [0, 1] },
+          { index: 0, embedding: [1, 0] },
+        ],
+      }),
+    );
+    const vectors = await createVoyageEmbedder('vk-test', 'voyage-3.5', 2).embed(['a', 'b']);
+
+    expect(vectors).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe('https://api.voyageai.com/v1/embeddings');
+    expect((init!.headers as Record<string, string>).Authorization).toBe('Bearer vk-test');
+    expect(JSON.parse(init!.body as string)).toMatchObject({
+      model: 'voyage-3.5',
+      output_dimension: 2,
+      input: ['a', 'b'],
+    });
+  });
+});
+
+describe('gemini embedder', () => {
+  it('sends one request per text with the key in a header, and returns the vectors in order', async () => {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(reply(200, { embeddings: [{ values: [1, 0] }, { values: [0, 1] }] }));
+    const vectors = await createGeminiEmbedder('gk-test', 'gemini-embedding-001', 2).embed([
+      'a',
+      'b',
+    ]);
+
+    expect(vectors).toEqual([
+      [1, 0],
+      [0, 1],
+    ]);
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:batchEmbedContents',
+    );
+    expect((init!.headers as Record<string, string>)['x-goog-api-key']).toBe('gk-test');
+    const body = JSON.parse(init!.body as string);
+    expect(body.requests).toHaveLength(2);
+    expect(body.requests[0]).toEqual({
+      model: 'models/gemini-embedding-001',
+      content: { parts: [{ text: 'a' }] },
+      outputDimensionality: 2,
+    });
+  });
+
+  it('rejects vectors of the wrong size without retrying', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply(200, { embeddings: [{ values: [1] }] }));
+    const error = await createGeminiEmbedder('k', 'm', 2)
+      .embed(['a'])
+      .catch((e) => e);
+    expect(error).toMatchObject({ retryable: false });
   });
 });
 

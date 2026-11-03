@@ -79,25 +79,19 @@ async function post(
   return res.body;
 }
 
-export function createOpenAI(
-  apiKey: string,
-  model: string,
-  baseUrl = 'https://api.openai.com/v1',
-  reasoningEffort?: string,
-): LlmProvider {
+export function createOpenAI(apiKey: string, model: string): LlmProvider {
   return {
     provider: 'openai',
     model,
     async *stream({ system, messages, maxTokens, signal }) {
       const body = await post(
-        `${baseUrl}/chat/completions`,
+        'https://api.openai.com/v1/chat/completions',
         {
           model,
           stream: true,
           // asks for a final chunk with the token counts
           stream_options: { include_usage: true },
           max_completion_tokens: maxTokens,
-          ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
           messages: [{ role: 'system', content: system }, ...messages],
         },
         { Authorization: `Bearer ${apiKey}` },
@@ -158,6 +152,49 @@ export function createAnthropic(apiKey: string, model: string): LlmProvider {
         if (event.type === 'message_delta' && event.usage) {
           yield { type: 'usage', inputTokens, outputTokens: event.usage.output_tokens };
         }
+      }
+    },
+  };
+}
+
+export function createGemini(apiKey: string, model: string): LlmProvider {
+  return {
+    provider: 'gemini',
+    model,
+    async *stream({ system, messages, maxTokens, signal }) {
+      const body = await post(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
+        {
+          systemInstruction: { parts: [{ text: system }] },
+          // Gemini calls the assistant's side "model"
+          contents: messages.map((m) => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.content }],
+          })),
+          generationConfig: { maxOutputTokens: maxTokens },
+        },
+        { 'x-goog-api-key': apiKey },
+        signal,
+      );
+      let usage: { promptTokenCount?: number; candidatesTokenCount?: number } | undefined;
+      for await (const frame of parseSse(body)) {
+        const chunk = JSON.parse(frame.data) as {
+          candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[];
+          usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+        };
+        for (const part of chunk.candidates?.[0]?.content?.parts ?? []) {
+          // a reasoning model can send its thinking as parts flagged as thoughts; only the answer is shown
+          if (part.text && !part.thought) yield { type: 'token', text: part.text };
+        }
+        // every chunk repeats the running totals, so the last one is the answer's
+        if (chunk.usageMetadata) usage = chunk.usageMetadata;
+      }
+      if (usage) {
+        yield {
+          type: 'usage',
+          inputTokens: usage.promptTokenCount ?? 0,
+          outputTokens: usage.candidatesTokenCount ?? 0,
+        };
       }
     },
   };
@@ -283,16 +320,15 @@ export function createLlm(config: Config): LlmProvider {
     case 'openai':
       if (!config.OPENAI_API_KEY)
         throw new Error('OPENAI_API_KEY is required for LLM_PROVIDER=openai.');
-      return createOpenAI(
-        config.OPENAI_API_KEY,
-        model ?? 'gpt-4o-mini',
-        config.OPENAI_BASE_URL,
-        config.LLM_REASONING_EFFORT,
-      );
+      return createOpenAI(config.OPENAI_API_KEY, model ?? 'gpt-4o-mini');
     case 'anthropic':
       if (!config.ANTHROPIC_API_KEY)
         throw new Error('ANTHROPIC_API_KEY is required for LLM_PROVIDER=anthropic.');
       return createAnthropic(config.ANTHROPIC_API_KEY, model ?? 'claude-haiku-5-5');
+    case 'gemini':
+      if (!config.GEMINI_API_KEY)
+        throw new Error('GEMINI_API_KEY is required for LLM_PROVIDER=gemini.');
+      return createGemini(config.GEMINI_API_KEY, model ?? 'gemini-flash-latest');
     case 'ollama':
       return createOllama(config.OLLAMA_URL, model ?? 'llama3.2');
     default:

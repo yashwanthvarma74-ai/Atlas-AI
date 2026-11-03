@@ -1,49 +1,43 @@
 {
-  "commit": "dd04d6e",
+  "commit": "bf631a1",
   "dirty": true,
-  "createdAt": "2026-11-03T10:51:19.073Z",
-  "datasetHash": "1934a89a70c3",
+  "createdAt": "2026-11-03T19:17:26.205Z",
+  "datasetHash": "cbacab4d3d4a",
   "config": {
     "chunkTokens": 64,
     "overlapTokens": 0,
     "reranker": "coverage",
-    "minScore": null,
     "embedder": "hash:feature-hashing",
     "llm": "extractive:quote-top-sources",
     "passages": 325
   },
   "metrics": {
-    "questions": {
-      "answerable": 240,
-      "unanswerable": 36
-    },
+    "questions": 240,
     "recallAt1": 0.5083333333333333,
-    "recallAt5": 0.7708333333333334,
-    "recallAt10": 0.8875,
-    "mrr": 0.6303373015873014,
+    "recallAt5": 0.7791666666666667,
+    "recallAt10": 0.8916666666666667,
     "recallAt10ByKind": {
-      "lexical": 0.9166666666666666,
+      "lexical": 0.925,
       "paraphrase": 0.8583333333333333
     },
-    "rejectedUnanswerable": null,
     "citationConsistency": 1,
-    "citationsChecked": 552,
+    "citationsChecked": 480,
     "crossWorkspaceHits": 0,
     "retrievalMs": {
       "p50": 2,
-      "p95": 2
+      "p95": 4
     },
     "ttftMs": {
-      "p50": 4,
-      "p95": 6
+      "p50": 5,
+      "p95": 7
     },
     "totalMs": {
       "p50": 5,
-      "p95": 6
+      "p95": 7
     },
     "tokensPerAnswer": {
-      "input": 428,
-      "output": 47
+      "input": 434,
+      "output": 48
     },
     "costPerAnswerUsd": 0
   }

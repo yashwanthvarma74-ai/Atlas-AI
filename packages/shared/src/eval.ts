@@ -6,14 +6,11 @@ export interface Timing {
 }
 
 export interface EvalMetrics {
-  questions: { answerable: number; unanswerable: number };
+  questions: number;
   recallAt1: number;
   recallAt5: number;
   recallAt10: number;
-  mrr: number;
   recallAt10ByKind: { lexical: number; paraphrase: number };
-  // the share of unanswerable questions for which search returned nothing; null while no cutoff is set
-  rejectedUnanswerable: number | null;
   // the share of citations whose passage supports the claim, and how many were checked
   citationConsistency: number;
   citationsChecked: number;

@@ -25,17 +25,14 @@ const envSchema = z.object({
   // "hash" needs no service and no key: it makes vectors from word hashes, so it finds shared words but
   // not meaning. It exists for tests and for running the pipeline offline. Real answers need
   // "ollama" (local) or "openai".
-  EMBEDDING_PROVIDER: z.enum(['hash', 'ollama', 'openai']).default('hash'),
+  EMBEDDING_PROVIDER: z.enum(['hash', 'ollama', 'openai', 'voyage', 'gemini']).default('hash'),
   // defaults to nomic-embed-text for ollama and text-embedding-3-small for openai
   EMBEDDING_MODEL: z.string().optional(),
   EMBEDDING_DIMENSIONS: z.coerce.number().int().positive().default(256),
   OLLAMA_URL: z.string().default('http://127.0.0.1:11434'),
   OPENAI_API_KEY: z.string().optional(),
-  // Any service that speaks the OpenAI API can stand in for OpenAI, for chat and for embeddings.
-  OPENAI_BASE_URL: z.string().default('https://api.openai.com/v1'),
-  // How much a reasoning model may think before it answers, for services that accept the setting. Unset sends
-  // nothing. Thinking time counts towards the wait for the first word.
-  LLM_REASONING_EFFORT: z.enum(['none', 'minimal', 'low', 'medium', 'high']).optional(),
+  VOYAGE_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
 
   // Chunk size in tokens (estimated at four characters each) and how much neighbouring chunks share. The defaults
   // come from the evaluation sweep, with the reasoning in docs/EVALUATION.md and ADR 0005.
@@ -45,7 +42,9 @@ const envSchema = z.object({
   // The model that writes answers. "extractive" needs no service and no key: it answers by quoting the
   // passages it is given, which is enough to run and test the whole chat pipeline offline. Real answers
   // need "openai", "anthropic" or "ollama".
-  LLM_PROVIDER: z.enum(['extractive', 'openai', 'anthropic', 'ollama']).default('extractive'),
+  LLM_PROVIDER: z
+    .enum(['extractive', 'openai', 'anthropic', 'gemini', 'ollama'])
+    .default('extractive'),
   // defaults per provider: gpt-4o-mini, claude-haiku-5-5, llama3.2
   LLM_MODEL: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
@@ -74,9 +73,6 @@ const envSchema = z.object({
   // How many passages a question gets (S1 to S8) and how many candidates each search contributes first.
   RETRIEVAL_LIMIT: z.coerce.number().int().positive().default(8),
   RETRIEVAL_POOL: z.coerce.number().int().positive().default(30),
-  // Drops passages whose vector similarity is below this, from 0 to 1. Unset keeps everything. Chosen from the
-  // evaluation in `apps/eval`, not guessed: see docs/EVALUATION.md.
-  RETRIEVAL_MIN_SCORE: z.coerce.number().min(0).max(1).optional(),
   // "none" keeps the fused order; "coverage" boosts passages that contain the question's own words.
   // On by default: the evaluation shows it raises recall@10 at every chunk size (docs/EVALUATION.md).
   RERANKER: z.enum(['none', 'coverage']).default('coverage'),

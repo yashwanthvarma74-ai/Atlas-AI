@@ -27,6 +27,7 @@ export * from './search-indexes';
 export * from './sniff';
 export * from './storage';
 export * from './tools';
+export * from './trace';
 export * from './users';
 export * from './worker';
 export * from './workspaces';

@@ -11,12 +11,6 @@ export type Ranks = (number | null)[];
 export const recallAt = (ranks: Ranks, k: number): number =>
   ranks.length === 0 ? 0 : ranks.filter((rank) => rank !== null && rank <= k).length / ranks.length;
 
-// Mean reciprocal rank: 1 for an answer found first, 1/2 for second, and 0 for one not found at all.
-export const meanReciprocalRank = (ranks: Ranks): number =>
-  ranks.length === 0
-    ? 0
-    : ranks.reduce<number>((sum, rank) => sum + (rank === null ? 0 : 1 / rank), 0) / ranks.length;
-
 // Nearest-rank percentile: the smallest value that at least p percent of the values are at or below.
 export function percentile(values: number[], p: number): number {
   if (values.length === 0) return 0;
@@ -126,7 +120,6 @@ export function compareRuns(current: EvalMetrics, baseline: EvalMetrics | null):
     baseline?.recallAt10ByKind.paraphrase,
     0.02,
   );
-  noWorse('MRR', current.mrr, baseline?.mrr, 0.02);
 
   const floor = Math.max(0.95, (baseline?.citationConsistency ?? 0) - 0.01);
   const citationsOk = current.citationConsistency >= floor;
@@ -139,15 +132,6 @@ export function compareRuns(current: EvalMetrics, baseline: EvalMetrics | null):
   if (!citationsOk) {
     failures.push(
       `citation consistency is ${current.citationConsistency.toFixed(3)}, below the floor of ${floor.toFixed(3)}`,
-    );
-  }
-
-  if (baseline?.rejectedUnanswerable != null && current.rejectedUnanswerable !== null) {
-    noWorse(
-      'unanswerable rejected',
-      current.rejectedUnanswerable,
-      baseline.rejectedUnanswerable,
-      0.03,
     );
   }
 

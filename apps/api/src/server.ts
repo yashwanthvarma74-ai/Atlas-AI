@@ -1,8 +1,9 @@
 import { pino } from 'pino';
-import { createCore, loadConfig, startIngestWorker } from '@atlas/core';
+import { createCore, loadConfig, startIngestWorker, startTracing } from '@atlas/core';
 import { createApp } from './app';
 
 const config = loadConfig();
+const flushTraces = await startTracing('atlas-api');
 const logger = pino({ level: config.LOG_LEVEL });
 
 const core = await createCore(config, { logger });
@@ -17,6 +18,7 @@ async function shutdown() {
   server.close();
   await worker?.stop();
   await core.close();
+  await flushTraces();
   process.exit(0);
 }
 process.on('SIGINT', shutdown);

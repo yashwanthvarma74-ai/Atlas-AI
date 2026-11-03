@@ -10,13 +10,11 @@ beforeAll(async () => {
 afterAll(() => t.destroy());
 
 const metrics: EvalMetrics = {
-  questions: { answerable: 240, unanswerable: 36 },
+  questions: 240,
   recallAt1: 0.5,
   recallAt5: 0.8,
   recallAt10: 0.89,
-  mrr: 0.63,
   recallAt10ByKind: { lexical: 0.92, paraphrase: 0.85 },
-  rejectedUnanswerable: null,
   citationConsistency: 1,
   citationsChecked: 500,
   crossWorkspaceHits: 0,

@@ -8,6 +8,7 @@ import { HttpError } from './errors';
 import { requireAccess } from './access';
 import { ParseError, parseDocument, type ParseDeps } from './parse';
 import type { IngestJob } from './queues';
+import { withSpan } from './trace';
 
 // A problem retrying cannot fix: a damaged file, a rejected API key, an uploader who lost access. The
 // queue gives up on it at once instead of spending its attempts.
@@ -34,11 +35,15 @@ async function setStatus(core: Core, doc: DocumentDoc, status: DocumentStatus) {
 
 // Runs one document through parse, chunk, embed and index. Safe to run again for the same document: the
 // chunks are replaced, never added to, so a retry after a half-finished attempt leaves no duplicates.
-export async function processDocument(
-  core: Core,
-  job: IngestJob,
-  deps: ParseDeps = {},
-): Promise<void> {
+export function processDocument(core: Core, job: IngestJob, deps: ParseDeps = {}): Promise<void> {
+  return withSpan(
+    'ingest.document',
+    { 'atlas.document_id': job.documentId, 'atlas.workspace_id': job.workspaceId },
+    () => ingestDocument(core, job, deps),
+  );
+}
+
+async function ingestDocument(core: Core, job: IngestJob, deps: ParseDeps): Promise<void> {
   const workspaceId = new ObjectId(job.workspaceId);
   const userId = new ObjectId(job.userId);
   const documentId = new ObjectId(job.documentId);
@@ -61,7 +66,9 @@ export async function processDocument(
   try {
     if (!(await setStatus(core, doc, 'parsing'))) return;
     const bytes = await core.storage.get(doc.storageKey);
-    const pages = await stageTimeout(core, 'parsing', parseDocument(doc.kind, bytes, deps));
+    const pages = await withSpan('ingest.parse', { 'atlas.kind': doc.kind }, () =>
+      stageTimeout(core, 'parsing', parseDocument(doc.kind, bytes, deps)),
+    );
 
     const chunks = chunkPages(pages, {
       targetTokens: core.config.CHUNK_TARGET_TOKENS,
@@ -76,10 +83,8 @@ export async function processDocument(
     }
 
     if (!(await setStatus(core, doc, 'embedding'))) return;
-    const vectors = await stageTimeout(
-      core,
-      'embedding',
-      core.embedder.embed(chunks.map((chunk) => chunk.text)),
+    const vectors = await withSpan('ingest.embed', { 'atlas.chunks': chunks.length }, () =>
+      stageTimeout(core, 'embedding', core.embedder.embed(chunks.map((chunk) => chunk.text))),
     );
 
     // replace, never add: see the comment on this function

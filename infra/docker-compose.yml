@@ -1,0 +1,77 @@
+# Run from the repository root, where docker-compose.yml includes this file.
+# Backing services only:        docker compose up -d
+# The whole app in containers:  JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build
+#   then open http://localhost:3002
+# Traces and a dashboard:       docker compose --profile app --profile observability up --build
+#   then open http://localhost:3000 (Grafana, no sign-in)
+services:
+  # MongoDB with Atlas Search and Atlas Vector Search, the same engines as an Atlas cluster. A plain mongod has
+  # neither, and retrieval needs both. Published on 27018 so it can sit next to a local mongod.
+  mongo:
+    image: mongodb/mongodb-atlas-local:latest
+    volumes: [mongo-data:/data/db]
+    ports: ['27018:27017']
+
+  redis:
+    image: redis:8
+    volumes: [redis-data:/data]
+    ports: ['6379:6379']
+
+  api:
+    profiles: [app]
+    build: { context: .., dockerfile: apps/api/Dockerfile }
+    depends_on: [mongo, redis]
+    environment: &app-env
+      NODE_ENV: production
+      # the production build over plain HTTP on one machine: browsers refuse a Secure cookie there
+      COOKIE_SECURE: 'false'
+      MONGODB_URI: mongodb://mongo:27017/atlas_ai?directConnection=true
+      REDIS_URL: redis://redis:6379
+      # not ${JWT_SECRET:?}: compose checks that for every service, profile or not, so it broke the backing-services
+      # line above. Unset, the API gets an empty secret and refuses to start (config wants 32+ characters).
+      JWT_SECRET: ${JWT_SECRET:-}
+      SITE_ORIGIN: http://localhost:3002
+      STORAGE_DRIVER: local
+      UPLOAD_DIR: /data/uploads
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-hash}
+      LLM_PROVIDER: ${LLM_PROVIDER:-extractive}
+      EXTRACTIVE_DELAY_MS: ${EXTRACTIVE_DELAY_MS:-0}
+      # leave at 1; the load test raises it so it measures the service and not the rate limiter
+      RATE_LIMIT_SCALE: ${RATE_LIMIT_SCALE:-1}
+      # empty sends no traces; the observability profile below is where they can go
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    volumes: [uploads:/data/uploads]
+    ports: ['4002:4002']
+
+  worker:
+    profiles: [app]
+    build: { context: .., dockerfile: apps/worker/Dockerfile }
+    depends_on: [mongo, redis]
+    environment: *app-env
+    # the worker reads the files the API stored: one volume, or an S3-compatible bucket across machines
+    volumes: [uploads:/data/uploads]
+
+  web:
+    profiles: [app]
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      # Next bakes the proxy target into the build, so it is set here and not when the container starts
+      args: { API_URL: 'http://api:4002' }
+    depends_on: [api]
+    ports: ['3002:3002']
+
+  # Grafana with Tempo, Loki and Prometheus in one container, for local use. Traces from the API and worker arrive on
+  # 4318; set OTEL_EXPORTER_OTLP_ENDPOINT=http://grafana:4318 for the app services to send them.
+  grafana:
+    profiles: [observability]
+    image: grafana/otel-lgtm:latest
+    ports: ['3000:3000', '4318:4318']
+    volumes:
+      - ./grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/atlas.yaml:ro
+      - ./grafana/dashboards:/atlas-dashboards:ro
+
+volumes:
+  mongo-data:
+  redis-data:
+  uploads:

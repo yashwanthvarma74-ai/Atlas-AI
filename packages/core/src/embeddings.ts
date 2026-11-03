@@ -118,12 +118,7 @@ export function createOllamaEmbedder(url: string, model: string, dimensions: num
   };
 }
 
-export function createOpenAIEmbedder(
-  apiKey: string,
-  model: string,
-  dimensions: number,
-  baseUrl = 'https://api.openai.com/v1',
-): Embedder {
+export function createOpenAIEmbedder(apiKey: string, model: string, dimensions: number): Embedder {
   return {
     provider: 'openai',
     model,
@@ -131,7 +126,7 @@ export function createOpenAIEmbedder(
     embed: (texts) =>
       inBatches(texts, async (batch) => {
         const body = (await postJson(
-          `${baseUrl}/embeddings`,
+          'https://api.openai.com/v1/embeddings',
           { model, input: batch, dimensions },
           { Authorization: `Bearer ${apiKey}` },
         )) as { data?: { index: number; embedding: unknown }[] };
@@ -139,6 +134,56 @@ export function createOpenAIEmbedder(
         const ordered = [...(body.data ?? [])].sort((a, b) => a.index - b.index);
         return checked(
           ordered.map((entry) => entry.embedding),
+          batch.length,
+          dimensions,
+        );
+      }),
+  };
+}
+
+// Voyage AI. `output_dimension` shortens the vector to the size the index was built for.
+export function createVoyageEmbedder(apiKey: string, model: string, dimensions: number): Embedder {
+  return {
+    provider: 'voyage',
+    model,
+    dimensions,
+    embed: (texts) =>
+      inBatches(texts, async (batch) => {
+        const body = (await postJson(
+          'https://api.voyageai.com/v1/embeddings',
+          { model, input: batch, output_dimension: dimensions },
+          { Authorization: `Bearer ${apiKey}` },
+        )) as { data?: { index: number; embedding: unknown }[] };
+        const ordered = [...(body.data ?? [])].sort((a, b) => a.index - b.index);
+        return checked(
+          ordered.map((entry) => entry.embedding),
+          batch.length,
+          dimensions,
+        );
+      }),
+  };
+}
+
+export function createGeminiEmbedder(apiKey: string, model: string, dimensions: number): Embedder {
+  return {
+    provider: 'gemini',
+    model,
+    dimensions,
+    embed: (texts) =>
+      inBatches(texts, async (batch) => {
+        const body = (await postJson(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:batchEmbedContents`,
+          {
+            requests: batch.map((text) => ({
+              model: `models/${model}`,
+              content: { parts: [{ text }] },
+              outputDimensionality: dimensions,
+            })),
+          },
+          { 'x-goog-api-key': apiKey },
+        )) as { embeddings?: { values: unknown }[] };
+        return checked(
+          (body.embeddings ?? []).map((entry) => entry.values),
           batch.length,
           dimensions,
         );
@@ -162,7 +207,24 @@ export function createEmbedder(config: Config): Embedder {
       config.OPENAI_API_KEY,
       config.EMBEDDING_MODEL ?? 'text-embedding-3-small',
       dimensions,
-      config.OPENAI_BASE_URL,
+    );
+  }
+  if (provider === 'voyage') {
+    if (!config.VOYAGE_API_KEY)
+      throw new Error('VOYAGE_API_KEY is required for EMBEDDING_PROVIDER=voyage.');
+    return createVoyageEmbedder(
+      config.VOYAGE_API_KEY,
+      config.EMBEDDING_MODEL ?? 'voyage-3.5',
+      dimensions,
+    );
+  }
+  if (provider === 'gemini') {
+    if (!config.GEMINI_API_KEY)
+      throw new Error('GEMINI_API_KEY is required for EMBEDDING_PROVIDER=gemini.');
+    return createGeminiEmbedder(
+      config.GEMINI_API_KEY,
+      config.EMBEDDING_MODEL ?? 'gemini-embedding-001',
+      dimensions,
     );
   }
   return createHashEmbedder(dimensions);

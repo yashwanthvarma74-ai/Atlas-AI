@@ -7,13 +7,11 @@ import EvalDashboard from './EvalDashboard';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }));
 
 const metrics = (recallAt10: number): EvalMetrics => ({
-  questions: { answerable: 240, unanswerable: 36 },
+  questions: 240,
   recallAt1: 0.5,
   recallAt5: 0.8,
   recallAt10,
-  mrr: 0.63,
   recallAt10ByKind: { lexical: 0.92, paraphrase: 0.85 },
-  rejectedUnanswerable: null,
   citationConsistency: 1,
   citationsChecked: 500,
   crossWorkspaceHits: 0,
