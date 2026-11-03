@@ -7,6 +7,7 @@ import { Skeleton } from '@yashwanthvarma74/react/components/Skeleton';
 import Link from 'next/link';
 import { ApiError } from '@/lib/api';
 import { useRequireUser, useWorkspace } from '@/lib/queries';
+import DocumentLibrary from './DocumentLibrary';
 import MemberList from './MemberList';
 import styles from './WorkspaceView.module.css';
 
@@ -39,6 +40,7 @@ export default function WorkspaceView({ id }: { id: string }) {
         <h1>{data.name}</h1>
         <Badge variant={data.role === 'owner' ? 'accent' : 'neutral'}>{data.role}</Badge>
       </div>
+      <DocumentLibrary workspaceId={data.id} role={data.role} />
       <MemberList workspaceId={data.id} userId={user.id} role={data.role} />
     </div>
   );

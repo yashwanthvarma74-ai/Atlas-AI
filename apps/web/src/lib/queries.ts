@@ -3,7 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import type { LoginInput, MemberRole, RegisterInput, SessionUser } from '@atlas/shared';
+import {
+  IN_PROGRESS_STATUSES,
+  type LoginInput,
+  type MemberRole,
+  type RegisterInput,
+  type SessionUser,
+} from '@atlas/shared';
 import { api } from './api';
 
 const keys = {
@@ -11,6 +17,7 @@ const keys = {
   workspaces: ['workspaces'] as const,
   workspace: (id: string) => ['workspaces', id] as const,
   members: (id: string) => ['workspaces', id, 'members'] as const,
+  documents: (id: string) => ['workspaces', id, 'documents'] as const,
 };
 
 export function useSession() {
@@ -107,5 +114,50 @@ export function useRemoveMember(workspaceId: string) {
   return useMutation({
     mutationFn: (userId: string) => api.removeMember(workspaceId, userId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.members(workspaceId) }),
+  });
+}
+
+// Polls while anything is still being processed, and stops once everything has settled.
+export function useDocuments(workspaceId: string) {
+  return useQuery({
+    queryKey: keys.documents(workspaceId),
+    queryFn: () => api.documents(workspaceId),
+    refetchInterval: (query) =>
+      query.state.data?.some((doc) => IN_PROGRESS_STATUSES.includes(doc.status)) ? 1500 : false,
+  });
+}
+
+export function useUploadDocuments(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    // one at a time, so a failure names the file it belongs to and the rest still go up
+    mutationFn: async (files: File[]) => {
+      const failures: { name: string; message: string }[] = [];
+      for (const file of files) {
+        try {
+          await api.uploadDocument(workspaceId, file);
+        } catch (error) {
+          failures.push({ name: file.name, message: (error as Error).message });
+        }
+        await queryClient.invalidateQueries({ queryKey: keys.documents(workspaceId) });
+      }
+      return failures;
+    },
+  });
+}
+
+export function useRetryDocument(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (documentId: string) => api.retryDocument(workspaceId, documentId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.documents(workspaceId) }),
+  });
+}
+
+export function useDeleteDocument(workspaceId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (documentId: string) => api.deleteDocument(workspaceId, documentId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.documents(workspaceId) }),
   });
 }

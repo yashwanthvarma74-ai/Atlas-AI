@@ -1,6 +1,7 @@
 import type {
   AddMemberInput,
   CreateWorkspaceInput,
+  DocumentSummary,
   LoginInput,
   Member,
   MemberRole,
@@ -86,6 +87,31 @@ export const api = {
     return (await request<{ workspace: Workspace }>('/workspaces', { method: 'POST', json: input }))
       .workspace;
   },
+
+  // ---- documents ----
+  async documents(workspaceId: string) {
+    return (await request<{ documents: DocumentSummary[] }>(`/workspaces/${workspaceId}/documents`))
+      .documents;
+  },
+  // The file is the request body, so the server can cut it off at the size limit.
+  async uploadDocument(workspaceId: string, file: File) {
+    return (
+      await request<{ document: DocumentSummary }>(
+        `/workspaces/${workspaceId}/documents?name=${encodeURIComponent(file.name)}`,
+        {
+          method: 'POST',
+          body: file,
+          headers: { 'Content-Type': 'application/octet-stream' },
+        },
+      )
+    ).document;
+  },
+  retryDocument: (workspaceId: string, documentId: string) =>
+    request(`/workspaces/${workspaceId}/documents/${documentId}/retry`, { method: 'POST' }),
+  deleteDocument: (workspaceId: string, documentId: string) =>
+    request(`/workspaces/${workspaceId}/documents/${documentId}`, { method: 'DELETE' }),
+  documentFileUrl: (workspaceId: string, documentId: string) =>
+    `/api/workspaces/${workspaceId}/documents/${documentId}/file`,
 
   // ---- members ----
   async members(workspaceId: string) {

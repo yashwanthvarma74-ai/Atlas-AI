@@ -48,7 +48,13 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
       res.status(error.status).json({ error: { code: error.code, message: error.message } });
       return;
     }
-    // Malformed JSON and oversized bodies are rejected by the body parser with their own status.
+    if ((error as { type?: unknown }).type === 'entity.too.large') {
+      res
+        .status(413)
+        .json({ error: { code: 'too_large', message: 'That is too large to accept.' } });
+      return;
+    }
+    // Malformed JSON and other bad bodies are rejected by the body parser with their own status.
     const status = (error as { status?: unknown }).status;
     if (typeof status === 'number' && status >= 400 && status < 500) {
       res

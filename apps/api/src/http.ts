@@ -2,7 +2,8 @@ import type { Request, RequestHandler } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import type { ObjectId } from 'mongodb';
 import type { z } from 'zod';
-import { badRequest, notFound, parseId, type Config } from '@atlas/core';
+import type { Role } from '@atlas/shared';
+import { badRequest, notFound, parseId, requireAccess, type Config, type Core } from '@atlas/core';
 
 // Parses untrusted input at the API boundary and turns a failure into a 400 with a readable message.
 export function parse<S extends z.ZodType>(schema: S, input: unknown): z.output<S> {
@@ -30,4 +31,10 @@ export function limit(config: Config, windowMs: number, max: number): RequestHan
       error: { code: 'rate_limited', message: 'Too many requests. Try again in a little while.' },
     },
   });
+}
+
+// The one way a route gets at a workspace named in its path: the id is parsed, the caller's membership
+// is looked up, and their role is checked. What comes back is the proof the data functions require.
+export function workspaceAccess(core: Core, req: Request, minimum?: Role) {
+  return requireAccess(core, req.user!._id, idParam(req, 'id', 'That workspace'), minimum);
 }

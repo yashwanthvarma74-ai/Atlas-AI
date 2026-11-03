@@ -11,8 +11,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w @atlas/api\" \"npm run dev -w @atlas/web\"",
-    "build": "npm run build -w @atlas/api && npm run build -w @atlas/web",
+    "dev": "concurrently -n api,worker,web -c blue,yellow,magenta \"npm run dev -w @atlas/api\" \"npm run dev -w @atlas/worker\" \"npm run dev -w @atlas/web\"",
+    "build": "npm run build -w @atlas/api && npm run build -w @atlas/worker && npm run build -w @atlas/web",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "npm run typecheck -ws --if-present",

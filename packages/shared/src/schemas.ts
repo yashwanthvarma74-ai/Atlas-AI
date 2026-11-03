@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  DOCUMENT_NAME_MAX_LENGTH,
   EMAIL_MAX_LENGTH,
   NAME_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
@@ -104,3 +105,38 @@ export const apiErrorSchema = z.object({
   error: z.object({ code: z.string(), message: z.string() }),
 });
 export type ApiError = z.infer<typeof apiErrorSchema>;
+
+// ---- documents ----
+
+// What a file is, decided from its bytes. The browser's Content-Type is never trusted.
+export const documentKindSchema = z.enum(['pdf', 'text', 'image']);
+export type DocumentKind = z.infer<typeof documentKindSchema>;
+
+// queued, parsing and embedding are in progress; indexed and failed are final until a retry.
+export const documentStatusSchema = z.enum(['queued', 'parsing', 'embedding', 'indexed', 'failed']);
+export type DocumentStatus = z.infer<typeof documentStatusSchema>;
+
+export const IN_PROGRESS_STATUSES: DocumentStatus[] = ['queued', 'parsing', 'embedding'];
+
+export const documentSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  kind: documentKindSchema,
+  size: z.number(),
+  status: documentStatusSchema,
+  // why it failed, in words a user can act on; only set when status is "failed"
+  error: z.string().nullable(),
+  pageCount: z.number().nullable(),
+  chunkCount: z.number().nullable(),
+  uploadedBy: z.string(),
+  createdAt: z.string(),
+});
+export type DocumentSummary = z.infer<typeof documentSchema>;
+
+export const uploadQuerySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name the file.')
+    .max(DOCUMENT_NAME_MAX_LENGTH, `Use at most ${DOCUMENT_NAME_MAX_LENGTH} characters.`),
+});

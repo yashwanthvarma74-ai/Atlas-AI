@@ -13,10 +13,10 @@ import {
   listMembers,
   listWorkspaces,
   removeMember,
-  requireAccess,
   type Core,
 } from '@atlas/core';
-import { idParam, limit, parse } from '../http';
+import { idParam, limit, parse, workspaceAccess } from '../http';
+import { documentsRouter } from './documents';
 import { requireUser } from '../middleware';
 
 export function workspacesRouter(core: Core): Router {
@@ -26,8 +26,7 @@ export function workspacesRouter(core: Core): Router {
   const writes = limit(core.config, 60 * 1000, 30);
 
   // Every route below that names a workspace starts here, so none of them can skip the check.
-  const accessFor = (req: Request, minimum?: Role) =>
-    requireAccess(core, req.user!._id, idParam(req, 'id', 'That workspace'), minimum);
+  const accessFor = (req: Request, minimum?: Role) => workspaceAccess(core, req, minimum);
 
   router.get('/', async (req, res) => {
     res.json({ workspaces: await listWorkspaces(core, req.user!._id) });
@@ -65,6 +64,8 @@ export function workspacesRouter(core: Core): Router {
     await removeMember(core, access, idParam(req, 'userId', 'That member'));
     res.status(204).end();
   });
+
+  router.use('/:id/documents', documentsRouter(core));
 
   return router;
 }

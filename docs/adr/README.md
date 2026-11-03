@@ -8,3 +8,6 @@ decision, the evidence, the consequences and the alternatives that were rejected
 | 0001 | [Workspace access is proved by a type, not remembered by each route](0001-workspace-access-is-proved-by-a-type.md) | accepted |
 | 0002 | [Build the UI with the design system](0002-build-the-ui-with-the-design-system.md)                                 | accepted |
 | 0003 | [Accounts, sessions and guests](0003-accounts-and-sessions.md)                                                     | accepted |
+| 0004 | [Ingest is a queue of idempotent jobs](0004-ingest-is-a-queue-of-idempotent-jobs.md)                               | accepted |
+| 0005 | [Chunking by structure, with a little overlap](0005-chunking-by-structure-with-overlap.md)                         | accepted |
+| 0006 | [Uploads are untrusted bytes](0006-uploads-are-untrusted-bytes.md)                                                 | accepted |
