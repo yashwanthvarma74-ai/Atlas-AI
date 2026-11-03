@@ -50,6 +50,12 @@ describe('OpenAI provider', () => {
     'data: [DONE]\n\n',
   ];
 
+  it('talks to another OpenAI-compatible service when given its address', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
+    await collect(createOpenAI('k', 'm', 'https://models.example.test/v1').stream(request()));
+    expect(fetch.mock.calls[0]![0]).toBe('https://models.example.test/v1/chat/completions');
+  });
+
   it('streams the text and reports the token counts', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf(chunks));
     const events = await collect(createOpenAI('sk-test', 'gpt-test').stream(request()));

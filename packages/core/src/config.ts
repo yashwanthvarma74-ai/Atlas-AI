@@ -31,6 +31,8 @@ const envSchema = z.object({
   EMBEDDING_DIMENSIONS: z.coerce.number().int().positive().default(256),
   OLLAMA_URL: z.string().default('http://127.0.0.1:11434'),
   OPENAI_API_KEY: z.string().optional(),
+  // Any service that speaks the OpenAI API can stand in for OpenAI, for chat and for embeddings.
+  OPENAI_BASE_URL: z.string().default('https://api.openai.com/v1'),
 
   // Chunk size in tokens (estimated at four characters each) and how much neighbouring chunks share. The defaults
   // come from the evaluation sweep, with the reasoning in docs/EVALUATION.md and ADR 0005.

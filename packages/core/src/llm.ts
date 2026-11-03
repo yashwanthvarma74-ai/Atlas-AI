@@ -79,13 +79,17 @@ async function post(
   return res.body;
 }
 
-export function createOpenAI(apiKey: string, model: string): LlmProvider {
+export function createOpenAI(
+  apiKey: string,
+  model: string,
+  baseUrl = 'https://api.openai.com/v1',
+): LlmProvider {
   return {
     provider: 'openai',
     model,
     async *stream({ system, messages, maxTokens, signal }) {
       const body = await post(
-        'https://api.openai.com/v1/chat/completions',
+        `${baseUrl}/chat/completions`,
         {
           model,
           stream: true,
@@ -277,7 +281,7 @@ export function createLlm(config: Config): LlmProvider {
     case 'openai':
       if (!config.OPENAI_API_KEY)
         throw new Error('OPENAI_API_KEY is required for LLM_PROVIDER=openai.');
-      return createOpenAI(config.OPENAI_API_KEY, model ?? 'gpt-4o-mini');
+      return createOpenAI(config.OPENAI_API_KEY, model ?? 'gpt-4o-mini', config.OPENAI_BASE_URL);
     case 'anthropic':
       if (!config.ANTHROPIC_API_KEY)
         throw new Error('ANTHROPIC_API_KEY is required for LLM_PROVIDER=anthropic.');

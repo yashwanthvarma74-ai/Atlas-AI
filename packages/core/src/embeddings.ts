@@ -118,7 +118,12 @@ export function createOllamaEmbedder(url: string, model: string, dimensions: num
   };
 }
 
-export function createOpenAIEmbedder(apiKey: string, model: string, dimensions: number): Embedder {
+export function createOpenAIEmbedder(
+  apiKey: string,
+  model: string,
+  dimensions: number,
+  baseUrl = 'https://api.openai.com/v1',
+): Embedder {
   return {
     provider: 'openai',
     model,
@@ -126,7 +131,7 @@ export function createOpenAIEmbedder(apiKey: string, model: string, dimensions: 
     embed: (texts) =>
       inBatches(texts, async (batch) => {
         const body = (await postJson(
-          'https://api.openai.com/v1/embeddings',
+          `${baseUrl}/embeddings`,
           { model, input: batch, dimensions },
           { Authorization: `Bearer ${apiKey}` },
         )) as { data?: { index: number; embedding: unknown }[] };
@@ -157,6 +162,7 @@ export function createEmbedder(config: Config): Embedder {
       config.OPENAI_API_KEY,
       config.EMBEDDING_MODEL ?? 'text-embedding-3-small',
       dimensions,
+      config.OPENAI_BASE_URL,
     );
   }
   return createHashEmbedder(dimensions);
