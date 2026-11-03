@@ -16,10 +16,11 @@ jobs:
   checks:
     name: Lint, types, tests
     runs-on: ubuntu-latest
-    # the tests run against a real MongoDB, Redis and S3 server, exactly like local development
+    # the tests run against a real MongoDB with Atlas Search, Redis and an S3 server, exactly like local development
     services:
+      # Atlas Local: MongoDB with Atlas Search and Vector Search, which the retrieval tests need
       mongodb:
-        image: mongo:8
+        image: mongodb/mongodb-atlas-local:latest
         ports: ['27017:27017']
       redis:
         image: redis:8
@@ -31,6 +32,8 @@ jobs:
           COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: atlas-test
     env:
       S3_TEST_ENDPOINT: http://127.0.0.1:9090
+      MONGODB_TEST_URL: mongodb://127.0.0.1:27017
+      SEARCH_TEST_URL: mongodb://127.0.0.1:27017
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

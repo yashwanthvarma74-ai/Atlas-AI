@@ -29,12 +29,14 @@ export interface TestCore extends Core {
 export async function createTestCore(
   overrides: Record<string, string> = {},
   options: CoreOptions = {},
+  mongoUrl = MONGO_URL,
 ): Promise<TestCore> {
   const suffix = randomBytes(6).toString('hex');
   const uploadDir = await mkdtemp(join(tmpdir(), 'atlas-uploads-'));
   const config = loadConfig({
     NODE_ENV: 'test',
-    MONGODB_URI: `${MONGO_URL}/atlas_test_${suffix}`,
+    // directConnection: Atlas Local is a replica set whose members advertise names only it can resolve
+    MONGODB_URI: `${mongoUrl}/atlas_test_${suffix}?directConnection=true`,
     REDIS_URL,
     REDIS_PREFIX: `atlas_test_${suffix}`,
     UPLOAD_DIR: uploadDir,

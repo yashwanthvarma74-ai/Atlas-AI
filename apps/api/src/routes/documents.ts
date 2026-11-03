@@ -1,9 +1,11 @@
 import express, { Router } from 'express';
 import { UPLOAD_MAX_BYTES, uploadQuerySchema } from '@atlas/shared';
 import {
+  badRequest,
   deleteDocument,
   getDocument,
   listDocuments,
+  listPassages,
   openDocumentFile,
   retryDocument,
   unsupportedMedia,
@@ -66,6 +68,16 @@ export function documentsRouter(core: Core): Router {
         'Content-Security-Policy': "default-src 'none'; sandbox",
       })
       .send(Buffer.from(file.bytes));
+  });
+
+  // The stored passages of one page, so a citation can be shown in context with the cited one marked.
+  router.get('/:docId/passages', async (req, res) => {
+    const access = await workspaceAccess(core, req);
+    const page = Number(req.query.page);
+    if (!Number.isInteger(page) || page < 1)
+      throw badRequest('Give the page as a whole number from 1.');
+    const id = idParam(req, 'docId', 'That document');
+    res.json({ passages: await listPassages(core, access, id, page) });
   });
 
   router.post('/:docId/retry', writes, async (req, res) => {

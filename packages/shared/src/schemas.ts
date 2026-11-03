@@ -5,6 +5,8 @@ import {
   NAME_MAX_LENGTH,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
+  QUESTION_MAX_LENGTH,
+  SEARCH_MAX_DOCUMENTS,
   WORKSPACE_NAME_MAX_LENGTH,
 } from './limits';
 
@@ -140,3 +142,36 @@ export const uploadQuerySchema = z.object({
     .min(1, 'Name the file.')
     .max(DOCUMENT_NAME_MAX_LENGTH, `Use at most ${DOCUMENT_NAME_MAX_LENGTH} characters.`),
 });
+
+// ---- search ----
+
+export const searchInputSchema = z.object({
+  query: z
+    .string()
+    .trim()
+    .min(1, 'Ask a question or type some words.')
+    .max(QUESTION_MAX_LENGTH, `Use at most ${QUESTION_MAX_LENGTH} characters.`),
+  // narrow the search to these documents; leave out to search the whole workspace
+  documentIds: z.array(z.string()).max(SEARCH_MAX_DOCUMENTS).optional(),
+});
+export type SearchInput = z.infer<typeof searchInputSchema>;
+
+// A passage that matched, numbered S1, S2, ... in rank order. The same numbers are what an answer cites.
+export const sourceSchema = z.object({
+  n: z.number(),
+  chunkId: z.string(),
+  documentId: z.string(),
+  documentName: z.string(),
+  page: z.number(),
+  text: z.string(),
+  score: z.number(),
+});
+export type SearchSource = z.infer<typeof sourceSchema>;
+
+export const passageSchema = z.object({
+  id: z.string(),
+  ord: z.number(),
+  page: z.number(),
+  text: z.string(),
+});
+export type Passage = z.infer<typeof passageSchema>;

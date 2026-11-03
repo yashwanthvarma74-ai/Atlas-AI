@@ -4,12 +4,15 @@ import type { Config } from './config';
 import { connect, ensureIndexes, type Database } from './db';
 import { createEmbedder, type Embedder } from './embeddings';
 import { createQueues, type Queues } from './queues';
+import { ensureSearchIndexes } from './search-indexes';
 import { createStorage, type Storage } from './storage';
 
 // Everything the domain code needs, created once per process and passed around explicitly.
 export interface Core {
   config: Config;
   database: Database;
+  // false on a database with no Atlas Search service: documents still index, but searching is refused
+  searchAvailable: boolean;
   queues: Queues;
   storage: Storage;
   embedder: Embedder;
@@ -27,6 +30,7 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
   const logger = options.logger ?? pino({ level: config.LOG_LEVEL });
   const database = await connect(config.MONGODB_URI);
   await ensureIndexes(database);
+  const searchAvailable = await ensureSearchIndexes(database, config.EMBEDDING_DIMENSIONS, logger);
 
   // Fail fast when Redis is away instead of queueing commands until it returns: an upload then gets
   // a clear "try again" instead of hanging.
@@ -39,6 +43,7 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
   return {
     config,
     database,
+    searchAvailable,
     queues,
     storage: options.storage ?? createStorage(config),
     embedder: options.embedder ?? createEmbedder(config),

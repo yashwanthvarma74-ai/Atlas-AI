@@ -18,8 +18,9 @@ export interface TestApp {
 
 const PASSWORD = 'a long enough password';
 
-export async function createTestApp(): Promise<TestApp> {
-  const core = await createTestCore();
+// `core` lets a suite bring its own, for example one on a database that has Atlas Search.
+export async function createTestApp(core?: TestCore): Promise<TestApp> {
+  core ??= await createTestCore();
   const app = createApp(core, pino({ level: 'silent' }));
 
   const browser = () => request.agent(app);

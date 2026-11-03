@@ -1,0 +1,26 @@
+.passages {
+  display: grid;
+  gap: var(--mrd-space-3);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.passage,
+.cited {
+  margin: 0;
+  padding: var(--mrd-space-3);
+  border-radius: var(--mrd-radius-md);
+  line-height: var(--mrd-font-line-height-relaxed);
+  white-space: pre-line;
+}
+
+.passage {
+  color: var(--mrd-color-text-secondary);
+}
+
+/* the marker is a fill and a bar, so it does not rely on colour alone */
+.cited {
+  border-left: var(--mrd-space-1) solid var(--mrd-color-accent-default);
+  background: var(--mrd-color-accent-subtle);
+  color: var(--mrd-color-text-primary);
+}

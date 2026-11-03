@@ -36,6 +36,13 @@ const envSchema = z.object({
   CHUNK_TARGET_TOKENS: z.coerce.number().int().positive().default(256),
   CHUNK_OVERLAP_TOKENS: z.coerce.number().int().min(0).default(32),
   // The longest any one ingest stage may run before the job is failed and retried.
+  // How many passages a question gets (S1 to S8) and how many candidates each search contributes first.
+  RETRIEVAL_LIMIT: z.coerce.number().int().positive().default(8),
+  RETRIEVAL_POOL: z.coerce.number().int().positive().default(30),
+  // "none" keeps the fused order; "coverage" boosts passages that contain the question's own words.
+  // Off until the evaluation in week 5 shows it helps.
+  RERANKER: z.enum(['none', 'coverage']).default('none'),
+
   // The first retry waits this long; each one after waits twice as long as the one before.
   INGEST_BACKOFF_MS: z.coerce.number().int().positive().default(2000),
   INGEST_STAGE_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),

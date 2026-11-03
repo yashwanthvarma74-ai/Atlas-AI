@@ -9,3 +9,6 @@ export const EMAIL_MAX_LENGTH = 254;
 
 export const UPLOAD_MAX_BYTES = 20 * 1024 * 1024;
 export const DOCUMENT_NAME_MAX_LENGTH = 200;
+
+export const QUESTION_MAX_LENGTH = 500;
+export const SEARCH_MAX_DOCUMENTS = 20;

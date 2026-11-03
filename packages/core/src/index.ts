@@ -1,5 +1,6 @@
 export * from './access';
 export * from './chunk';
+export * from './citations';
 export * from './config';
 export * from './core';
 export * from './db';
@@ -11,6 +12,10 @@ export * from './ingest';
 export * from './parse';
 export * from './passwords';
 export * from './queues';
+export * from './rank';
+export * from './rerank';
+export * from './retrieve';
+export * from './search-indexes';
 export * from './sniff';
 export * from './storage';
 export * from './users';

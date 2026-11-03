@@ -5,7 +5,9 @@ import type {
   LoginInput,
   Member,
   MemberRole,
+  Passage,
   RegisterInput,
+  SearchSource,
   SessionUser,
   Workspace,
 } from '@atlas/shared';
@@ -112,6 +114,23 @@ export const api = {
     request(`/workspaces/${workspaceId}/documents/${documentId}`, { method: 'DELETE' }),
   documentFileUrl: (workspaceId: string, documentId: string) =>
     `/api/workspaces/${workspaceId}/documents/${documentId}/file`,
+
+  // ---- search ----
+  async search(workspaceId: string, query: string) {
+    return (
+      await request<{ sources: SearchSource[] }>(`/workspaces/${workspaceId}/search`, {
+        method: 'POST',
+        json: { query },
+      })
+    ).sources;
+  },
+  async passages(workspaceId: string, documentId: string, page: number) {
+    return (
+      await request<{ passages: Passage[] }>(
+        `/workspaces/${workspaceId}/documents/${documentId}/passages?page=${page}`,
+      )
+    ).passages;
+  },
 
   // ---- members ----
   async members(workspaceId: string) {

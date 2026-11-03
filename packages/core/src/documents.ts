@@ -159,3 +159,30 @@ export async function openDocumentFile(
   if (url) return { url };
   return { bytes: await core.storage.get(doc.storageKey), name: doc.name, mimeType: doc.mimeType };
 }
+
+export interface Passage {
+  id: string;
+  ord: number;
+  page: number;
+  text: string;
+}
+
+// The stored passages of one page of a document, in reading order, for showing a citation in context.
+export async function listPassages(
+  core: Core,
+  access: WorkspaceAccess,
+  id: ObjectId,
+  page: number,
+): Promise<Passage[]> {
+  const doc = await findDocument(core, access, id);
+  const chunks = await core.database.chunks
+    .find({ documentId: doc._id, workspaceId: access.workspaceId, page })
+    .sort({ ord: 1 })
+    .toArray();
+  return chunks.map((chunk) => ({
+    id: hex(chunk._id),
+    ord: chunk.ord,
+    page: chunk.page,
+    text: chunk.text,
+  }));
+}

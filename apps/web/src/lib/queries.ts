@@ -18,6 +18,8 @@ const keys = {
   workspace: (id: string) => ['workspaces', id] as const,
   members: (id: string) => ['workspaces', id, 'members'] as const,
   documents: (id: string) => ['workspaces', id, 'documents'] as const,
+  passages: (id: string, documentId: string, page: number) =>
+    ['workspaces', id, 'documents', documentId, 'passages', page] as const,
 };
 
 export function useSession() {
@@ -159,5 +161,23 @@ export function useDeleteDocument(workspaceId: string) {
   return useMutation({
     mutationFn: (documentId: string) => api.deleteDocument(workspaceId, documentId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.documents(workspaceId) }),
+  });
+}
+
+export function useSearch(workspaceId: string) {
+  return useMutation({ mutationFn: (query: string) => api.search(workspaceId, query) });
+}
+
+// The passages of one page, fetched when a citation is opened.
+export function usePassages(
+  workspaceId: string,
+  documentId: string,
+  page: number,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: keys.passages(workspaceId, documentId, page),
+    queryFn: () => api.passages(workspaceId, documentId, page),
+    enabled,
   });
 }

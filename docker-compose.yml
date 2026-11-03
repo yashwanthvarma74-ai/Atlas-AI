@@ -2,10 +2,12 @@
 # The apps run from source with "npm run dev" for now; they join this file when the Dockerfiles do
 # (week 6).
 services:
+  # MongoDB with Atlas Search and Atlas Vector Search, the same engines as an Atlas cluster. A plain
+  # mongod has neither, and retrieval needs both. Published on 27018 so it can sit next to a local mongod.
   mongo:
-    image: mongo:8
+    image: mongodb/mongodb-atlas-local:latest
     volumes: [mongo-data:/data/db]
-    ports: ['27017:27017']
+    ports: ['27018:27017']
 
   redis:
     image: redis:8
