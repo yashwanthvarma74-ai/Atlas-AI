@@ -7,6 +7,7 @@ import {
   createGeminiEmbedder,
   createOpenAIEmbedder,
   createVoyageEmbedder,
+  rateLimited,
   EmbeddingError,
 } from './embeddings';
 
@@ -280,5 +281,31 @@ describe('a refused batch', () => {
       .embed(['a'])
       .catch(() => undefined);
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('rateLimited', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('sends texts in slices and waits between them so it stays under the allowance', async () => {
+    vi.useFakeTimers();
+    const calls: { size: number; at: number }[] = [];
+    const inner = {
+      provider: 'x',
+      model: 'm',
+      dimensions: 1,
+      embed: async (texts: string[]) => {
+        calls.push({ size: texts.length, at: Date.now() });
+        return texts.map(() => [1]);
+      },
+    };
+    const start = Date.now();
+    const result = rateLimited(inner, 30).embed(Array.from({ length: 70 }, (_, i) => `t${i}`));
+    await vi.advanceTimersByTimeAsync(10 * 60_000);
+
+    expect(await result).toHaveLength(70);
+    expect(calls.map((c) => c.size)).toEqual([30, 30, 10]);
+    // 30 texts a minute: the second slice waits a minute after the first, the third a minute after that
+    expect(calls.map((c) => Math.round((c.at - start) / 60_000))).toEqual([0, 1, 2]);
   });
 });

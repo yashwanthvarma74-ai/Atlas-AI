@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { describeFailure } from './ingest';
 import { createHashEmbedder, EmbeddingError, type Embedder } from './embeddings';
 import {
   addMember,
@@ -199,5 +200,20 @@ describe('embedding failures', () => {
     } finally {
       await slowCore.destroy();
     }
+  });
+});
+
+describe('describeFailure', () => {
+  it('says what went wrong in words a person can act on, without a provider body', () => {
+    expect(
+      describeFailure(new EmbeddingError('The embedding service answered 429.', true)),
+    ).toMatch(/kept refusing requests \(The embedding service answered 429\).*smaller file/);
+    expect(describeFailure(new Error('The embedding stage took longer than 300000 ms.'))).toMatch(
+      /took too long/,
+    );
+    expect(describeFailure(new Error('The parser stopped without an answer (SIGKILL).'))).toMatch(
+      /could not be read/,
+    );
+    expect(describeFailure(new Error('anything else'))).toMatch(/failed after 3 attempts/);
   });
 });

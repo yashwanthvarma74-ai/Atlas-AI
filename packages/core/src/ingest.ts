@@ -8,22 +8,48 @@ import { HttpError } from './errors';
 import { requireAccess } from './access';
 import { ParseError, parseDocument, type ParseDeps } from './parse';
 import { parseInChild } from './parse-isolated';
-import type { IngestJob } from './queues';
+import { INGEST_ATTEMPTS, type IngestJob } from './queues';
 import { withSpan } from './trace';
 
 // A problem retrying cannot fix: a damaged file, a rejected API key, an uploader who lost access. The
 // queue gives up on it at once instead of spending its attempts.
 export class PermanentIngestError extends Error {}
 
-const stageTimeout = <T>(core: Core, stage: string, work: Promise<T>): Promise<T> =>
+const stageTimeout = <T>(
+  core: Core,
+  stage: string,
+  work: Promise<T>,
+  ms = core.config.INGEST_STAGE_TIMEOUT_MS,
+): Promise<T> =>
   new Promise((resolve, reject) => {
-    const ms = core.config.INGEST_STAGE_TIMEOUT_MS;
     const timer = setTimeout(
       () => reject(new Error(`The ${stage} stage took longer than ${ms} ms.`)),
       ms,
     );
     work.then(resolve, reject).finally(() => clearTimeout(timer));
   });
+
+// With a per-minute allowance the embedding of a big file takes as long as the allowance says, so the stage gets that
+// long (and half as much again), not the fixed time that suits a service with no limit.
+function embeddingBudget(core: Core, chunks: number): number {
+  const perMinute = core.config.EMBEDDING_PER_MINUTE;
+  const floor = core.config.INGEST_STAGE_TIMEOUT_MS;
+  return perMinute ? Math.max(floor, Math.ceil((chunks / perMinute) * 90_000)) : floor;
+}
+
+// What to tell the person when a document is out of attempts. Only our own messages go in, never a provider's body.
+export function describeFailure(error: unknown): string {
+  const retry = 'Try again in a few minutes, or with a smaller file.';
+  if (error instanceof EmbeddingError) {
+    return `The embedding service kept refusing requests (${error.message.replace(/\.$/, '')}). A large file can use up a free plan's allowance. ${retry}`;
+  }
+  const message = error instanceof Error ? error.message : '';
+  if (/stage took longer/.test(message)) return `This file took too long to process. ${retry}`;
+  if (/parser stopped|did not finish/.test(message)) {
+    return `The file could not be read: the parser stopped before it finished, which a very large or complex file can cause. ${retry}`;
+  }
+  return `Processing failed after ${INGEST_ATTEMPTS} attempts. ${retry}`;
+}
 
 async function setStatus(core: Core, doc: DocumentDoc, status: DocumentStatus) {
   const result = await core.database.documents.updateOne(
@@ -96,7 +122,12 @@ async function ingestDocument(core: Core, job: IngestJob, deps: ParseDeps): Prom
 
     if (!(await setStatus(core, doc, 'embedding'))) return;
     const vectors = await withSpan('ingest.embed', { 'atlas.chunks': chunks.length }, () =>
-      stageTimeout(core, 'embedding', core.embedder.embed(chunks.map((chunk) => chunk.text))),
+      stageTimeout(
+        core,
+        'embedding',
+        core.embedder.embed(chunks.map((chunk) => chunk.text)),
+        embeddingBudget(core, chunks.length),
+      ),
     );
 
     // replace, never add: see the comment on this function

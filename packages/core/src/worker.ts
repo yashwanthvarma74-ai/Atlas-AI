@@ -5,7 +5,7 @@ import type { Core } from './core';
 import { purgeExpiredGuests } from './guests';
 import { hex } from './ids';
 import { failAllStaleAnswers } from './answer';
-import { markFailed, PermanentIngestError, processDocument } from './ingest';
+import { describeFailure, markFailed, PermanentIngestError, processDocument } from './ingest';
 import { enqueueIngest, INGEST_ATTEMPTS, type IngestJob } from './queues';
 import type { ParseDeps } from './parse';
 
@@ -51,7 +51,7 @@ export function startIngestWorker(core: Core, deps: ParseDeps = {}): IngestWorke
         core,
         new ObjectId(job.data.documentId),
         new ObjectId(job.data.workspaceId),
-        `Processing failed after ${INGEST_ATTEMPTS} attempts. Try again in a moment.`,
+        describeFailure(error),
       );
     }
   });

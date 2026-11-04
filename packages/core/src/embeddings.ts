@@ -219,7 +219,34 @@ export function createGeminiEmbedder(apiKey: string, model: string, dimensions: 
   };
 }
 
+// Keeps an embedder under a per-minute allowance by sending its texts in slices and waiting between them. A service
+// that refuses over-quota requests gets none, instead of a storm of refusals that are all retried.
+export function rateLimited(embedder: Embedder, perMinute: number): Embedder {
+  const slice = Math.max(1, Math.min(BATCH_SIZE, perMinute));
+  return {
+    ...embedder,
+    async embed(texts) {
+      const out: number[][] = [];
+      for (let i = 0; i < texts.length; i += slice) {
+        const started = Date.now();
+        const part = texts.slice(i, i + slice);
+        out.push(...(await embedder.embed(part)));
+        const due = (part.length / perMinute) * 60_000 - (Date.now() - started);
+        if (i + slice < texts.length && due > 0) await pause(due);
+      }
+      return out;
+    },
+  };
+}
+
 export function createEmbedder(config: Config): Embedder {
+  const embedder = createProviderEmbedder(config);
+  return config.EMBEDDING_PER_MINUTE
+    ? rateLimited(embedder, config.EMBEDDING_PER_MINUTE)
+    : embedder;
+}
+
+function createProviderEmbedder(config: Config): Embedder {
   const { EMBEDDING_PROVIDER: provider, EMBEDDING_DIMENSIONS: dimensions } = config;
   if (provider === 'ollama') {
     return createOllamaEmbedder(

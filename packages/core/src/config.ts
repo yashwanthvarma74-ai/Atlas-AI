@@ -29,6 +29,8 @@ const envSchema = z.object({
   // defaults to nomic-embed-text for ollama and text-embedding-3-small for openai
   EMBEDDING_MODEL: z.string().optional(),
   EMBEDDING_DIMENSIONS: z.coerce.number().int().positive().default(256),
+  // How many texts a minute the embedding service allows, when it has a limit. Unset sends as fast as it will take.
+  EMBEDDING_PER_MINUTE: z.coerce.number().int().positive().optional(),
   OLLAMA_URL: z.string().default('http://127.0.0.1:11434'),
   OPENAI_API_KEY: z.string().optional(),
   VOYAGE_API_KEY: z.string().optional(),

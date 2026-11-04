@@ -80,7 +80,7 @@ describe('ingest worker', () => {
     const doc = await uploadDocument(core, ws, { name: 'down.txt', bytes });
 
     const failed = await until(core, doc.id, ['failed']);
-    expect(failed.error).toMatch(/failed after 3 attempts/);
+    expect(failed.error).toMatch(/kept refusing requests/);
     expect(calls).toBe(3);
     const job = await core.queues.ingest.getJob(doc.id);
     expect(await job?.getState()).toBe('failed');
