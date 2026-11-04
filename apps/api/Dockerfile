@@ -1,5 +1,5 @@
 # Build from the repository root:  docker build -f apps/api/Dockerfile -t atlas-api .
-FROM node:22-slim AS build
+FROM node:26-slim AS build
 WORKDIR /app
 # every workspace's manifest is needed so that npm ci can read the lockfile
 COPY package.json package-lock.json tsconfig.base.json ./
@@ -19,7 +19,7 @@ RUN node infra/fetch-models.mjs /app/models
 # ONNX Runtime ships binaries for every platform; this image only ever runs the Linux one
 RUN rm -rf node_modules/onnxruntime-node/bin/napi-v*/darwin node_modules/onnxruntime-node/bin/napi-v*/win32
 
-FROM node:22-slim
+FROM node:26-slim
 WORKDIR /app/apps/api
 ENV NODE_ENV=production
 ENV MODEL_CACHE_DIR=/app/models
