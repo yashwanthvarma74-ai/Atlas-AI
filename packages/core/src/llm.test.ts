@@ -78,12 +78,36 @@ describe('OpenAI provider', () => {
       [401, false],
       [400, false],
     ] as const) {
+      vi.useFakeTimers();
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf([], status));
-      const error = await collect(createOpenAI('sk-secret', 'm').stream(request())).catch((e) => e);
+      const pending = collect(createOpenAI('sk-secret', 'm').stream(request())).catch((e) => e);
+      await vi.advanceTimersByTimeAsync(10_000);
+      const error = await pending;
+      vi.useRealTimers();
       expect(error).toBeInstanceOf(LlmError);
       expect(error).toMatchObject({ retryable });
       expect(error.message).not.toContain('sk-secret');
     }
+  });
+
+  it('asks a busy model again before giving up, and starts the answer when it is free', async () => {
+    vi.useFakeTimers();
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(streamOf([], 503))
+      .mockResolvedValueOnce(streamOf([], 429))
+      .mockResolvedValueOnce(streamOf(chunks));
+    const pending = collect(createOpenAI('k', 'm').stream(request()));
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(textOf(await pending)).toBe('Revenue [S1].');
+    expect(fetch).toHaveBeenCalledTimes(3);
+    vi.useRealTimers();
+  });
+
+  it('does not ask again after a refusal that will not pass', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(streamOf([], 401));
+    await collect(createOpenAI('k', 'm').stream(request())).catch(() => undefined);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it('treats an unreachable service as worth retrying', async () => {

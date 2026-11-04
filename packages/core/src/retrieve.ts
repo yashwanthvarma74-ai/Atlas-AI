@@ -105,7 +105,7 @@ export async function retrieve(
   let vector: number[];
   try {
     [vector] = (await withSpan('retrieve.embed', { 'atlas.embedder': core.embedder.model }, () =>
-      core.embedder.embed([question]),
+      core.embedder.embed([question], 'query'),
     )) as [number[]];
   } catch (error) {
     if (error instanceof EmbeddingError) throw unavailable('The embedding service is unavailable.');

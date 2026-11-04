@@ -35,7 +35,9 @@ services:
       SITE_ORIGIN: http://localhost:3002
       STORAGE_DRIVER: local
       UPLOAD_DIR: /data/uploads
-      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-hash}
+      # the model is in the image; it runs on the CPU with no key
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-local}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-384}
       LLM_PROVIDER: ${LLM_PROVIDER:-extractive}
       EXTRACTIVE_DELAY_MS: ${EXTRACTIVE_DELAY_MS:-0}
       # leave at 1; the load test raises it so it measures the service and not the rate limiter

@@ -21,3 +21,4 @@ decision, the evidence, the consequences and the alternatives that were rejected
 | 0014 | [The assistant proposes, and a person approves](0014-the-assistant-proposes-and-a-person-approves.md)                                                                 | accepted |
 | 0015 | [Containers, and the hardening that came with them](0015-containers-and-hardening.md)                                                                                 | accepted |
 | 0016 | [Traces from spans, and a parser in its own process](0016-traces-and-an-isolated-parser.md)                                                                           | accepted |
+| 0017 | [Embeddings run in the process, not behind someone else's quota](0017-embeddings-run-in-process.md)                                                                   | accepted |

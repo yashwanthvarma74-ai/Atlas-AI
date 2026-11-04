@@ -4,8 +4,9 @@ export interface Embedder {
   readonly provider: string;
   readonly model: string;
   readonly dimensions: number;
-  // One vector per text, in order. Vectors have length `dimensions`.
-  embed(texts: string[]): Promise<number[][]>;
+  // One vector per text, in order. Vectors have length `dimensions`. A question is embedded as a `query`, a passage
+  // as a `document` (the default); most models ignore the difference, some search better for it.
+  embed(texts: string[], purpose?: 'query' | 'document'): Promise<number[][]>;
 }
 
 // `retryable` says whether trying again can help: a timeout or a 503 can, a bad API key or a rejected
@@ -169,6 +170,52 @@ export function createOpenAIEmbedder(apiKey: string, model: string, dimensions: 
   };
 }
 
+// A model that runs in this process, on the CPU, through ONNX Runtime. No service, no key and no allowance to run out
+// of, which is what a free deployment needs: a hosted embedder's free quota is what failed uploads in production. The
+// model is fetched once into MODEL_CACHE_DIR (the container image has it already) and kept in memory after first use.
+const LOCAL_BATCH = 16;
+// BGE models search better when the question, and only the question, carries this instruction.
+const BGE_QUERY = 'Represent this sentence for searching relevant passages: ';
+
+type Extractor = (
+  texts: string[],
+  options: { pooling: 'cls' | 'mean'; normalize: boolean },
+) => Promise<{ tolist(): number[][] }>;
+
+export function createLocalEmbedder(model: string, dimensions: number, cacheDir: string): Embedder {
+  const bge = /bge/i.test(model);
+  let loading: Promise<Extractor> | undefined;
+  const extractor = () =>
+    (loading ??= (async () => {
+      const { pipeline, env } = await import('@huggingface/transformers');
+      env.cacheDir = cacheDir;
+      return (await pipeline('feature-extraction', model, { dtype: 'q8' })) as unknown as Extractor;
+    })().catch((error: Error) => {
+      loading = undefined;
+      throw new EmbeddingError(`The embedding model could not be loaded: ${error.message}`, true);
+    }));
+
+  return {
+    provider: 'local',
+    model,
+    dimensions,
+    async embed(texts, purpose = 'document') {
+      const run = await extractor();
+      const out: number[][] = [];
+      for (let i = 0; i < texts.length; i += LOCAL_BATCH) {
+        const batch = texts
+          .slice(i, i + LOCAL_BATCH)
+          .map((t) => (bge && purpose === 'query' ? BGE_QUERY + t : t));
+        const vectors = (
+          await run(batch, { pooling: bge ? 'cls' : 'mean', normalize: true })
+        ).tolist();
+        out.push(...checked(vectors, batch.length, dimensions));
+      }
+      return out;
+    },
+  };
+}
+
 // Voyage AI. `output_dimension` shortens the vector to the size the index was built for.
 export function createVoyageEmbedder(apiKey: string, model: string, dimensions: number): Embedder {
   return {
@@ -225,12 +272,12 @@ export function rateLimited(embedder: Embedder, perMinute: number): Embedder {
   const slice = Math.max(1, Math.min(BATCH_SIZE, perMinute));
   return {
     ...embedder,
-    async embed(texts) {
+    async embed(texts, purpose) {
       const out: number[][] = [];
       for (let i = 0; i < texts.length; i += slice) {
         const started = Date.now();
         const part = texts.slice(i, i + slice);
-        out.push(...(await embedder.embed(part)));
+        out.push(...(await embedder.embed(part, purpose)));
         const due = (part.length / perMinute) * 60_000 - (Date.now() - started);
         if (i + slice < texts.length && due > 0) await pause(due);
       }
@@ -248,6 +295,13 @@ export function createEmbedder(config: Config): Embedder {
 
 function createProviderEmbedder(config: Config): Embedder {
   const { EMBEDDING_PROVIDER: provider, EMBEDDING_DIMENSIONS: dimensions } = config;
+  if (provider === 'local') {
+    return createLocalEmbedder(
+      config.EMBEDDING_MODEL ?? 'Xenova/bge-small-en-v1.5',
+      dimensions,
+      config.MODEL_CACHE_DIR,
+    );
+  }
   if (provider === 'ollama') {
     return createOllamaEmbedder(
       config.OLLAMA_URL,

@@ -5,7 +5,7 @@ import { connect, ensureIndexes, type Database } from './db';
 import { createEmbedder, type Embedder } from './embeddings';
 import { createLlm, type LlmProvider } from './llm';
 import { createQueues, type Queues } from './queues';
-import { ensureSearchIndexes } from './search-indexes';
+import { ensureSearchIndexes, rebuildVectorIndex } from './search-indexes';
 import { createStorage, type Storage } from './storage';
 import { defaultTools, type ToolRegistry } from './tools';
 
@@ -41,7 +41,16 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
   const logger = options.logger ?? pino({ level: config.LOG_LEVEL });
   const database = await connect(config.MONGODB_URI);
   await ensureIndexes(database);
-  const searchAvailable = await ensureSearchIndexes(database, config.EMBEDDING_DIMENSIONS, logger);
+  const embedder = options.embedder ?? createEmbedder(config);
+  let searchAvailable: boolean;
+  try {
+    searchAvailable = await ensureSearchIndexes(database, config.EMBEDDING_DIMENSIONS, logger);
+  } catch (error) {
+    // the embedder changed and the old index holds vectors of another size
+    if (!config.VECTOR_INDEX_REBUILD) throw error;
+    await rebuildVectorIndex(database, embedder.model, logger);
+    searchAvailable = await ensureSearchIndexes(database, config.EMBEDDING_DIMENSIONS, logger);
+  }
 
   // Fail fast when Redis is away instead of queueing commands until it returns: an upload then gets
   // a clear "try again" instead of hanging.
@@ -69,7 +78,7 @@ export async function createCore(config: Config, options: CoreOptions = {}): Pro
     },
     queues,
     storage: options.storage ?? createStorage(config),
-    embedder: options.embedder ?? createEmbedder(config),
+    embedder,
     llm: options.llm ?? createLlm(config),
     tools: options.tools ?? defaultTools,
     logger,

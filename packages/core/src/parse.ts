@@ -1,6 +1,9 @@
+import { existsSync } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import type { Worker } from 'tesseract.js';
 import type { DocumentKind } from '@atlas/shared';
 import type { Page } from './chunk';
 
@@ -101,14 +104,36 @@ export function confidentLines(blocks: OcrBlock[], minConfidence = MIN_WORD_CONF
   return lines.join('\n');
 }
 
-// Tesseract fetches its English model on first use and keeps it in this folder afterwards. A page of text is read as
-// one. A picture that reads poorly that way (an infographic, a screenshot, a photo of a sign) is read again as
-// scattered text, keeping only the words it is sure of, and whichever pass kept more is used.
+// One OCR engine for the life of the process. Loading it (the WebAssembly engine and a language model) takes longer
+// than reading a picture on a small machine, so it is loaded on first use and kept.
+//
+// The container image carries Tesseract's "fast" English model in OCR_CACHE_DIR, which reads about a third faster
+// than the default with the same confidence on our test images. Elsewhere the default is fetched once into a temp
+// folder.
+type OcrWorker = Worker;
+let ocrWorker: Promise<OcrWorker> | undefined;
+
+async function startOcr(): Promise<OcrWorker> {
+  const { createWorker } = await import('tesseract.js');
+  const baked = process.env.OCR_CACHE_DIR;
+  if (baked && existsSync(join(baked, 'eng.traineddata'))) {
+    return createWorker('eng', 1, { langPath: baked, gzip: false, cacheMethod: 'none' });
+  }
+  const cachePath = join(tmpdir(), 'atlas-tesseract');
+  // tesseract.js only keeps the model in a folder that exists; without one it fetched it again for every picture
+  await mkdir(cachePath, { recursive: true });
+  return createWorker('eng', 1, { cachePath });
+}
+
+// A page of text is read as one. A picture that reads poorly that way (an infographic, a screenshot, a photo of a
+// sign) is read again as scattered text, keeping only the words it is sure of, and whichever pass kept more is used.
 async function recognise(image: Uint8Array): Promise<string> {
-  const { createWorker, PSM } = await import('tesseract.js');
-  const worker = await createWorker('eng', 1, { cachePath: join(tmpdir(), 'atlas-tesseract') });
+  const { PSM } = await import('tesseract.js');
+  ocrWorker ??= startOcr();
+  const worker = await ocrWorker;
   try {
     const buffer = Buffer.from(image);
+    await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO });
     const page = await worker.recognize(buffer, {}, { blocks: true });
     if (page.data.confidence >= PAGE_CONFIDENCE) return page.data.text;
 
@@ -117,7 +142,10 @@ async function recognise(image: Uint8Array): Promise<string> {
     const kept = confidentLines(scattered.data.blocks ?? []);
     const first = confidentLines(page.data.blocks ?? []);
     return kept.length >= first.length ? kept : first;
-  } finally {
-    await worker.terminate();
+  } catch (error) {
+    // an engine that failed is not trusted with the next picture
+    ocrWorker = undefined;
+    await worker.terminate().catch(() => undefined);
+    throw error;
   }
 }

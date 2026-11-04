@@ -16,8 +16,15 @@ services:
       - { key: PARSE_ISOLATION, value: process }
       # the worker shares a 0.1 CPU machine with the API, so one document at a time keeps pages responsive
       - { key: INGEST_CONCURRENCY, value: '1' }
-      # stay under the free embedding allowance instead of being refused over it; raise it if the allowance allows
-      - { key: EMBEDDING_PER_MINUTE, value: '60' }
+      # embeddings run in this service on its CPU (the model is in the image): no key, no quota
+      - { key: EMBEDDING_PROVIDER, value: local }
+      - { key: EMBEDDING_MODEL, value: Xenova/bge-small-en-v1.5 }
+      - { key: EMBEDDING_DIMENSIONS, value: '384' }
+      # a change of embedder rebuilds the vector index and re-embeds the documents by itself
+      - { key: VECTOR_INDEX_REBUILD, value: 'true' }
+      # the answer model; the key is set in the dashboard
+      - { key: LLM_PROVIDER, value: gemini }
+      - { key: GEMINI_API_KEY, sync: false }
       # the browser reaches the API through the web app's proxy, so there are two hops in front of it
       - { key: TRUST_PROXY_HOPS, value: '2' }
       # the web app's public address; writes naming any other origin are refused

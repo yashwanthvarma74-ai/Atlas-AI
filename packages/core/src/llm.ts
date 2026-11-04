@@ -50,33 +50,51 @@ export async function complete(
   return { text, inputTokens, outputTokens };
 }
 
+// A busy model (429, 503) usually answers a moment later. Before any word has been sent there is nothing to undo, so
+// the request is made again, twice at most, inside the time the answer already has to start.
+const MODEL_TRIES = 3;
+const MODEL_WAITS_MS = [1500, 4000];
+
+const wait = (ms: number, signal: AbortSignal) =>
+  new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, ms);
+    signal.addEventListener('abort', () => (clearTimeout(timer), resolve()), { once: true });
+  });
+
 async function post(
   url: string,
   body: unknown,
   headers: Record<string, string>,
   signal: AbortSignal,
 ) {
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...headers },
-      body: JSON.stringify(body),
-      signal,
-    });
-  } catch (error) {
-    // an abort is the caller's decision and must reach it unchanged
-    if (signal.aborted) throw error;
-    throw new LlmError(`Could not reach the model: ${(error as Error).message}`, true);
-  }
-  if (!res.ok || !res.body) {
+  for (let attempt = 1; ; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        body: JSON.stringify(body),
+        signal,
+      });
+    } catch (error) {
+      // an abort is the caller's decision and must reach it unchanged
+      if (signal.aborted) throw error;
+      throw new LlmError(`Could not reach the model: ${(error as Error).message}`, true);
+    }
+    if (res.ok && res.body) return res.body;
+
+    const busy = res.status === 429 || res.status === 503;
+    if (busy && attempt < MODEL_TRIES && !signal.aborted) {
+      await res.body?.cancel().catch(() => undefined);
+      await wait(MODEL_WAITS_MS[attempt - 1]!, signal);
+      continue;
+    }
     // never include the response body: some providers echo parts of the request, including keys
     throw new LlmError(
       `The model service answered ${res.status}.`,
       res.status === 429 || res.status >= 500,
     );
   }
-  return res.body;
 }
 
 export function createOpenAI(apiKey: string, model: string): LlmProvider {

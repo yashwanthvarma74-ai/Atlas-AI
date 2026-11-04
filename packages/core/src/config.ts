@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { z } from 'zod';
 
 const DEV_SECRET = 'dev-only-secret-replace-before-deploying';
@@ -22,13 +24,24 @@ const envSchema = z.object({
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
 
-  // "hash" needs no service and no key: it makes vectors from word hashes, so it finds shared words but
-  // not meaning. It exists for tests and for running the pipeline offline. Real answers need
-  // "ollama" (local) or "openai".
-  EMBEDDING_PROVIDER: z.enum(['hash', 'ollama', 'openai', 'voyage', 'gemini']).default('hash'),
+  // "local" runs bge-small-en-v1.5 in this process: real semantic search with no service, key or quota, and what the
+  // containers and the hosted demo use. "hash" makes vectors from word hashes, so it finds shared words but not
+  // meaning; it is the default only so the tests run fast and the same everywhere. Hosted options: "openai",
+  // "voyage", "gemini", or "ollama" on your own machine.
+  EMBEDDING_PROVIDER: z
+    .enum(['hash', 'local', 'ollama', 'openai', 'voyage', 'gemini'])
+    .default('hash'),
   // defaults to nomic-embed-text for ollama and text-embedding-3-small for openai
   EMBEDDING_MODEL: z.string().optional(),
   EMBEDDING_DIMENSIONS: z.coerce.number().int().positive().default(256),
+  // When the vector index was built for another vector size (the embedder changed), drop it, remove the old vectors
+  // and re-queue their documents, instead of refusing to start. For a demo; on real data, decide it by hand.
+  VECTOR_INDEX_REBUILD: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  // Where the in-process model ("local") is kept once downloaded.
+  MODEL_CACHE_DIR: z.string().default(join(tmpdir(), 'atlas-models')),
   // How many texts a minute the embedding service allows, when it has a limit. Unset sends as fast as it will take.
   EMBEDDING_PER_MINUTE: z.coerce.number().int().positive().optional(),
   OLLAMA_URL: z.string().default('http://127.0.0.1:11434'),

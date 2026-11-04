@@ -4,7 +4,14 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { loadConfig } from './config';
 import { createCore } from './core';
 import { connect, ensureIndexes, type Database } from './db';
-import { ensureSearchIndexes, TEXT_INDEX, VECTOR_INDEX } from './search-indexes';
+import { ObjectId } from 'mongodb';
+import { uploadDocument } from './documents';
+import {
+  ensureSearchIndexes,
+  rebuildVectorIndex,
+  TEXT_INDEX,
+  VECTOR_INDEX,
+} from './search-indexes';
 import type { TestCore } from './test/context';
 import { createSearchTestCore, SEARCH_TEST_URL } from './test/search';
 
@@ -97,5 +104,46 @@ describe('ensureSearchIndexes', () => {
         /256-dimensional.*EMBEDDING_DIMENSIONS is 768.*re-processing every document/,
       );
     });
+
+    it('rebuilds the index for a new size when allowed, and queues the documents to embed again', async () => {
+      const ws = await core.workspace(await core.user('rebuild@search.test'));
+      const doc = await uploadDocument(core, ws, {
+        name: 'a.txt',
+        bytes: new TextEncoder().encode('Hello there.'),
+      });
+      await core.database.chunks.insertOne({
+        _id: new ObjectId(),
+        workspaceId: ws.workspaceId,
+        documentId: new ObjectId(doc.id),
+        ord: 0,
+        page: 1,
+        text: 'Hello there.',
+        tokenCount: 3,
+        embedding: Array.from({ length: 256 }, () => 0.1),
+        embeddingModel: 'feature-hashing',
+      });
+      await core.database.documents.updateOne(
+        { _id: new ObjectId(doc.id) },
+        { $set: { status: 'indexed' } },
+      );
+
+      const requeued = await rebuildVectorIndex(core.database, 'new-model', logger);
+      expect(await ensureSearchIndexes(core.database, 384, logger)).toBe(true);
+
+      const [vector] = (await core.database.chunks.listSearchIndexes(VECTOR_INDEX).toArray()) as {
+        latestDefinition?: { fields?: { type: string; numDimensions?: number }[] };
+      }[];
+      expect(
+        vector?.latestDefinition?.fields?.find((f) => f.type === 'vector')?.numDimensions,
+      ).toBe(384);
+      expect(requeued).toBe(1);
+      expect(await core.database.chunks.countDocuments({ documentId: new ObjectId(doc.id) })).toBe(
+        0,
+      );
+      const after = await core.database.documents.findOne({ _id: new ObjectId(doc.id) });
+      expect(after?.status).toBe('queued');
+      // old enough that the requeue sweep takes it on its next pass
+      expect(after?.updatedAt.getTime()).toBe(0);
+    }, 180_000);
   });
 });

@@ -97,6 +97,43 @@ export async function ensureSearchIndexes(
   }
 }
 
+// Replaces a vector index built for another vector size, when the deployment allows it (VECTOR_INDEX_REBUILD). The
+// old vectors cannot be searched with the new embedder, so they are removed, and every document that had them is put
+// back in the queue, where the requeue sweep picks it up within a minute and embeds it again. Nothing is lost: the
+// original files are in storage. Without the setting, a size change stops the app instead (see above).
+export async function rebuildVectorIndex(
+  database: Database,
+  embeddingModel: string,
+  logger: Logger,
+  timeoutMs = 120_000,
+): Promise<number> {
+  await database.chunks.dropSearchIndex(VECTOR_INDEX).catch(() => undefined);
+  // dropping is asynchronous: creating the new one under the same name before the old has gone would be refused
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const left = (await database.chunks.listSearchIndexes(VECTOR_INDEX).toArray()).length;
+    if (left === 0) break;
+    if (Date.now() > deadline)
+      throw new Error('The old vector index is still being removed. Start again in a minute.');
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
+  const stale = await database.chunks.distinct('documentId', {
+    embeddingModel: { $ne: embeddingModel },
+  });
+  await database.chunks.deleteMany({ embeddingModel: { $ne: embeddingModel } });
+  // an old updatedAt, so the sweep that re-queues stuck documents takes these at once
+  await database.documents.updateMany(
+    { _id: { $in: stale } },
+    { $set: { status: 'queued', error: null, chunkCount: null, updatedAt: new Date(0) } },
+  );
+  logger.warn(
+    { documents: stale.length },
+    'vector index rebuilt for a new embedder; documents re-queued',
+  );
+  return stale.length;
+}
+
 // Search indexes catch up with writes a moment later. This waits until both hold every chunk the workspace has
 // in the database, so a read that follows a write sees all of it, not a ranking of whatever had arrived. Used by
 // tests and by the evaluation, which would otherwise score a half-built index.

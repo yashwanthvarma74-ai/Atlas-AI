@@ -47,10 +47,18 @@ jobs:
         run: npm run typecheck
       - name: Tests with coverage
         run: npm run test:coverage
+      # the same in-process embedding model the deployment uses, fetched once and kept between runs
+      - uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/atlas-models
+          key: models-bge-small-en-v1.5-q8
       - name: Evaluation gate (retrieval quality, citations, tenant isolation)
         run: npm run check -w @atlas/eval
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/?directConnection=true
+          EMBEDDING_PROVIDER: local
+          EMBEDDING_DIMENSIONS: '384'
+          MODEL_CACHE_DIR: /home/runner/.cache/atlas-models
       - name: Audit dependencies
         run: npm audit --audit-level=high --omit=dev
 
