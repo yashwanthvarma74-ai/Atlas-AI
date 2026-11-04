@@ -32,14 +32,14 @@ Settings that matter:
 
 ## The hosted setup
 
-| Piece          | Service                  | Notes                                                                                                                                                   |
-| -------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Web            | Vercel Hobby             | Root directory `apps/web`; `API_URL` set to the API's address at build time. Pull requests get a preview deploy.                                        |
-| API and worker | Render, free web service | `render.yaml` is the blueprint. `INLINE_WORKER=true` runs the ingest worker inside the API, because a free plan has no background workers.              |
-| Database       | MongoDB Atlas M0         | `MONGODB_URI` must end in a database name, because the app uses the one in the address. The free tier allows three search indexes and the app uses two. |
-| Redis          | Upstash                  | `REDIS_URL` is the `rediss://` address (TLS).                                                                                                           |
-| Files          | Supabase Storage         | S3-compatible: `S3_ENDPOINT` is the project's `/storage/v1/s3` address, with its region, bucket and access key.                                         |
-| Models         | Google Gemini free tier  | `LLM_PROVIDER=gemini`, `EMBEDDING_PROVIDER=gemini`, `GEMINI_API_KEY`, and `EMBEDDING_DIMENSIONS=768`.                                                   |
+| Piece          | Service                                           | Notes                                                                                                                                                   |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web            | Vercel Hobby                                      | Root directory `apps/web`; `API_URL` set to the API's address at build time. Pull requests get a preview deploy.                                        |
+| API and worker | Render, free web service                          | `render.yaml` is the blueprint. `INLINE_WORKER=true` runs the ingest worker inside the API, because a free plan has no background workers.              |
+| Database       | MongoDB Atlas M0                                  | `MONGODB_URI` must end in a database name, because the app uses the one in the address. The free tier allows three search indexes and the app uses two. |
+| Redis          | Upstash                                           | `REDIS_URL` is the `rediss://` address (TLS).                                                                                                           |
+| Files          | Supabase Storage                                  | S3-compatible: `S3_ENDPOINT` is the project's `/storage/v1/s3` address, with its region, bucket and access key.                                         |
+| Models         | In-process embedder; Gemini free tier for answers | `EMBEDDING_PROVIDER=local`, `EMBEDDING_DIMENSIONS=384` (the model is in the image); `LLM_PROVIDER=gemini` and `GEMINI_API_KEY`.                         |
 
 **Deploys.** `.github/workflows/deploy.yml` runs after CI passes on `main` and calls the Render deploy hook, kept in
 the repository secret `RENDER_DEPLOY_HOOK_URL`; `render.yaml` turns off Render's own deploy-on-push so a red CI run

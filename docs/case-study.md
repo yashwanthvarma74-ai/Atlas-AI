@@ -53,25 +53,31 @@ time. Creating an index that already exists now counts as success, and search av
 ## The numbers, including the miss
 
 On a benchmark of 240 generated questions, recall@10 started at 71.7%. A sweep over chunk size, overlap and reranker
-moved it to about 89%, and MRR from 0.37 to 0.63. The target was 0.90, so it is **not met**, and the dashboard says so.
+moved it to 89.2%, and MRR from 0.37 to 0.63. The target was 0.90, and the dashboard showed the miss.
 
 I did not take the best-scoring setting. A 32-token chunk scored 94% but is a single sentence, which suits generated
 one-sentence facts and would starve real documents of context. I picked the smallest size that holds the longest answer
 sentence and a neighbour, which is 64.
 
-Under load on a laptop, search sustained about 976 requests a second with a p95 of 63 ms at 50 in flight, and chat about
-523, with no errors. Those use offline stand-ins for the embedder and the model, so they measure the system's own work and
-nothing about a real model.
+What met the target was the embedder. The first one matched words; replacing it with a small semantic model
+(`bge-small-en-v1.5`) running in the process took recall@10 to 95.4% on the CI runner and 96.7% on my laptop, and it
+removed the hosted embedding quota that had been failing uploads on the free deployment.
+
+Under load on a laptop, with that embedder in the loop, search held a p95 of 36 ms at 10 in flight and 174 ms at 50,
+with no failed requests. Answers in that test come from an offline extractive answerer, so they measure the system and
+not a model. On the free host, a tenth of one CPU core, one search takes about 1.4 s.
 
 ## What I would change at ten times the scale
 
 Search is the first thing to hurt: two queries and an embedding per question, and an index that syncs a moment behind
-writes. I would cache embeddings of repeated questions, and move uploads to object storage so the API and worker can run on
-different machines. At a hundred times, the single approval-per-request flow and the per-conversation answer slot
+writes. I would cache embeddings of repeated questions, and run the worker as its own service instead of inside the API, as it
+is on the free host. At a hundred times, the single approval-per-request flow and the per-conversation answer slot
 become a design question rather than a tuning one. The evaluation would need real documents and a real model first, because
-everything above is measured against stand-ins.
+the benchmark is generated and its answers are extractive.
 
 ## What is not done
 
-Nothing is deployed and there is no recorded demo. The hosted model providers have never run against their live services.
-The benchmark is generated, so it says how retrieval behaves on near-identical sentences, not on messy real documents.
+The demo is deployed on free tiers (Vercel, Render, Atlas M0) and answers with Gemini, but there is no recorded video.
+First-word time and citation accuracy with Gemini have not been measured as distributions. OpenAI, Anthropic and Ollama
+are tested against recorded responses only. The benchmark is generated, so it says how retrieval behaves on
+near-identical sentences, not on messy real documents.

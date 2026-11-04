@@ -35,28 +35,31 @@ one request in flight per user, a corpus of 30 documents (about 325 passages). T
 docker run --rm -i -v "$PWD:/work" -w /work/infra/k6 -e BASE_URL=http://host.docker.internal:4002 grafana/k6 run atlas.js
 ```
 
+Embedder: `bge-small-en-v1.5` in process, as deployed, so every search includes embedding the question on the CPU.
+Answers: the offline extractive answerer, so chat measures the system around the model and not a model.
+
 | endpoint | in flight | p50 ms | p95 ms | p99 ms |
 | -------- | --------- | ------ | ------ | ------ |
-| search   | 1         | 2.8    | 3.8    | 5.2    |
-| search   | 10        | 7.4    | 9.5    | 11.6   |
-| search   | 50        | 35.7   | 44.8   | 50.2   |
-| chat     | 1         | 6.9    | 10.5   | 12.4   |
-| chat     | 10        | 11.8   | 18.5   | 20.8   |
-| chat     | 50        | 42.7   | 71.5   | 79.6   |
+| search   | 1         | 5.7    | 9.0    | 11.4   |
+| search   | 10        | 29.2   | 36.5   | 41.5   |
+| search   | 50        | 131.7  | 174.0  | 233.8  |
+| chat     | 1         | 8.9    | 11.9   | 13.6   |
+| chat     | 10        | 23.4   | 42.3   | 48.7   |
+| chat     | 50        | 94.5   | 166.8  | 176.8  |
 
-Across the whole run: 41,837 iterations (about 521 a second), 53,379 requests, **0.00% failed**, and every one of
-the 41,837 checks passed. The first word of an answer, as the server recorded it for each chat, was p50 23 ms, p95 41 ms,
-p99 47 ms. The script holds the run to thresholds (under 1% failed requests, search p95 under 500 ms, chat p95 under
-2 s), and exits non-zero if one is missed.
+Across the whole run: 14,251 iterations (about 184 a second), 19,881 requests, **0.00% failed**. The run is held to
+thresholds (under 1% failed requests, search p95 under 500 ms, chat p95 under 2 s) and exits non-zero if one is missed.
 
-Reading it: latency grows with the number of requests in flight, as a single Node process saturating would show. A
-chat is a search, a rewrite when it is a follow-up, a model call and several writes. Two things are not in these numbers:
-a real model's time, and the network. Run once on a laptop, so treat the third digit as noise.
+Reading it: embedding the question is now most of a search, and latency grows with the number in flight as one Node
+process saturates. These numbers are for an Apple M4 Pro. On the free host (a tenth of one CPU core) a single search
+takes about 1.4 s, and a real model adds its own time to the first word (about 4 to 18 s on Gemini's free tier in the
+answers seen while testing; not yet measured as a distribution).
 
 ## What was not measured
 
-- Anything with a real model or embedder: first-word time, cost per answer (the offline provider costs $0), and
-  recall on real documents.
+- A real answer model as a distribution: first-word time p95, citation consistency and cost per answer with Gemini.
+  The benchmark against the live site has not completed on the free host.
+- Recall on real documents (the benchmark is generated).
 - Ingest throughput for large files, or many users uploading at once.
 - A deployment: network latency, a managed database, cold starts.
 - Behaviour at ten or a hundred times this load. What breaks first is written down in the

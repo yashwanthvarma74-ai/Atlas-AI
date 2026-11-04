@@ -46,8 +46,8 @@ Status: **built** means the code and its test exist today.
   bug would therefore not be contained by the browser. The defences against one are that model output is rendered
   as text and safe Markdown, and that no user text is ever rendered as HTML.
 
-- **The hosted model providers have not been run against their live services.** Their request and stream formats
-  are tested against fixtures in each provider's documented shape. See ADR 0012.
+- **Of the hosted model providers, only Gemini has run against its live service** (it answers on the demo). OpenAI,
+  Anthropic and Ollama are tested against fixtures in each provider's documented shape. See ADR 0012.
 
 - **Retrieval has no relevance cutoff.** A question the documents cannot answer still gets the nearest
   passages. The answer step must not treat "got sources" as "has an answer"; that is the model's judgement.

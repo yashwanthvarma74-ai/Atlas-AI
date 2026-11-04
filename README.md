@@ -48,15 +48,15 @@ first token.
 
 ## Highlights
 
-|                          |                                                                                                    |
-| ------------------------ | -------------------------------------------------------------------------------------------------- |
-| **Grounded answers**     | Sources are numbered by the server; the model cites numbers only, and unknown numbers are removed. |
-| **Hybrid retrieval**     | Atlas Vector Search and Atlas Search, fused with reciprocal rank fusion and reranked.              |
-| **Measured quality**     | Recall@10 **95.4%** on a 240-question benchmark, checked in CI on every push.                      |
-| **Tenant isolation**     | The workspace filter lives inside each search stage; an adversarial suite attacks every layer.     |
-| **Agent safety**         | The model can only _propose_ an action; a person approves it, and every call is audited.           |
-| **Runs without a quota** | Embeddings run in-process on ONNX Runtime; OCR runs in an isolated child process.                  |
-| **Accessible**           | Zero axe violations in end-to-end tests; Lighthouse 100 for performance and accessibility.         |
+|                        |                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Grounded answers**   | Sources are numbered by the server; the model cites numbers only, and unknown numbers are removed. |
+| **Hybrid retrieval**   | Atlas Vector Search and Atlas Search, fused with reciprocal rank fusion and reranked.              |
+| **Measured quality**   | Recall@10 **95.4%** on a 240-question benchmark, checked in CI on every push.                      |
+| **Tenant isolation**   | The workspace filter lives inside each search stage; an adversarial suite attacks every layer.     |
+| **Agent safety**       | The model can only _propose_ an action; a person approves it, and every call is audited.           |
+| **No embedding quota** | Embeddings run in-process on ONNX Runtime; OCR runs in an isolated child process.                  |
+| **Accessible**         | Zero axe violations in end-to-end tests; Lighthouse 100 on the landing and sign-in pages.          |
 
 ## Screenshots
 
@@ -87,7 +87,7 @@ flowchart LR
   subgraph Answer["Answer · streamed"]
     Rewrite["Rewrite follow-ups"] --> Retrieve["Vector + keyword search<br/>workspace filter in-query"]
     Retrieve --> Rank["RRF + rerank → S1…S8"]
-    Rank --> Model["LLM provider<br/>Gemini · OpenAI · Anthropic · Ollama"]
+    Rank --> Model["LLM provider<br/>Gemini on the demo"]
     Model --> Cite["Server resolves citations"]
   end
 
@@ -96,7 +96,7 @@ flowchart LR
   Embed --> Atlas[("MongoDB Atlas<br/>Vector Search + Atlas Search")]
   Retrieve --> Atlas
   Worker --> Storage[("Object storage<br/>S3-compatible")]
-  API -.->|OTLP| Traces["OpenTelemetry → Grafana Tempo"]
+  API -.->|"OTLP, when configured"| Traces["OpenTelemetry → Grafana Tempo"]
 ```
 
 <details>
@@ -130,7 +130,7 @@ flowchart LR
 | API           | Node.js 22, Express 5, Zod, hand-written Server-Sent Events                                                         |
 | Ingest        | BullMQ on Redis, pdf.js, Tesseract.js, isolated child processes                                                     |
 | Retrieval     | MongoDB Atlas Vector Search + Atlas Search, reciprocal rank fusion                                                  |
-| Models        | bge-small-en-v1.5 on ONNX Runtime (in-process); Gemini, OpenAI, Anthropic, Ollama                                   |
+| Models        | bge-small-en-v1.5 on ONNX Runtime (in-process); Gemini live, with OpenAI, Anthropic and Ollama adapters             |
 | Observability | OpenTelemetry, Grafana and Tempo, Pino structured logs                                                              |
 | Quality       | Vitest, fast-check, Playwright, axe, Lighthouse CI, k6, a custom eval harness                                       |
 | Delivery      | Docker, GitHub Actions, Vercel, Render                                                                              |
@@ -150,8 +150,10 @@ npm run dev                   # http://localhost:3002
 
 Or run everything in containers: `JWT_SECRET=$(openssl rand -base64 48) docker compose --profile app up --build`.
 
-Everything runs offline by default. Set `LLM_PROVIDER` (`gemini`, `openai`, `anthropic`, `ollama`) and its key in
-`.env` for written answers; see [`.env.example`](.env.example).
+No keys are needed by default: the embedder runs in the process (the model downloads once) and answers come from an
+extractive answerer that quotes the sources. Set `LLM_PROVIDER` and its key in `.env` for written answers; see
+[`.env.example`](.env.example). Gemini is the provider used on the demo; the OpenAI, Anthropic and Ollama adapters are
+tested against recorded responses, not their live services.
 
 | Command              | What it does                                                      |
 | -------------------- | ----------------------------------------------------------------- |
@@ -166,13 +168,13 @@ Everything runs offline by default. Set `LLM_PROVIDER` (`gemini`, `openai`, `ant
 Measured on a 240-question labelled benchmark over 30 documents, generated from a fixed seed so every label is exact.
 Full method and tables in [EVALUATION.md](docs/EVALUATION.md) and [BENCHMARKS.md](docs/BENCHMARKS.md).
 
-| Metric                       | Result                                 | Target |
-| ---------------------------- | -------------------------------------- | ------ |
-| Recall@10                    | **95.4%** (CI runner) · 96.7% (M4 Pro) | ≥ 0.90 |
-| Recall@10, paraphrased       | 95.8%                                  |        |
-| Cross-workspace retrievals   | **0**                                  | 0      |
-| Search latency, 10 in flight | p95 9.5 ms                             |        |
-| Lighthouse                   | 100 performance · 100 accessibility    |        |
+| Metric                        | Result                                  | Target |
+| ----------------------------- | --------------------------------------- | ------ |
+| Recall@10                     | **95.4%** (CI runner) · 96.7% (M4 Pro)  | ≥ 0.90 |
+| Recall@10, paraphrased        | 95.8%                                   |        |
+| Cross-workspace retrievals    | **0**                                   | 0      |
+| Search latency, 10 in flight  | p95 36 ms (M4 Pro) · ~1.4 s (free host) |        |
+| Lighthouse, landing + sign-in | 100 performance · 100 accessibility     |        |
 
 <details>
 <summary><b>Failure modes</b></summary>
