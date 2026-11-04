@@ -1,3 +1,4 @@
+/* global process, URL, console, document, HTMLElement */
 // The README's screenshots, taken from a running site so they show the product as it is.
 //   node scripts/screenshots.mjs https://atlas-ai-seven-vert.vercel.app
 // It signs in as a guest, uploads the two sample documents in docs/samples, asks a question and photographs each
