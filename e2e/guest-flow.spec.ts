@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { openMyWorkspace, signInWithADocument, waitUntilSearchable } from './helpers';
+import {
+  askFromWorkspace,
+  openMyWorkspace,
+  signInWithADocument,
+  waitUntilSearchable,
+} from './helpers';
 
 test('a guest uploads a document, searches it, asks about it and opens the citation', async ({
   page,
@@ -10,10 +15,8 @@ test('a guest uploads a document, searches it, asks about it and opens the citat
   await waitUntilSearchable(page);
 
   // ask, and read the answer as it is saved
-  await page.getByRole('link', { name: 'Conversations' }).click();
-  await page.getByRole('button', { name: 'New conversation' }).first().click();
-  await page.getByLabel('Your question').fill('Who led the Orion project?');
-  await page.getByRole('button', { name: 'Send' }).click();
+  // asked from the workspace page: it opens a conversation and the answer streams there
+  await askFromWorkspace(page, 'Who led the Orion project?');
 
   const log = page.getByRole('list', { name: 'Conversation' });
   await expect(log.getByText('Priya Raman').first()).toBeVisible();

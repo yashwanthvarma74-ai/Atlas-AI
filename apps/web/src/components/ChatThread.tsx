@@ -27,6 +27,7 @@ import {
   useUpdateConversation,
   useWorkspace,
 } from '@/lib/queries';
+import { takeQuestion } from '@/lib/ask';
 import { useChat } from '@/lib/useChat';
 import { AssistantMessage, PendingAnswer, UserMessage } from './ChatMessage';
 import ToolCallCard from './ToolCallCard';
@@ -74,6 +75,15 @@ export default function ChatThread({
   const isPending = pending !== null;
   const streamed = pending?.content;
   const count = messages.length;
+
+  // a question asked from the workspace page is asked here as soon as the empty conversation has loaded
+  const loaded = conversation.data !== undefined;
+  const { send } = chat;
+  useEffect(() => {
+    if (!loaded || messages.length > 0) return;
+    const question = takeQuestion(conversationId);
+    if (question) void send(question);
+  }, [loaded, messages.length, conversationId, send]);
 
   // keep the newest words in view while an answer is written, and when a new message is added
   useEffect(() => {

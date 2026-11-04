@@ -112,6 +112,19 @@ export function confidentLines(blocks: OcrBlock[], minConfidence = MIN_WORD_CONF
 // folder.
 type OcrWorker = Worker;
 let ocrWorker: Promise<OcrWorker> | undefined;
+let idleTimer: NodeJS.Timeout | undefined;
+// An engine nobody has used for this long is closed, giving its memory (about 100 MB) back until the next picture.
+const OCR_IDLE_MS = 60_000;
+
+function closeWhenIdle() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    const closing = ocrWorker;
+    ocrWorker = undefined;
+    void closing?.then((worker) => worker.terminate()).catch(() => undefined);
+  }, OCR_IDLE_MS);
+  idleTimer.unref();
+}
 
 async function startOcr(): Promise<OcrWorker> {
   const { createWorker } = await import('tesseract.js');
@@ -129,6 +142,7 @@ async function startOcr(): Promise<OcrWorker> {
 // sign) is read again as scattered text, keeping only the words it is sure of, and whichever pass kept more is used.
 async function recognise(image: Uint8Array): Promise<string> {
   const { PSM } = await import('tesseract.js');
+  clearTimeout(idleTimer);
   ocrWorker ??= startOcr();
   const worker = await ocrWorker;
   try {
@@ -143,9 +157,12 @@ async function recognise(image: Uint8Array): Promise<string> {
     const first = confidentLines(page.data.blocks ?? []);
     return kept.length >= first.length ? kept : first;
   } catch (error) {
+    clearTimeout(idleTimer);
     // an engine that failed is not trusted with the next picture
     ocrWorker = undefined;
     await worker.terminate().catch(() => undefined);
     throw error;
+  } finally {
+    if (ocrWorker) closeWhenIdle();
   }
 }

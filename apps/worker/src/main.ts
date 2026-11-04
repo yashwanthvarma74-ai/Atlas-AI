@@ -7,6 +7,8 @@ const flushTraces = await startTracing('atlas-worker');
 const logger = pino({ level: config.LOG_LEVEL });
 
 const core = await createCore(config, { logger });
+// load the embedding model now, so the first search or upload does not wait for it
+void core.embedder.embed(['ready'], 'query').catch(() => undefined);
 
 // the parser child is built next to this file
 const parseDeps = (mode: string) =>

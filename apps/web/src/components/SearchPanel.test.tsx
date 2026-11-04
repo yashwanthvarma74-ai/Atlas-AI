@@ -5,6 +5,9 @@ import type { Passage, SearchSource } from '@atlas/shared';
 import { expectNoAxeViolations, json, renderWithProviders } from '@/test/render';
 import SearchPanel from './SearchPanel';
 
+const push = vi.fn();
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push, replace: vi.fn() }) }));
+
 const source = (n: number, fields: Partial<SearchSource> = {}): SearchSource => ({
   n,
   chunkId: `c${n}`,
@@ -26,8 +29,8 @@ function show(sources: SearchSource[], passages: Passage[] = []) {
 }
 
 async function ask(question: string) {
-  await userEvent.type(screen.getByLabelText('Search your documents'), question);
-  await userEvent.click(screen.getByRole('button', { name: 'Search' }));
+  await userEvent.type(screen.getByLabelText('Your question'), question);
+  await userEvent.click(screen.getByRole('button', { name: 'Find passages' }));
 }
 
 describe('SearchPanel', () => {
@@ -73,8 +76,8 @@ describe('SearchPanel', () => {
 
   it('does not search for a blank question', async () => {
     const { fetch } = show([source(1)]);
-    await userEvent.type(screen.getByLabelText('Search your documents'), '   ');
-    await userEvent.click(screen.getByRole('button', { name: 'Search' }));
+    await userEvent.type(screen.getByLabelText('Your question'), '   ');
+    await userEvent.click(screen.getByRole('button', { name: 'Find passages' }));
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -98,5 +101,19 @@ describe('SearchPanel', () => {
       expect(marked[0]).toHaveTextContent('The passage that was cited.');
     });
     expect(dialog).toHaveTextContent('report-2.pdf, page 4');
+  });
+
+  it('asks the question in a new conversation, carrying it there without putting it in the address', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) =>
+      String(url).endsWith('/conversations') && init?.method === 'POST'
+        ? json(201, { conversation: { id: 'c9' } })
+        : json(404),
+    );
+    renderWithProviders(<SearchPanel workspaceId="w1" />);
+    await userEvent.type(screen.getByLabelText('Your question'), 'What does the poster list?');
+    await userEvent.click(screen.getByRole('button', { name: 'Ask' }));
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/w/w1/chat/c9'));
+    expect(sessionStorage.getItem('atlas:ask:c9')).toBe('What does the poster list?');
   });
 });

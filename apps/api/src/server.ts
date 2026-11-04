@@ -8,6 +8,8 @@ const flushTraces = await startTracing('atlas-api');
 const logger = pino({ level: config.LOG_LEVEL });
 
 const core = await createCore(config, { logger });
+// load the embedding model now, so the first search or upload does not wait for it
+void core.embedder.embed(['ready'], 'query').catch(() => undefined);
 // hosts that assign the port say so in PORT
 const port = Number(process.env.PORT ?? config.API_PORT);
 const worker = config.INLINE_WORKER

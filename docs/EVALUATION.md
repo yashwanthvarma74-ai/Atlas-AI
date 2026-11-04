@@ -11,7 +11,19 @@ named document, so it stays valid when chunk sizes change. It is generated from 
 seeded and reproducible). It tests whether retrieval can tell near-identical sentences apart. It does not test
 reading real, messy documents.
 
-## Results (hash embedder, extractive model)
+## Results with the deployed embedder (bge-small-en-v1.5, in process)
+
+| Where it ran                      | recall@1 | recall@5 | recall@10 | same words | paraphrased | cross-workspace |
+| --------------------------------- | -------- | -------- | --------- | ---------- | ----------- | --------------- |
+| CI runner (ubuntu-latest, x86_64) | 60.4%    | 94.6%    | **95.4%** | 95.0%      | 95.8%       | 0               |
+| Apple M4 Pro                      | 61.7%    | 95.8%    | **96.7%** | 95.8%      | 97.5%       | 0               |
+
+The spec's target is 0.90; this meets it on both machines. The gap between them is ONNX Runtime rounding differently
+on the two processors, so the baseline the CI gate compares against is the CI runner's. The same chunk settings as
+below (64 tokens, no overlap, coverage reranker). Answers in this run are from the extractive stand-in, so citation
+consistency (100%) still says nothing about a real model; the remote run below measures that.
+
+## Results with the hash embedder (the test default), from the chunk sweep
 
 | Setting                      | recall@10 | same words | paraphrased |
 | ---------------------------- | --------- | ---------- | ----------- |

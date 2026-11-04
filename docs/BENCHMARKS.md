@@ -13,15 +13,16 @@ real embedder adds one embedding call to each search.
 
 Run with `npm run eval` (see [EVALUATION.md](EVALUATION.md)).
 
-| Metric                                       | Result                                                      | Target            |
-| -------------------------------------------- | ----------------------------------------------------------- | ----------------- |
-| Recall@10                                    | 88.7% to 89.2% between runs                                 | 0.90, **not met** |
-| Recall@10, questions in the document's words | 92%                                                         |                   |
-| Recall@10, paraphrased questions             | 86%                                                         |                   |
-| Cross-workspace retrievals                   | 0                                                           | 0, met            |
-| Citation consistency                         | 100% (the offline model only quotes, so this proves little) | 95%+              |
+| Metric                                       | Result                                                      | Target        |
+| -------------------------------------------- | ----------------------------------------------------------- | ------------- |
+| Recall@10                                    | **95.4%** on the CI runner, 96.7% on the M4 Pro             | 0.90, **met** |
+| Recall@10, questions in the document's words | 95.0% / 95.8%                                               |               |
+| Recall@10, paraphrased questions             | 95.8% / 97.5%                                               |               |
+| Cross-workspace retrievals                   | 0                                                           | 0, met        |
+| Citation consistency                         | 100% (the offline model only quotes, so this proves little) | 95%+          |
 
-Before the sweep chose the chunk settings, recall@10 was 71.7%.
+The embedder is the one the deployment runs, `bge-small-en-v1.5` in process. With the hash embedder (words, not
+meaning) the same benchmark scored 89.2%, and before the chunk sweep 71.7%.
 
 ## Load (k6, against the API)
 

@@ -1,4 +1,5 @@
 import { fork, type ChildProcess } from 'node:child_process';
+import { setPriority } from 'node:os';
 import type { DocumentKind } from '@atlas/shared';
 import type { Page } from './chunk';
 import { ParseError, parseDocument } from './parse';
@@ -12,6 +13,8 @@ import { ParseError, parseDocument } from './parse';
 // crashes, runs out of memory or overruns its time is killed, and the next file gets a new one.
 
 const MAX_OLD_SPACE_MB = 384;
+// the lowest scheduling priority there is
+const CHILD_PRIORITY = 19;
 
 type Request = { id: number; kind: DocumentKind; bytes: Uint8Array };
 type Reply = { id: number } & ({ pages: Page[] } | { error: string; parse: boolean });
@@ -90,6 +93,15 @@ function start(childPath: string): ChildProcess {
   };
   started.once('exit', (code, signal) => gone(signal ?? `exit ${code}`));
   started.once('error', (error) => gone(error.message));
+  // Parsing is the heavy work and answering requests is the urgent work. On a machine with a tenth of a CPU the child
+  // would otherwise take the whole share and the API would stop answering, health checks included.
+  if (started.pid) {
+    try {
+      setPriority(started.pid, CHILD_PRIORITY);
+    } catch {
+      // not allowed here; it runs at the same priority, which is slower to answer but still correct
+    }
+  }
   started.unref();
   return started;
 }

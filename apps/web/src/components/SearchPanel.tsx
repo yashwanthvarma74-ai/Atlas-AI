@@ -7,9 +7,11 @@ import { FormField } from '@yashwanthvarma74/react/components/FormField';
 import { Input } from '@yashwanthvarma74/react/components/Input';
 import { Skeleton } from '@yashwanthvarma74/react/components/Skeleton';
 import { VisuallyHidden } from '@yashwanthvarma74/react/components/VisuallyHidden';
+import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { QUESTION_MAX_LENGTH, type SearchSource } from '@atlas/shared';
-import { useSearch } from '@/lib/queries';
+import { useCreateConversation, useSearch } from '@/lib/queries';
+import { stashQuestion } from '@/lib/ask';
 import PassageDialog from './PassageDialog';
 import styles from './SearchPanel.module.css';
 
@@ -19,12 +21,26 @@ const snippet = (text: string) =>
   text.length > SNIPPET_LENGTH ? `${text.slice(0, SNIPPET_LENGTH).trimEnd()}…` : text;
 
 export default function SearchPanel({ workspaceId }: { workspaceId: string }) {
+  const router = useRouter();
   const search = useSearch(workspaceId);
+  const create = useCreateConversation(workspaceId);
   const [query, setQuery] = useState('');
   const [opened, setOpened] = useState<SearchSource | null>(null);
 
-  function submit(event: FormEvent) {
+  // The question opens a new conversation, which asks it as soon as it loads and streams the explained answer.
+  function ask(event: FormEvent) {
     event.preventDefault();
+    const question = query.trim();
+    if (!question) return;
+    create.mutate(undefined, {
+      onSuccess: (conversation) => {
+        stashQuestion(conversation.id, question);
+        router.push(`/w/${workspaceId}/chat/${conversation.id}`);
+      },
+    });
+  }
+
+  function findPassages() {
     if (query.trim()) search.mutate(query);
   }
 
@@ -32,12 +48,12 @@ export default function SearchPanel({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section aria-labelledby="search-title" className={styles.section}>
-      <h2 id="search-title">Search</h2>
+      <h2 id="search-title">Ask your documents</h2>
 
-      <form className={styles.form} onSubmit={submit} role="search">
+      <form className={styles.form} onSubmit={ask} role="search">
         <FormField
-          label="Search your documents"
-          description="Finds passages by meaning and by the exact words and codes you type."
+          label="Your question"
+          description="Ask gets an explained answer that cites the pages it used. Find passages shows the matching text itself."
         >
           <Input
             type="search"
@@ -47,10 +63,25 @@ export default function SearchPanel({ workspaceId }: { workspaceId: string }) {
             autoComplete="off"
           />
         </FormField>
-        <Button type="submit" variant="secondary" loading={search.isPending}>
-          Search
-        </Button>
+        <div className={styles.actions}>
+          <Button type="submit" variant="primary" loading={create.isPending}>
+            Ask
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            loading={search.isPending}
+            onClick={findPassages}
+          >
+            Find passages
+          </Button>
+        </div>
       </form>
+      {create.error && (
+        <Alert variant="danger" title="Could not start a conversation">
+          {create.error.message}
+        </Alert>
+      )}
 
       <VisuallyHidden role="status" aria-live="polite">
         {sources && `${sources.length} ${sources.length === 1 ? 'passage' : 'passages'} found`}

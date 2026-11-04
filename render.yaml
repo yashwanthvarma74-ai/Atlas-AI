@@ -20,6 +20,7 @@ services:
       - { key: EMBEDDING_PROVIDER, value: local }
       - { key: EMBEDDING_MODEL, value: Xenova/bge-small-en-v1.5 }
       - { key: EMBEDDING_DIMENSIONS, value: '384' }
+      - { key: EMBEDDING_THREADS, value: '1' }
       # a change of embedder rebuilds the vector index and re-embeds the documents by itself
       - { key: VECTOR_INDEX_REBUILD, value: 'true' }
       # the answer model; the key is set in the dashboard

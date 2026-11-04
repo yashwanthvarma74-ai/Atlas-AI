@@ -10,6 +10,17 @@
   gap: var(--mrd-space-3);
 }
 
+.actions {
+  display: flex;
+  gap: var(--mrd-space-2);
+}
+
+@media (max-width: 40rem) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}
+
 .empty {
   color: var(--mrd-color-text-secondary);
 }

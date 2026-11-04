@@ -182,14 +182,25 @@ type Extractor = (
   options: { pooling: 'cls' | 'mean'; normalize: boolean },
 ) => Promise<{ tolist(): number[][] }>;
 
-export function createLocalEmbedder(model: string, dimensions: number, cacheDir: string): Embedder {
+export function createLocalEmbedder(
+  model: string,
+  dimensions: number,
+  cacheDir: string,
+  // threads for one inference; on a machine with a fraction of a CPU, more threads only fight each other
+  threads?: number,
+): Embedder {
   const bge = /bge/i.test(model);
   let loading: Promise<Extractor> | undefined;
   const extractor = () =>
     (loading ??= (async () => {
       const { pipeline, env } = await import('@huggingface/transformers');
       env.cacheDir = cacheDir;
-      return (await pipeline('feature-extraction', model, { dtype: 'q8' })) as unknown as Extractor;
+      return (await pipeline('feature-extraction', model, {
+        dtype: 'q8',
+        ...(threads
+          ? { session_options: { intraOpNumThreads: threads, interOpNumThreads: 1 } }
+          : {}),
+      })) as unknown as Extractor;
     })().catch((error: Error) => {
       loading = undefined;
       throw new EmbeddingError(`The embedding model could not be loaded: ${error.message}`, true);
@@ -288,7 +299,8 @@ export function rateLimited(embedder: Embedder, perMinute: number): Embedder {
 
 export function createEmbedder(config: Config): Embedder {
   const embedder = createProviderEmbedder(config);
-  return config.EMBEDDING_PER_MINUTE
+  // a model in this process has no allowance to stay under
+  return config.EMBEDDING_PER_MINUTE && embedder.provider !== 'local'
     ? rateLimited(embedder, config.EMBEDDING_PER_MINUTE)
     : embedder;
 }
@@ -300,6 +312,7 @@ function createProviderEmbedder(config: Config): Embedder {
       config.EMBEDDING_MODEL ?? 'Xenova/bge-small-en-v1.5',
       dimensions,
       config.MODEL_CACHE_DIR,
+      config.EMBEDDING_THREADS,
     );
   }
   if (provider === 'ollama') {

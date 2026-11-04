@@ -40,6 +40,9 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  // Threads the in-process model may use for one batch. Unset lets it choose, which suits a real CPU; 1 suits a
+  // machine with a fraction of one.
+  EMBEDDING_THREADS: z.coerce.number().int().positive().optional(),
   // Where the in-process model ("local") is kept once downloaded.
   MODEL_CACHE_DIR: z.string().default(join(tmpdir(), 'atlas-models')),
   // How many texts a minute the embedding service allows, when it has a limit. Unset sends as fast as it will take.

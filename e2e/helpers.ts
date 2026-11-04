@@ -29,9 +29,15 @@ export async function signInWithADocument(page: Page) {
 // The search index trails the database by a moment, so a document that is "Indexed" may not be found yet. Asking
 // before it is would get a fair "nothing found", so wait until a search finds it.
 export async function waitUntilSearchable(page: Page) {
-  await page.getByLabel('Search your documents').fill('Who led the Orion project');
+  await page.getByLabel('Your question').fill('Who led the Orion project');
   await expect(async () => {
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    await page.getByRole('button', { name: 'Find passages' }).click();
     await expect(page.getByText('led by Priya Raman').first()).toBeVisible({ timeout: 3_000 });
   }).toPass({ timeout: 40_000 });
+}
+
+// The way most people ask: type the question on the workspace page and press Ask.
+export async function askFromWorkspace(page: Page, question: string) {
+  await page.getByLabel('Your question').fill(question);
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
 }
