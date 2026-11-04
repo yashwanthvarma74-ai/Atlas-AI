@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import '@yashwanthvarma74/react/styles.css';
 import '@/styles/base.css';
-import AppHeader from '@/components/AppHeader';
+import Chrome from '@/components/Chrome';
 import Providers from '@/components/Providers';
 import ThemeScript from '@/components/ThemeScript';
 import styles from './layout.module.css';
@@ -25,10 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="#main" className={styles.skipLink}>
             Skip to main content
           </a>
-          <AppHeader />
-          <main id="main" tabIndex={-1} className={styles.main}>
-            {children}
-          </main>
+          <Chrome>{children}</Chrome>
         </Providers>
       </body>
     </html>

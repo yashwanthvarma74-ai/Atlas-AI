@@ -3,7 +3,19 @@
   gap: var(--mrd-space-4);
 }
 
+.lead {
+  margin-top: var(--mrd-space-1);
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
+}
+
+.heading h1 {
+  font-size: var(--mrd-font-size-2xl);
+}
+
 .heading {
+  padding-bottom: var(--mrd-space-6);
+  border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;

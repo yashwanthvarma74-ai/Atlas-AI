@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { DocumentSummary, Role } from '@atlas/shared';
@@ -34,8 +34,12 @@ describe('DocumentLibrary', () => {
     const { container } = show([doc({})]);
     expect(await screen.findByText('report.pdf')).toBeInTheDocument();
 
-    expect(screen.getByText('Indexed')).toBeInTheDocument();
-    expect(screen.getByText(/2\.0 KB · 3 pages · 12 passages/)).toBeInTheDocument();
+    // one row of the table, its cells in column order
+    const row = screen.getByRole('row', { name: /report\.pdf/ });
+    const cells = within(row)
+      .getAllByRole('cell')
+      .map((cell) => cell.textContent);
+    expect(cells.slice(1, 5)).toEqual(['Indexed', '2.0 KB', '3', '12']);
     await expectNoAxeViolations(container);
   });
 

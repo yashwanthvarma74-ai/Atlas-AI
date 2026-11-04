@@ -42,6 +42,14 @@ const STATUS: Record<DocumentStatus, { label: string; variant: BadgeVariant; pro
   failed: { label: 'Failed', variant: 'danger', progress: 0 },
 };
 
+// when a document was added, short: the date only matters to tell files apart
+const added = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 const ACCEPT = '.pdf,.txt,.md,.png,.jpg,.jpeg,application/pdf,text/plain,image/png,image/jpeg';
 
 // Says out loud, politely, when a document finishes or fails, so people who cannot see the badge
@@ -186,66 +194,111 @@ export default function DocumentLibrary({
       )}
 
       {documents.data && documents.data.length > 0 && (
-        <ul className={styles.list}>
-          {documents.data.map((doc) => {
-            const status = STATUS[doc.status];
-            const working = IN_PROGRESS_STATUSES.includes(doc.status);
-            return (
-              <li key={doc.id} className={styles.row}>
-                <span className={styles.kind} aria-hidden="true">
-                  {doc.kind === 'pdf' ? 'PDF' : doc.kind === 'image' ? 'IMG' : 'TXT'}
-                </span>
-                <div className={styles.main}>
-                  <span className={styles.name}>{doc.name}</span>
-                  <span className={styles.meta}>
-                    {formatBytes(doc.size)}
-                    {doc.pageCount !== null &&
-                      ` · ${doc.pageCount} ${doc.pageCount === 1 ? 'page' : 'pages'}`}
-                    {doc.chunkCount !== null && ` · ${doc.chunkCount} passages`}
-                  </span>
-                  {working && (
-                    <Progress label={`Processing ${doc.name}`} value={status.progress} size="sm" />
-                  )}
-                  {doc.status === 'failed' && doc.error && (
-                    <span className={styles.error}>{doc.error}</span>
-                  )}
-                </div>
-                <Badge variant={status.variant}>{status.label}</Badge>
-                <div className={styles.actions}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Download ${doc.name}`}
-                    onClick={() => window.location.assign(api.documentFileUrl(workspaceId, doc.id))}
-                  >
-                    Download
-                  </Button>
-                  {canEdit && doc.status === 'failed' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Retry ${doc.name}`}
-                      loading={retry.isPending && retry.variables === doc.id}
-                      onClick={() => retry.mutate(doc.id)}
-                    >
-                      Retry
-                    </Button>
-                  )}
-                  {canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Delete ${doc.name}`}
-                      onClick={() => setDeleting(doc)}
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Status</th>
+                <th scope="col" className={`${styles.number} ${styles.optional}`}>
+                  Size
+                </th>
+                <th scope="col" className={`${styles.number} ${styles.optional}`}>
+                  Pages
+                </th>
+                <th scope="col" className={`${styles.number} ${styles.optional}`}>
+                  Passages
+                </th>
+                <th scope="col" className={styles.optional}>
+                  Added
+                </th>
+                <th scope="col">
+                  <VisuallyHidden>Actions</VisuallyHidden>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.data.map((doc) => {
+                const status = STATUS[doc.status];
+                const working = IN_PROGRESS_STATUSES.includes(doc.status);
+                return (
+                  <tr key={doc.id}>
+                    <td className={styles.nameCell}>
+                      <span className={styles.kind} aria-hidden="true">
+                        {doc.kind === 'pdf' ? 'PDF' : doc.kind === 'image' ? 'IMG' : 'TXT'}
+                      </span>
+                      <span className={styles.nameText}>
+                        <span className={styles.name} title={doc.name}>
+                          {doc.name}
+                        </span>
+                        {working && (
+                          <Progress
+                            label={`Processing ${doc.name}`}
+                            value={status.progress}
+                            size="sm"
+                          />
+                        )}
+                        {doc.status === 'failed' && doc.error && (
+                          <span className={styles.error}>{doc.error}</span>
+                        )}
+                      </span>
+                    </td>
+                    <td>
+                      <Badge variant={status.variant}>{status.label}</Badge>
+                    </td>
+                    <td className={`${styles.number} ${styles.optional}`}>
+                      {formatBytes(doc.size)}
+                    </td>
+                    <td className={`${styles.number} ${styles.optional}`}>
+                      {doc.pageCount ?? '–'}
+                    </td>
+                    <td className={`${styles.number} ${styles.optional}`}>
+                      {doc.chunkCount ?? '–'}
+                    </td>
+                    <td className={`${styles.muted} ${styles.optional}`}>
+                      {added.format(new Date(doc.createdAt))}
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={`Download ${doc.name}`}
+                          onClick={() =>
+                            window.location.assign(api.documentFileUrl(workspaceId, doc.id))
+                          }
+                        >
+                          Download
+                        </Button>
+                        {canEdit && doc.status === 'failed' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label={`Retry ${doc.name}`}
+                            loading={retry.isPending && retry.variables === doc.id}
+                            onClick={() => retry.mutate(doc.id)}
+                          >
+                            Retry
+                          </Button>
+                        )}
+                        {canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label={`Delete ${doc.name}`}
+                            onClick={() => setDeleting(doc)}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <Dialog

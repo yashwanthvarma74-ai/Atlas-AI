@@ -39,6 +39,17 @@ export function AssistantMessage({ message, canRetry, onRetry, onOpen }: Assista
 
   return (
     <li className={styles.assistant}>
+      {message.citations.length > 0 && (
+        <ul className={styles.sources} aria-label="Sources">
+          {message.citations.map((citation) => (
+            <li key={citation.n}>
+              <button type="button" className={styles.source} onClick={() => onOpen(citation)}>
+                <strong>S{citation.n}</strong> {citation.documentName}, page {citation.page}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       {message.content && (
         <Answer
           content={message.content}
@@ -57,18 +68,6 @@ export function AssistantMessage({ message, canRetry, onRetry, onOpen }: Assista
         <Alert variant="danger" title="The answer could not be finished">
           {message.error}
         </Alert>
-      )}
-
-      {message.citations.length > 0 && (
-        <ul className={styles.sources} aria-label="Sources">
-          {message.citations.map((citation) => (
-            <li key={citation.n}>
-              <button type="button" className={styles.source} onClick={() => onOpen(citation)}>
-                <strong>S{citation.n}</strong> {citation.documentName}, page {citation.page}
-              </button>
-            </li>
-          ))}
-        </ul>
       )}
 
       <div className={styles.footer}>

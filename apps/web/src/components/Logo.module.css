@@ -1,0 +1,17 @@
+.logo {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.logo rect {
+  fill: var(--mrd-color-text-primary);
+}
+
+.logo path {
+  fill: none;
+  stroke: var(--mrd-color-bg-surface);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

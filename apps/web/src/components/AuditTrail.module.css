@@ -59,3 +59,7 @@
 .result {
   color: var(--mrd-color-text-secondary);
 }
+
+.page > h1 {
+  font-size: var(--mrd-font-size-2xl);
+}

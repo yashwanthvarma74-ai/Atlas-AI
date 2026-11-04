@@ -3,8 +3,7 @@
   top: 0;
   z-index: var(--mrd-z-sticky);
   border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
-  background: color-mix(in srgb, var(--mrd-color-bg-surface) 85%, transparent);
-  backdrop-filter: saturate(1.4) blur(12px);
+  background: var(--mrd-color-bg-surface);
 }
 
 .inner {
@@ -12,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--mrd-space-4);
-  max-width: 72rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: var(--mrd-space-3) var(--mrd-space-4);
 }
@@ -27,23 +26,6 @@
   letter-spacing: var(--mrd-font-tracking-tight);
   text-decoration: none;
   white-space: nowrap;
-}
-
-.mark {
-  width: 1.75rem;
-  height: 1.75rem;
-}
-
-.mark rect {
-  fill: var(--mrd-color-accent-default);
-}
-
-.mark path {
-  fill: none;
-  stroke: var(--mrd-color-accent-on-accent);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 .nav {

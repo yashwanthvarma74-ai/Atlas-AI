@@ -13,14 +13,3 @@
 .skipLink:focus {
   top: var(--mrd-space-2);
 }
-
-.main {
-  width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: var(--mrd-space-8) var(--mrd-space-4) var(--mrd-space-12);
-}
-
-.main:focus {
-  outline: none;
-}

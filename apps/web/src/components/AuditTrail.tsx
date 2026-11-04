@@ -2,7 +2,6 @@
 
 import { Alert } from '@yashwanthvarma74/react/components/Alert';
 import { Badge, type BadgeVariant } from '@yashwanthvarma74/react/components/Badge';
-import { Breadcrumbs } from '@yashwanthvarma74/react/components/Breadcrumbs';
 import { EmptyState } from '@yashwanthvarma74/react/components/EmptyState';
 import { Skeleton } from '@yashwanthvarma74/react/components/Skeleton';
 import type { ToolCallStatus } from '@atlas/shared';
@@ -34,13 +33,6 @@ export default function AuditTrail({ workspaceId }: { workspaceId: string }) {
   const owner = workspace.data?.role === 'owner';
   return (
     <section aria-labelledby="audit-title" className={styles.page}>
-      <Breadcrumbs
-        items={[
-          { label: 'Workspaces', href: '/workspaces' },
-          { label: workspace.data?.name ?? 'Workspace', href: `/w/${workspaceId}` },
-          { label: 'Audit trail' },
-        ]}
-      />
       <h1 id="audit-title">Audit trail</h1>
       <p className={styles.note}>
         {owner

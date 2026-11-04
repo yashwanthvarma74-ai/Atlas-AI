@@ -27,7 +27,7 @@
 .messages {
   display: flex;
   flex-direction: column;
-  gap: var(--mrd-space-6);
+  gap: var(--mrd-space-5);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -46,5 +46,14 @@
 }
 
 .heading h1 {
-  font-size: var(--mrd-font-size-2xl);
+  overflow: hidden;
+  font-size: var(--mrd-font-size-md);
+  font-weight: var(--mrd-font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.heading {
+  padding-bottom: var(--mrd-space-4);
+  border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
 }

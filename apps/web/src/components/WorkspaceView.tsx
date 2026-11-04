@@ -1,14 +1,13 @@
 'use client';
 
 import { Badge } from '@yashwanthvarma74/react/components/Badge';
-import { Breadcrumbs } from '@yashwanthvarma74/react/components/Breadcrumbs';
 import { EmptyState } from '@yashwanthvarma74/react/components/EmptyState';
 import { Skeleton } from '@yashwanthvarma74/react/components/Skeleton';
 import Link from 'next/link';
 import { ApiError } from '@/lib/api';
 import { useRequireUser, useWorkspace } from '@/lib/queries';
 import DocumentLibrary from './DocumentLibrary';
-import MemberList from './MemberList';
+import PageHeader from './PageHeader';
 import SearchPanel from './SearchPanel';
 import styles from './WorkspaceView.module.css';
 
@@ -36,32 +35,13 @@ export default function WorkspaceView({ id }: { id: string }) {
   const { data } = workspace;
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <Breadcrumbs items={[{ label: 'Workspaces', href: '/workspaces' }, { label: data.name }]} />
-        <div className={styles.heading}>
-          <div className={styles.title}>
-            <h1>{data.name}</h1>
-            <Badge variant={data.role === 'owner' ? 'accent' : 'neutral'}>{data.role}</Badge>
-          </div>
-          <nav className={styles.tabs} aria-label="This workspace">
-            <Link href={`/w/${data.id}/chat`} className={styles.tab}>
-              Conversations
-            </Link>
-            {(data.role === 'owner' || data.role === 'editor') && (
-              <Link href={`/w/${data.id}/audit`} className={styles.tab}>
-                Audit trail
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <PageHeader
+        title={data.name}
+        badge={<Badge variant="neutral">{data.role}</Badge>}
+        description="Ask about the documents in this workspace. Answers cite the pages they come from."
+      />
       <SearchPanel workspaceId={data.id} />
-      <div className={styles.columns}>
-        <DocumentLibrary workspaceId={data.id} role={data.role} />
-        <aside className={styles.aside} aria-label="People">
-          <MemberList workspaceId={data.id} userId={user.id} role={data.role} />
-        </aside>
-      </div>
+      <DocumentLibrary workspaceId={data.id} role={data.role} />
     </div>
   );
 }

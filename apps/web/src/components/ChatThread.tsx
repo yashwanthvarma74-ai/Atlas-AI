@@ -2,7 +2,6 @@
 
 import { Alert } from '@yashwanthvarma74/react/components/Alert';
 import { Badge } from '@yashwanthvarma74/react/components/Badge';
-import { Breadcrumbs } from '@yashwanthvarma74/react/components/Breadcrumbs';
 import { Button } from '@yashwanthvarma74/react/components/Button';
 import {
   Dialog,
@@ -135,15 +134,6 @@ export default function ChatThread({
 
   return (
     <div className={styles.page}>
-      <Breadcrumbs
-        items={[
-          { label: 'Workspaces', href: '/workspaces' },
-          { label: 'Workspace', href: `/w/${workspaceId}` },
-          { label: 'Conversations', href: `/w/${workspaceId}/chat` },
-          { label: info.title },
-        ]}
-      />
-
       <div className={styles.heading}>
         <h1>{info.title}</h1>
         {info.mine ? (

@@ -2,7 +2,6 @@
 
 import { Alert } from '@yashwanthvarma74/react/components/Alert';
 import { Badge } from '@yashwanthvarma74/react/components/Badge';
-import { Breadcrumbs } from '@yashwanthvarma74/react/components/Breadcrumbs';
 import { Button } from '@yashwanthvarma74/react/components/Button';
 import { EmptyState } from '@yashwanthvarma74/react/components/EmptyState';
 import { FormField } from '@yashwanthvarma74/react/components/FormField';
@@ -39,15 +38,11 @@ export default function ChatList({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section aria-labelledby="chat-title" className={styles.page}>
-      <Breadcrumbs
-        items={[
-          { label: 'Workspaces', href: '/workspaces' },
-          { label: 'Workspace', href: `/w/${workspaceId}` },
-          { label: 'Conversations' },
-        ]}
-      />
       <div className={styles.heading}>
-        <h1 id="chat-title">Conversations</h1>
+        <div>
+          <h1 id="chat-title">Conversations</h1>
+          <p className={styles.lead}>Questions asked in this workspace, newest first.</p>
+        </div>
         <Button variant="primary" loading={create.isPending} onClick={start}>
           New conversation
         </Button>

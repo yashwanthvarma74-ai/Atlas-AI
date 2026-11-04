@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSession } from '@/lib/queries';
 import AccountMenu from './AccountMenu';
+import Logo from './Logo';
 import styles from './AppHeader.module.css';
 
 export default function AppHeader() {
@@ -12,10 +13,7 @@ export default function AppHeader() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href={user ? '/workspaces' : '/'} className={styles.brand}>
-          <svg className={styles.mark} viewBox="0 0 24 24" aria-hidden="true">
-            <rect width="24" height="24" rx="7" />
-            <path d="M7 17.5 12 6l5 11.5M9.2 13h5.6" />
-          </svg>
+          <Logo />
           Atlas AI
         </Link>
         <nav className={styles.right} aria-label="Main">

@@ -15,6 +15,7 @@ import {
 import { Select } from '@yashwanthvarma74/react/components/Select';
 import { Skeleton } from '@yashwanthvarma74/react/components/Skeleton';
 import { useToast } from '@yashwanthvarma74/react/components/Toast';
+import { VisuallyHidden } from '@yashwanthvarma74/react/components/VisuallyHidden';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { memberRoleSchema, type Member, type Role } from '@atlas/shared';
@@ -50,7 +51,10 @@ export default function MemberList({ workspaceId, userId, role }: Props) {
 
   return (
     <section aria-labelledby="members-title" className={styles.section}>
-      <h2 id="members-title">Members</h2>
+      {/* the page header names the page; the section keeps its name for screen readers */}
+      <VisuallyHidden>
+        <h2 id="members-title">Members</h2>
+      </VisuallyHidden>
 
       {isOwner && <AddMemberForm workspaceId={workspaceId} />}
 

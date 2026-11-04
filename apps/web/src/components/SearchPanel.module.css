@@ -7,17 +7,19 @@
 .card {
   display: grid;
   gap: var(--mrd-space-4);
-  padding: var(--mrd-space-6);
+  padding: var(--mrd-space-5);
   border: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
-  border-radius: var(--mrd-radius-xl);
-  background:
-    radial-gradient(120% 140% at 0% 0%, var(--mrd-color-accent-subtle) 0%, transparent 55%),
-    var(--mrd-color-bg-surface);
-  box-shadow: var(--mrd-shadow-sm);
+  border-radius: var(--mrd-radius-lg);
+  background: var(--mrd-color-bg-surface);
+}
+
+.card h2 {
+  font-size: var(--mrd-font-size-md);
 }
 
 .lead {
   color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
 }
 
 .form {

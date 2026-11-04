@@ -11,8 +11,8 @@
 }
 
 .dropzone {
-  border: 2px dashed var(--mrd-color-border-default);
-  border-radius: var(--mrd-radius-xl);
+  border: var(--mrd-border-width-thin) dashed var(--mrd-color-border-default);
+  border-radius: var(--mrd-radius-lg);
   background: var(--mrd-color-bg-surface);
 }
 
@@ -20,13 +20,13 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
+  border: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
   border-radius: var(--mrd-radius-md);
-  background: var(--mrd-color-accent-subtle);
-  color: var(--mrd-color-accent-text);
-  font-size: var(--mrd-font-size-xs);
-  font-weight: var(--mrd-font-weight-bold);
+  color: var(--mrd-color-text-secondary);
+  font-size: 0.625rem;
+  font-weight: var(--mrd-font-weight-semibold);
   letter-spacing: var(--mrd-font-tracking-wide);
 }
 
@@ -35,6 +35,10 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--mrd-space-4);
+}
+
+.heading h2 {
+  font-size: var(--mrd-font-size-md);
 }
 
 /* the real input is driven by the button, so it stays out of sight and out of the tab order */
@@ -108,5 +112,80 @@
 
   .actions {
     width: 100%;
+  }
+}
+
+/* ---- the table ---- */
+
+.tableWrap {
+  overflow-x: auto;
+  border: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+  border-radius: var(--mrd-radius-lg);
+  background: var(--mrd-color-bg-surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--mrd-font-size-sm);
+}
+
+.table th {
+  padding: var(--mrd-space-2) var(--mrd-space-4);
+  border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+  background: var(--mrd-color-bg-subtle);
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-xs);
+  font-weight: var(--mrd-font-weight-medium);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--mrd-space-3) var(--mrd-space-4);
+  vertical-align: middle;
+}
+
+.table tbody tr + tr td {
+  border-top: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+}
+
+.table tbody tr:hover td {
+  background: var(--mrd-color-bg-subtle);
+}
+
+.table .number {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--mrd-color-text-secondary);
+  white-space: nowrap;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: var(--mrd-space-3);
+  min-width: 14rem;
+  max-width: 28rem;
+}
+
+.nameText {
+  display: grid;
+  gap: var(--mrd-space-1);
+  min-width: 0;
+}
+
+/* a phone shows the name, the status and the actions; the rest is one tap away in the file itself */
+@media (max-width: 40rem) {
+  .optional {
+    display: none;
+  }
+
+  .nameCell {
+    min-width: 0;
   }
 }
