@@ -15,7 +15,7 @@ import { EmptyState } from '@yashwanthvarma74/react/components/EmptyState';
 import { Progress } from '@yashwanthvarma74/react/components/Progress';
 import { Skeleton } from '@yashwanthvarma74/react/components/Skeleton';
 import { VisuallyHidden } from '@yashwanthvarma74/react/components/VisuallyHidden';
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import {
   hasRole,
   IN_PROGRESS_STATUSES,
@@ -81,9 +81,34 @@ export default function DocumentLibrary({
   const announcement = useStatusAnnouncement(documents.data);
   const canEdit = hasRole(role, 'editor');
 
+  const [dragging, setDragging] = useState(false);
+
   function onPick(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
     event.target.value = '';
+    send(files);
+  }
+
+  // files dropped anywhere on the documents section are uploaded, the same as picked ones
+  const drop = canEdit
+    ? {
+        onDragOver: (event: DragEvent) => {
+          if (!event.dataTransfer.types.includes('Files')) return;
+          event.preventDefault();
+          setDragging(true);
+        },
+        onDragLeave: (event: DragEvent) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
+        },
+        onDrop: (event: DragEvent) => {
+          event.preventDefault();
+          setDragging(false);
+          send(Array.from(event.dataTransfer.files));
+        },
+      }
+    : {};
+
+  function send(files: File[]) {
     // too big is known before sending, so say so without spending the upload
     const tooBig = files.filter((file) => file.size > UPLOAD_MAX_BYTES);
     setRejected(tooBig.map((file) => `${file.name} is over ${formatBytes(UPLOAD_MAX_BYTES)}.`));
@@ -97,7 +122,11 @@ export default function DocumentLibrary({
   ];
 
   return (
-    <section aria-labelledby="documents-title" className={styles.section}>
+    <section
+      aria-labelledby="documents-title"
+      className={`${styles.section} ${dragging ? styles.dragging : ''}`}
+      {...drop}
+    >
       <div className={styles.heading}>
         <h2 id="documents-title">Documents</h2>
         {canEdit && (
@@ -144,14 +173,16 @@ export default function DocumentLibrary({
       {documents.isPending && <Skeleton height="4rem" />}
 
       {documents.data?.length === 0 && (
-        <EmptyState
-          title="No documents yet"
-          description={
-            canEdit
-              ? 'Upload PDFs, text files or images. Each one is read, split into passages and indexed.'
-              : 'Someone with the editor role needs to add documents.'
-          }
-        />
+        <div className={styles.dropzone}>
+          <EmptyState
+            title="No documents yet"
+            description={
+              canEdit
+                ? 'Drop PDFs, text files or images here, or use Upload documents. Each one is read, split into passages and indexed.'
+                : 'Someone with the editor role needs to add documents.'
+            }
+          />
+        </div>
       )}
 
       {documents.data && documents.data.length > 0 && (
@@ -161,6 +192,9 @@ export default function DocumentLibrary({
             const working = IN_PROGRESS_STATUSES.includes(doc.status);
             return (
               <li key={doc.id} className={styles.row}>
+                <span className={styles.kind} aria-hidden="true">
+                  {doc.kind === 'pdf' ? 'PDF' : doc.kind === 'image' ? 'IMG' : 'TXT'}
+                </span>
                 <div className={styles.main}>
                   <span className={styles.name}>{doc.name}</span>
                   <span className={styles.meta}>

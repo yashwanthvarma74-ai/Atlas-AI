@@ -41,5 +41,5 @@ test('the main flow works with the keyboard alone', async ({ page }) => {
   }
   await expect(page.getByRole('button', { name: 'Continue as guest' })).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('link', { name: 'My workspace' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My workspace' })).toBeVisible();
 });

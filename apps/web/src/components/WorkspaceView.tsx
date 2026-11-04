@@ -36,20 +36,32 @@ export default function WorkspaceView({ id }: { id: string }) {
   const { data } = workspace;
   return (
     <div className={styles.page}>
-      <Breadcrumbs items={[{ label: 'Workspaces', href: '/workspaces' }, { label: data.name }]} />
-      <div className={styles.heading}>
-        <h1>{data.name}</h1>
-        <Badge variant={data.role === 'owner' ? 'accent' : 'neutral'}>{data.role}</Badge>
-        <Link href={`/w/${data.id}/chat`} className={styles.chat}>
-          Conversations
-        </Link>
-        {(data.role === 'owner' || data.role === 'editor') && (
-          <Link href={`/w/${data.id}/audit`}>Audit trail</Link>
-        )}
-      </div>
-      <DocumentLibrary workspaceId={data.id} role={data.role} />
+      <header className={styles.header}>
+        <Breadcrumbs items={[{ label: 'Workspaces', href: '/workspaces' }, { label: data.name }]} />
+        <div className={styles.heading}>
+          <div className={styles.title}>
+            <h1>{data.name}</h1>
+            <Badge variant={data.role === 'owner' ? 'accent' : 'neutral'}>{data.role}</Badge>
+          </div>
+          <nav className={styles.tabs} aria-label="This workspace">
+            <Link href={`/w/${data.id}/chat`} className={styles.tab}>
+              Conversations
+            </Link>
+            {(data.role === 'owner' || data.role === 'editor') && (
+              <Link href={`/w/${data.id}/audit`} className={styles.tab}>
+                Audit trail
+              </Link>
+            )}
+          </nav>
+        </div>
+      </header>
       <SearchPanel workspaceId={data.id} />
-      <MemberList workspaceId={data.id} userId={user.id} role={data.role} />
+      <div className={styles.columns}>
+        <DocumentLibrary workspaceId={data.id} role={data.role} />
+        <aside className={styles.aside} aria-label="People">
+          <MemberList workspaceId={data.id} userId={user.id} role={data.role} />
+        </aside>
+      </div>
     </div>
   );
 }

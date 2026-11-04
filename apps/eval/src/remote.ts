@@ -32,18 +32,36 @@ const ANSWER_GAP_MS = 3_200;
 type Quoted = Citation & { quote: string };
 
 let cookie = '';
+// A free host drops the odd connection and is sometimes busy (502, 503, 429). One of those is not a result, so a
+// request is tried again, a few times, with growing waits, before the run gives up.
+const TRIES = 4;
 async function call(path: string, init: RequestInit = {}): Promise<Response> {
-  const res = await fetch(`${API}${path}`, {
-    ...init,
-    headers: {
-      Origin: SITE,
-      ...(init.headers as Record<string, string>),
-      ...(cookie ? { cookie } : {}),
-    },
-  });
-  const set = res.headers.get('set-cookie');
-  if (set) cookie = set.split(';')[0]!;
-  return res;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const res = await fetch(`${API}${path}`, {
+        ...init,
+        headers: {
+          Origin: SITE,
+          ...(init.headers as Record<string, string>),
+          ...(cookie ? { cookie } : {}),
+        },
+      });
+      const busy = res.status === 429 || res.status === 502 || res.status === 503;
+      if (busy && attempt < TRIES) {
+        await res.body?.cancel();
+        await pause(5_000 * attempt);
+        continue;
+      }
+      const set = res.headers.get('set-cookie');
+      if (set) cookie = set.split(';')[0]!;
+      return res;
+    } catch (error) {
+      if (attempt === TRIES) throw error;
+      const cause = (error as Error & { cause?: { code?: string } }).cause?.code;
+      log(`  ${path}: ${(error as Error).message}${cause ? ` (${cause})` : ''}, trying again`);
+      await pause(5_000 * attempt);
+    }
+  }
 }
 
 async function json<T>(res: Response): Promise<T> {

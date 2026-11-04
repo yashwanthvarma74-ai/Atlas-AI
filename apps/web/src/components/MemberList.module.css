@@ -1,6 +1,7 @@
 .section {
   display: grid;
   gap: var(--mrd-space-4);
+  container-type: inline-size;
 }
 
 .add {
@@ -10,7 +11,7 @@
   gap: var(--mrd-space-3);
   padding: var(--mrd-space-4);
   border: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
-  border-radius: var(--mrd-radius-lg);
+  border-radius: var(--mrd-radius-xl);
   background: var(--mrd-color-bg-surface);
 }
 
@@ -64,6 +65,13 @@
 }
 
 @media (max-width: 40rem) {
+  .add {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* beside the documents the list is narrow, so the add form stacks */
+@container (max-width: 30rem) {
   .add {
     grid-template-columns: 1fr;
   }

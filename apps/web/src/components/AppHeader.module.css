@@ -3,7 +3,8 @@
   top: 0;
   z-index: var(--mrd-z-sticky);
   border-bottom: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
-  background: var(--mrd-color-bg-surface);
+  background: color-mix(in srgb, var(--mrd-color-bg-surface) 85%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
 }
 
 .inner {
@@ -11,16 +12,52 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--mrd-space-4);
-  max-width: 60rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: var(--mrd-space-3) var(--mrd-space-4);
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mrd-space-2);
   color: var(--mrd-color-text-primary);
-  font-size: var(--mrd-font-size-lg);
+  font-size: var(--mrd-font-size-md);
   font-weight: var(--mrd-font-weight-semibold);
+  letter-spacing: var(--mrd-font-tracking-tight);
   text-decoration: none;
+  white-space: nowrap;
+}
+
+.mark {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.mark rect {
+  fill: var(--mrd-color-accent-default);
+}
+
+.mark path {
+  fill: none;
+  stroke: var(--mrd-color-accent-on-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav {
+  padding: var(--mrd-space-1) var(--mrd-space-2);
+  border-radius: var(--mrd-radius-md);
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
+  font-weight: var(--mrd-font-weight-medium);
+  text-decoration: none;
+}
+
+.nav:hover {
+  background: var(--mrd-color-bg-subtle);
+  color: var(--mrd-color-text-primary);
 }
 
 .name {
@@ -33,9 +70,17 @@
 .right {
   display: flex;
   align-items: center;
-  gap: var(--mrd-space-4);
+  gap: var(--mrd-space-2);
 }
 
 .avatar {
   display: inline-flex;
+}
+
+/* a phone has room for the brand and the account menu; the pages link to everything else */
+@media (max-width: 40rem) {
+  .nav,
+  .name {
+    display: none;
+  }
 }

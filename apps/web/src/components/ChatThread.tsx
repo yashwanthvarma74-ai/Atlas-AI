@@ -217,7 +217,10 @@ export default function ChatThread({
       )}
 
       {info.mine ? (
-        <ChatComposer busy={pending !== null} onSend={chat.send} onStop={chat.stop} />
+        // stays at the bottom of the window while the conversation scrolls
+        <div className={styles.dock}>
+          <ChatComposer busy={pending !== null} onSend={chat.send} onStop={chat.stop} />
+        </div>
       ) : (
         <p className={styles.empty}>
           You can read this conversation. Only {info.authorName} can add to it.

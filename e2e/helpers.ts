@@ -6,10 +6,9 @@ export const NOTE = [
   'The team shipped the billing rewrite in June.',
 ].join(' ');
 
-// "Continue as guest" lands on the list of workspaces, where the new guest has one.
+// "Continue as guest" opens the new guest's own workspace.
 export async function openMyWorkspace(page: Page) {
   await page.getByRole('button', { name: 'Continue as guest' }).click();
-  await page.getByRole('link', { name: 'My workspace' }).click();
   await expect(page.getByRole('heading', { name: 'My workspace' })).toBeVisible();
 }
 

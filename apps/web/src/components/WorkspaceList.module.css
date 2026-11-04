@@ -19,6 +19,15 @@
 /* positions the stretched link below, which would otherwise cover the whole page */
 .item {
   position: relative;
+  border-radius: var(--mrd-radius-xl);
+  transition:
+    box-shadow var(--mrd-motion-duration-fast) var(--mrd-motion-easing-standard),
+    transform var(--mrd-motion-duration-fast) var(--mrd-motion-easing-standard);
+}
+
+.item:hover {
+  box-shadow: var(--mrd-shadow-md);
+  transform: translateY(-1px);
 }
 
 .card {

@@ -12,12 +12,25 @@ export default function AppHeader() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href={user ? '/workspaces' : '/'} className={styles.brand}>
+          <svg className={styles.mark} viewBox="0 0 24 24" aria-hidden="true">
+            <rect width="24" height="24" rx="7" />
+            <path d="M7 17.5 12 6l5 11.5M9.2 13h5.6" />
+          </svg>
           Atlas AI
         </Link>
-        <div className={styles.right}>
-          {user && <Link href="/eval">Evaluation</Link>}
+        <nav className={styles.right} aria-label="Main">
+          {user && (
+            <Link href="/workspaces" className={styles.nav}>
+              Workspaces
+            </Link>
+          )}
+          {user && (
+            <Link href="/eval" className={styles.nav}>
+              Evaluation
+            </Link>
+          )}
           <AccountMenu user={user ?? null} />
-        </div>
+        </nav>
       </div>
     </header>
   );

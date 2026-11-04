@@ -22,6 +22,14 @@
   padding-left: var(--mrd-space-6);
 }
 
+.answer li + li {
+  margin-top: var(--mrd-space-1);
+}
+
+.answer strong {
+  font-weight: var(--mrd-font-weight-semibold);
+}
+
 .answer pre {
   overflow-x: auto;
   padding: var(--mrd-space-3);

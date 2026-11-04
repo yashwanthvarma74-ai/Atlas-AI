@@ -1,15 +1,70 @@
 .page {
   display: grid;
-  gap: var(--mrd-space-6);
+  gap: var(--mrd-space-8);
+}
+
+.header {
+  display: grid;
+  gap: var(--mrd-space-3);
 }
 
 .heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--mrd-space-3);
+  justify-content: space-between;
+  gap: var(--mrd-space-4);
 }
 
-.chat {
-  margin-left: auto;
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--mrd-space-3);
+  min-width: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--mrd-space-1);
+  padding: var(--mrd-space-1);
+  border: var(--mrd-border-width-thin) solid var(--mrd-color-border-subtle);
+  border-radius: var(--mrd-radius-lg);
+  background: var(--mrd-color-bg-surface);
+}
+
+.tab {
+  padding: var(--mrd-space-1) var(--mrd-space-3);
+  border-radius: var(--mrd-radius-md);
+  color: var(--mrd-color-text-secondary);
+  font-size: var(--mrd-font-size-sm);
   font-weight: var(--mrd-font-weight-medium);
+  text-decoration: none;
+}
+
+.tab:hover {
+  background: var(--mrd-color-bg-subtle);
+  color: var(--mrd-color-text-primary);
+}
+
+/* documents take the width; the people who share the workspace sit beside them on a wide screen */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  align-items: start;
+  gap: var(--mrd-space-8);
+}
+
+.aside {
+  position: sticky;
+  top: 5rem;
+}
+
+@media (max-width: 64rem) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .aside {
+    position: static;
+  }
 }

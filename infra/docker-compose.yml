@@ -38,6 +38,8 @@ services:
       # the model is in the image; it runs on the CPU with no key
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-local}
       EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-384}
+      # a local database from before a model change is rebuilt instead of refusing to start
+      VECTOR_INDEX_REBUILD: ${VECTOR_INDEX_REBUILD:-true}
       LLM_PROVIDER: ${LLM_PROVIDER:-extractive}
       EXTRACTIVE_DELAY_MS: ${EXTRACTIVE_DELAY_MS:-0}
       # leave at 1; the load test raises it so it measures the service and not the rate limiter

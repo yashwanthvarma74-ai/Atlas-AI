@@ -48,40 +48,47 @@ export default function SearchPanel({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section aria-labelledby="search-title" className={styles.section}>
-      <h2 id="search-title">Ask your documents</h2>
-
-      <form className={styles.form} onSubmit={ask} role="search">
-        <FormField
-          label="Your question"
-          description="Ask gets an explained answer that cites the pages it used. Find passages shows the matching text itself."
-        >
-          <Input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            maxLength={QUESTION_MAX_LENGTH}
-            autoComplete="off"
-          />
-        </FormField>
-        <div className={styles.actions}>
-          <Button type="submit" variant="primary" loading={create.isPending}>
-            Ask
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            loading={search.isPending}
-            onClick={findPassages}
-          >
-            Find passages
-          </Button>
+      <div className={styles.card}>
+        <div>
+          <h2 id="search-title">Ask your documents</h2>
+          <p className={styles.lead}>
+            Ask in plain words. The answer is explained and cites the pages it used.
+          </p>
         </div>
-      </form>
-      {create.error && (
-        <Alert variant="danger" title="Could not start a conversation">
-          {create.error.message}
-        </Alert>
-      )}
+
+        <form className={styles.form} onSubmit={ask} role="search">
+          <FormField
+            label="Your question"
+            description="Find passages shows the matching text itself, without an answer."
+          >
+            <Input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              maxLength={QUESTION_MAX_LENGTH}
+              autoComplete="off"
+            />
+          </FormField>
+          <div className={styles.actions}>
+            <Button type="submit" variant="primary" loading={create.isPending}>
+              Ask
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              loading={search.isPending}
+              onClick={findPassages}
+            >
+              Find passages
+            </Button>
+          </div>
+        </form>
+        {create.error && (
+          <Alert variant="danger" title="Could not start a conversation">
+            {create.error.message}
+          </Alert>
+        )}
+      </div>
 
       <VisuallyHidden role="status" aria-live="polite">
         {sources && `${sources.length} ${sources.length === 1 ? 'passage' : 'passages'} found`}

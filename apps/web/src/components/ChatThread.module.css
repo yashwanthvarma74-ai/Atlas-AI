@@ -1,10 +1,18 @@
 .page {
-  display: grid;
-  gap: var(--mrd-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mrd-space-5);
+  /* fills the window, so the composer sits at the bottom even before the conversation is long */
+  min-height: calc(100dvh - 10rem);
+  /* a reading column: long answers are easier to follow at this width */
+  width: 100%;
+  max-width: 50rem;
+  margin: 0 auto;
 }
 
 .heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--mrd-space-4);
@@ -19,7 +27,7 @@
 .messages {
   display: flex;
   flex-direction: column;
-  gap: var(--mrd-space-4);
+  gap: var(--mrd-space-6);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -27,4 +35,16 @@
 
 .empty {
   color: var(--mrd-color-text-secondary);
+}
+
+.dock {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: var(--mrd-space-3) 0 var(--mrd-space-4);
+  background: linear-gradient(to top, var(--mrd-color-bg-canvas) 75%, transparent);
+}
+
+.heading h1 {
+  font-size: var(--mrd-font-size-2xl);
 }
