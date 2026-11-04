@@ -39,9 +39,14 @@ describe('parseDocument: PDF', () => {
     expect(pages[0]?.text).not.toContain('Costs');
   });
 
-  it('keeps line breaks, so paragraphs can still be found', async () => {
-    const [page] = await parseDocument('pdf', makePdf([['First line', 'Second line']]));
-    expect(page?.text).toMatch(/First line\s*\n\s*Second line/);
+  it('joins lines that wrap into one paragraph, and keeps paragraphs apart', async () => {
+    const [page] = await parseDocument(
+      'pdf',
+      makePdf([['The new tracking page', 'resolves most questions.', '', 'Support tickets fell.']]),
+    );
+    expect(page?.text).toBe(
+      'The new tracking page resolves most questions.\n\nSupport tickets fell.',
+    );
   });
 
   it('handles text with parentheses and backslashes', async () => {

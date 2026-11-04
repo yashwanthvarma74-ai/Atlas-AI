@@ -33,7 +33,7 @@ await page
     path('docs/samples/information-security-policy.pdf'),
   ]);
 // both indexed, and the search index caught up with them
-await page.getByText('Indexed').nth(1).waitFor();
+await page.getByText('Indexed', { exact: true }).nth(1).waitFor();
 await page.getByLabel('Your question').fill('support tickets');
 for (let i = 0; i < 40; i++) {
   await page.getByRole('button', { name: 'Find passages' }).click();
@@ -46,7 +46,10 @@ for (let i = 0; i < 40; i++) {
   )
     break;
 }
-await page.getByLabel('Your question').fill('');
+// leave and come back through the sidebar, so the page shows the documents and not the search that was just run
+await page.getByRole('link', { name: 'Conversations' }).click();
+await page.getByRole('link', { name: 'Documents' }).click();
+await page.getByRole('table').waitFor();
 await page.mouse.move(0, 0);
 await shot('workspace');
 
@@ -67,21 +70,12 @@ await page.waitForTimeout(400);
 await shot('citation');
 await page.keyboard.press('Escape');
 
-const url = page.url();
-const phone = await browser.newContext({
-  viewport: { width: 390, height: 844 },
-  deviceScaleFactor: 3,
-  isMobile: true,
-  colorScheme: 'dark',
-  storageState: await desktop.storageState(),
-});
-const mobile = await phone.newPage();
-mobile.setDefaultTimeout(120_000);
-// a reload empties a guest's workspace on the demo, so the phone opens the conversation by client-side link only if
-// it can; otherwise it shows the landing page in dark mode
-await mobile.goto(url);
-await mobile.waitForTimeout(4_000);
-await mobile.screenshot({ path: path('docs/images/phone.png') });
+// the same conversation on a phone, in dark mode. The page is resized, not reloaded: a reload empties a guest's
+// workspace on the demo.
+await page.setViewportSize({ width: 390, height: 844 });
+await page.emulateMedia({ colorScheme: 'dark' });
+await page.waitForTimeout(800);
+await shot('phone');
 
 await browser.close();
 console.log('screenshots written to docs/images');

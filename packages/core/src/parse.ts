@@ -41,6 +41,52 @@ function parseText(bytes: Uint8Array): Page[] {
   return text.split('\f').map((part, i) => ({ page: i + 1, text: part }));
 }
 
+interface PdfText {
+  str?: string;
+  hasEOL?: boolean;
+  transform?: number[];
+  height?: number;
+}
+
+// A PDF stores text as lines placed on the page, not as paragraphs: a sentence that wraps is two lines, and nothing
+// says they belong together. Lines are joined back into paragraphs here, and a paragraph ends where the gap down to
+// the next line is clearly larger than a line's own height, which is how a heading or a blank line looks on the page.
+export function paragraphs(items: PdfText[]): string {
+  const lines: { text: string; y: number; size: number }[] = [];
+  let text = '';
+  let y: number | undefined;
+  let size = 0;
+  for (const item of items) {
+    if (item.str === undefined) continue;
+    if (item.str !== '' && y === undefined) {
+      y = item.transform?.[5] ?? 0;
+      size = item.height ?? 0;
+    }
+    text += item.str;
+    if (item.hasEOL) {
+      if (text.trim() !== '' && y !== undefined) lines.push({ text: text.trim(), y, size });
+      text = '';
+      y = undefined;
+    } else if (!text.endsWith(' ')) {
+      text += ' ';
+    }
+  }
+  if (text.trim() !== '' && y !== undefined) lines.push({ text: text.trim(), y, size });
+
+  let out = lines[0]?.text ?? '';
+  for (let i = 1; i < lines.length; i++) {
+    const before = lines[i - 1]!;
+    const line = lines[i]!;
+    const height = Math.max(before.size, line.size) || 12;
+    const gap = before.y - line.y;
+    // further down than a line and a half, back up the page (a new column), or a change of type size (a heading
+    // and the text under it): a new paragraph
+    const resized = Math.abs(before.size - line.size) > Math.min(before.size, line.size) * 0.15;
+    out += gap > height * 1.6 || gap < 0 || resized ? `\n\n${line.text}` : ` ${line.text}`;
+  }
+  return out;
+}
+
 async function parsePdf(bytes: Uint8Array): Promise<Page[]> {
   // pdf.js 6 releases a document through its loading task, not the document
   const task = getDocument({
@@ -66,10 +112,7 @@ async function parsePdf(bytes: Uint8Array): Promise<Page[]> {
     for (let number = 1; number <= pdf.numPages; number++) {
       const page = await pdf.getPage(number);
       const content = await page.getTextContent();
-      const text = content.items
-        .map((item) => ('str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : ''))
-        .join('');
-      pages.push({ page: number, text });
+      pages.push({ page: number, text: paragraphs(content.items as PdfText[]) });
       page.cleanup();
     }
     return pages;
