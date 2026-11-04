@@ -8,7 +8,7 @@ import styles from './layout.module.css';
 
 export const metadata: Metadata = {
   title: { default: 'Atlas AI', template: '%s | Atlas AI' },
-  authors: [{ name: 'Yashwanth Varma', url: 'https://github.com/yashwanthvarma74-ai' }],
+  authors: [{ name: 'Yashwanth Varma', url: 'https://github.com/yashwanthvarmakonduru' }],
   description:
     'A private knowledge copilot: upload your documents, ask questions, and get streamed answers with citations you can check.',
 };

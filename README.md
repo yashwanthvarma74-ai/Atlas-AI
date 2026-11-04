@@ -6,7 +6,7 @@
 
 **A private knowledge copilot. Ask your documents in plain words; every answer cites the page it came from.**
 
-[![CI](https://github.com/yashwanthvarma74-ai/Atlas-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/yashwanthvarma74-ai/Atlas-AI/actions/workflows/ci.yml)
+[![CI](https://github.com/yashwanthvarmakonduru/Atlas-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/yashwanthvarmakonduru/Atlas-AI/actions/workflows/ci.yml)
 [![Recall@10](https://img.shields.io/badge/recall%4010-95.4%25-2ea44f)](docs/EVALUATION.md)
 [![Cross-tenant leaks](https://img.shields.io/badge/cross--tenant%20leaks-0-2ea44f)](docs/THREAT-MODEL.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
@@ -126,7 +126,7 @@ flowchart LR
 
 | Layer         | Technology                                                                                                          |
 | ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Web           | Next.js 16, React 19, TanStack Query, [Meridian design system](https://github.com/yashwanthvarma74-ai/designSystem) |
+| Web           | Next.js 16, React 19, TanStack Query, [Meridian design system](https://github.com/yashwanthvarmakonduru/designSystem) |
 | API           | Node.js 22, Express 5, Zod, hand-written Server-Sent Events                                                         |
 | Ingest        | BullMQ on Redis, pdf.js, Tesseract.js, isolated child processes                                                     |
 | Retrieval     | MongoDB Atlas Vector Search + Atlas Search, reciprocal rank fusion                                                  |
@@ -140,7 +140,7 @@ flowchart LR
 Requires Node 22 and Docker.
 
 ```bash
-git clone https://github.com/yashwanthvarma74-ai/Atlas-AI.git && cd Atlas-AI
+git clone https://github.com/yashwanthvarmakonduru/Atlas-AI.git && cd Atlas-AI
 cp .env.example .env
 npm install
 docker compose up -d          # MongoDB with Atlas Search, and Redis
