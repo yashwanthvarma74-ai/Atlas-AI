@@ -2,6 +2,7 @@ import { UnrecoverableError, Worker } from 'bullmq';
 import { Redis } from 'ioredis';
 import { ObjectId } from 'mongodb';
 import type { Core } from './core';
+import { removeOlderThan } from './cleanup';
 import { purgeExpiredGuests } from './guests';
 import { hex } from './ids';
 import { failAllStaleAnswers } from './answer';
@@ -61,6 +62,9 @@ export function startIngestWorker(core: Core, deps: ParseDeps = {}): IngestWorke
     void requeueStale(core).catch(() => undefined);
     void failAllStaleAnswers(core).catch(() => undefined);
     void purgeExpiredGuests(core).catch(() => undefined);
+    if (core.config.DATA_TTL_HOURS) {
+      void removeOlderThan(core, core.config.DATA_TTL_HOURS).catch(() => undefined);
+    }
   }, SWEEP_EVERY_MS);
 
   return {

@@ -2,6 +2,7 @@ export * from './access';
 export * from './answer';
 export * from './chunk';
 export * from './citations';
+export * from './cleanup';
 export * from './config';
 export * from './conversations';
 export * from './core';

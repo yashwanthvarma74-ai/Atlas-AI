@@ -9,7 +9,8 @@ check. Built by [Yashwanth Varma](https://github.com/yashwanthvarma74-ai) on the
 ## Live demo
 
 **<https://atlas-ai-seven-vert.vercel.app>**. Press **Continue as guest**: no sign-up, and you land in a workspace you
-own. Guests and their data are deleted after 24 hours.
+own. It is a demo, so nothing is kept: reloading the page empties your workspace, everyone's documents and
+conversations are deleted after three hours, and guest accounts after 24.
 
 It runs on free tiers (Vercel, Render, MongoDB Atlas, Upstash, Supabase Storage), so the first visit after a quiet spell
 waits up to a minute for the API to wake. Retrieval and answers use whichever embedder and model the deployment is

@@ -125,6 +125,14 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  // A demo setting: a signed-in person's page load empties the workspaces they own (documents, files, conversations),
+  // so each visit starts from nothing. Off by default; nobody wants it on real data.
+  WIPE_ON_REFRESH: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  // Documents and conversations older than this many hours are deleted, everyone's. Unset keeps them.
+  DATA_TTL_HOURS: z.coerce.number().positive().optional(),
   // How long a guest account and its workspace live before the worker deletes them.
   GUEST_TTL_HOURS: z.coerce.number().positive().default(24),
   // How many proxies sit in front of the API (Vercel and Fly make two), so rate limits see the real visitor.

@@ -83,6 +83,8 @@ export const api = {
     return (await request<{ user: SessionUser }>('/auth/guest', { method: 'POST' })).user;
   },
   logout: () => request('/auth/logout', { method: 'POST' }),
+  // empties the caller's own workspaces when the deployment wipes on every visit; nothing otherwise
+  clearMyData: () => request('/auth/me/data', { method: 'DELETE' }),
 
   // ---- workspaces ----
   async workspaces() {

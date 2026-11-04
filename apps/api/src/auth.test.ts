@@ -185,3 +185,42 @@ describe('errors', () => {
     expect(res.body).toEqual({ ok: true, mongo: true });
   });
 });
+
+describe('starting each visit empty', () => {
+  const upload = async (client: ReturnType<TestApp['browser']>) => {
+    const { body } = await client.get('/workspaces').expect(200);
+    const ws = body.workspaces[0].id as string;
+    await client
+      .post(`/workspaces/${ws}/documents?name=a.txt`)
+      .set('Content-Type', 'application/octet-stream')
+      .send(Buffer.from('Some notes.'))
+      .expect(202);
+    return ws;
+  };
+
+  it('clears nothing when the deployment has not turned it on', async () => {
+    const client = t.browser();
+    await client.post('/auth/guest').expect(201);
+    const ws = await upload(client);
+    await client.delete('/auth/me/data').expect(204);
+    const { body } = await client.get(`/workspaces/${ws}/documents`).expect(200);
+    expect(body.documents).toHaveLength(1);
+  });
+
+  it("empties the caller's own workspaces when it is on, and needs a session", async () => {
+    const local = await createTestApp(await createTestCore({ WIPE_ON_REFRESH: 'true' }));
+    try {
+      await local.anonymous().delete('/auth/me/data').expect(401);
+      const client = local.browser();
+      await client.post('/auth/guest').expect(201);
+      const ws = await upload(client);
+
+      const res = await client.delete('/auth/me/data').expect(200);
+      expect(res.body.removed).toEqual({ documents: 1, conversations: 0 });
+      const { body } = await client.get(`/workspaces/${ws}/documents`).expect(200);
+      expect(body.documents).toEqual([]);
+    } finally {
+      await local.destroy();
+    }
+  });
+});

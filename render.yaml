@@ -23,6 +23,9 @@ services:
       - { key: EMBEDDING_THREADS, value: '1' }
       # a change of embedder rebuilds the vector index and re-embeds the documents by itself
       - { key: VECTOR_INDEX_REBUILD, value: 'true' }
+      # a demo: each page load empties the visitor's own workspaces, and nothing is kept longer than three hours
+      - { key: WIPE_ON_REFRESH, value: 'true' }
+      - { key: DATA_TTL_HOURS, value: '3' }
       # the answer model; the key is set in the dashboard
       - { key: LLM_PROVIDER, value: gemini }
       - { key: GEMINI_API_KEY, sync: false }

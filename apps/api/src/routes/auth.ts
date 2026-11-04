@@ -1,6 +1,13 @@
 import { Router, type Response } from 'express';
 import { loginInputSchema, registerInputSchema } from '@atlas/shared';
-import { authenticate, createGuest, registerUser, toSessionUser, type Core } from '@atlas/core';
+import {
+  authenticate,
+  clearOwnWorkspaces,
+  createGuest,
+  registerUser,
+  toSessionUser,
+  type Core,
+} from '@atlas/core';
 import { clearSessionCookie, setSessionCookie, signSession } from '../auth/session';
 import { limit, parse } from '../http';
 import { requireUser } from '../middleware';
@@ -42,6 +49,17 @@ export function authRouter(core: Core): Router {
 
   router.get('/me', requireUser, (req, res) => {
     res.json({ user: toSessionUser(req.user!) });
+  });
+
+  // The demo's "every visit starts empty": the web app calls this when a page is loaded. It only ever touches the
+  // caller's own workspaces, and does nothing unless the deployment turned it on.
+  router.delete('/me/data', requireUser, async (req, res) => {
+    if (!core.config.WIPE_ON_REFRESH) {
+      res.status(204).end();
+      return;
+    }
+    const removed = await clearOwnWorkspaces(core, req.user!._id);
+    res.json({ removed });
   });
 
   router.post('/logout', (_req, res) => {
