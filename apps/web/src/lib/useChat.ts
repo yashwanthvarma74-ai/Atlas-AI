@@ -110,7 +110,9 @@ export function useChat(workspaceId: string, conversationId: string): Chat {
               };
             });
             setPending(null);
-            // the title may have been set by the first question, and the history is ordered by activity
+            // the first question names the conversation, and the history is ordered by activity, so both are read
+            // again; the messages already shown are the same ones, so nothing visible changes but the title
+            void queryClient.invalidateQueries({ queryKey: key });
             void queryClient.invalidateQueries({ queryKey: keys.conversations(workspaceId) });
             break;
         }
