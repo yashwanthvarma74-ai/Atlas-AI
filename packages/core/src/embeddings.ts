@@ -14,6 +14,8 @@ export class EmbeddingError extends Error {
   constructor(
     message: string,
     readonly retryable: boolean,
+    // how long the service asked to wait, when it said
+    readonly retryAfterMs?: number,
   ) {
     super(message);
   }
@@ -75,7 +77,12 @@ async function postJson(url: string, body: unknown, headers: Record<string, stri
   if (!res.ok) {
     // a rate limit or a server error may pass; any other 4xx will fail the same way every time
     const retryable = res.status === 429 || res.status >= 500;
-    throw new EmbeddingError(`The embedding service answered ${res.status}.`, retryable);
+    const seconds = Number(res.headers.get('retry-after'));
+    throw new EmbeddingError(
+      `The embedding service answered ${res.status}.`,
+      retryable,
+      Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : undefined,
+    );
   }
   return (await res.json()) as unknown;
 }
@@ -95,10 +102,31 @@ function checked(vectors: unknown, count: number, dimensions: number): number[][
   return vectors as number[][];
 }
 
+// A large document is many batches, and a hosted service with a per-minute allowance will refuse some of them. Failing
+// the whole document for one refused batch wastes every batch before it, so a batch that was refused for a reason
+// that passes (a rate limit, a busy server) is tried again, waiting longer each time, before giving up.
+const BATCH_TRIES = 5;
+const BASE_WAIT_MS = 1000;
+const MAX_WAIT_MS = 20_000;
+const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+async function withRetries(send: () => Promise<number[][]>): Promise<number[][]> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await send();
+    } catch (error) {
+      if (!(error instanceof EmbeddingError) || !error.retryable || attempt === BATCH_TRIES)
+        throw error;
+      await pause(Math.min(error.retryAfterMs ?? BASE_WAIT_MS * 2 ** (attempt - 1), MAX_WAIT_MS));
+    }
+  }
+}
+
 async function inBatches(texts: string[], send: (batch: string[]) => Promise<number[][]>) {
   const out: number[][] = [];
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    out.push(...(await send(texts.slice(i, i + BATCH_SIZE))));
+    const batch = texts.slice(i, i + BATCH_SIZE);
+    out.push(...(await withRetries(() => send(batch))));
   }
   return out;
 }

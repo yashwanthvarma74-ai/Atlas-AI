@@ -98,11 +98,14 @@ describe('ollama embedder', () => {
   });
 
   it('treats an unreachable service as worth retrying', async () => {
+    vi.useFakeTimers();
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('fetch failed'));
-    const error = await createOllamaEmbedder('http://x', 'm', 3)
+    const result = createOllamaEmbedder('http://x', 'm', 3)
       .embed(['a'])
       .catch((e) => e);
-    expect(error).toMatchObject({ retryable: true });
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(await result).toMatchObject({ retryable: true });
+    vi.useRealTimers();
   });
 });
 
@@ -202,9 +205,12 @@ describe('openai embedder', () => {
       [401, false],
       [400, false],
     ] as const) {
+      vi.useFakeTimers();
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply(status, { error: 'no' }));
-      const error = await embedder.embed(['a']).catch((e) => e);
-      expect(error).toMatchObject({ retryable });
+      const result = embedder.embed(['a']).catch((e) => e);
+      await vi.advanceTimersByTimeAsync(120_000);
+      expect(await result).toMatchObject({ retryable });
+      vi.useRealTimers();
     }
   });
 
@@ -234,5 +240,45 @@ describe('createEmbedder', () => {
     expect(() => createEmbedder(loadConfig({ EMBEDDING_PROVIDER: 'openai' }))).toThrow(
       'OPENAI_API_KEY',
     );
+  });
+});
+
+describe('a refused batch', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('is tried again after a wait, so one rate limit does not fail the whole document', async () => {
+    vi.useFakeTimers();
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(reply(429, {}))
+      .mockResolvedValueOnce(reply(503, {}))
+      .mockResolvedValueOnce(reply(200, { data: [{ index: 0, embedding: [1, 0] }] }));
+
+    const result = createOpenAIEmbedder('k', 'm', 2).embed(['a']);
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    await expect(result).resolves.toEqual([[1, 0]]);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives up after five tries and still reports a service that keeps refusing', async () => {
+    vi.useFakeTimers();
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply(429, {}));
+
+    const result = createOpenAIEmbedder('k', 'm', 2)
+      .embed(['a'])
+      .catch((e) => e);
+    await vi.advanceTimersByTimeAsync(120_000);
+
+    expect(await result).toMatchObject({ retryable: true });
+    expect(fetch).toHaveBeenCalledTimes(5);
+  });
+
+  it('does not wait and try again for a bad key', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(reply(401, {}));
+    await createOpenAIEmbedder('k', 'm', 2)
+      .embed(['a'])
+      .catch(() => undefined);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

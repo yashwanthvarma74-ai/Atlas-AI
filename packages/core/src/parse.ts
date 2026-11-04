@@ -75,13 +75,48 @@ async function parsePdf(bytes: Uint8Array): Promise<Page[]> {
   }
 }
 
-// Tesseract fetches its English model on first use and keeps it in this folder afterwards.
+// Words OCR is not sure of. On a clean scan nearly every word is above this; on a photo or a poster the rest is
+// noise ("=] © ® °") that, left in, fills the index with junk.
+const MIN_WORD_CONFIDENCE = 70;
+// Below this overall, the picture is probably not a page of text, and a second pass for scattered text may do better.
+const PAGE_CONFIDENCE = 75;
+
+interface OcrBlock {
+  paragraphs: { lines: { words: { text: string; confidence: number }[] }[] }[];
+}
+
+// The lines of recognised words that are sure enough and look like words, one line of the picture per line of text.
+export function confidentLines(blocks: OcrBlock[], minConfidence = MIN_WORD_CONFIDENCE): string {
+  const lines: string[] = [];
+  for (const block of blocks) {
+    for (const paragraph of block.paragraphs) {
+      for (const line of paragraph.lines) {
+        const words = line.words
+          .filter((w) => w.confidence >= minConfidence && /[\p{L}\p{N}]{2,}/u.test(w.text))
+          .map((w) => w.text);
+        if (words.length > 0) lines.push(words.join(' '));
+      }
+    }
+  }
+  return lines.join('\n');
+}
+
+// Tesseract fetches its English model on first use and keeps it in this folder afterwards. A page of text is read as
+// one. A picture that reads poorly that way (an infographic, a screenshot, a photo of a sign) is read again as
+// scattered text, keeping only the words it is sure of, and whichever pass kept more is used.
 async function recognise(image: Uint8Array): Promise<string> {
-  const { createWorker } = await import('tesseract.js');
+  const { createWorker, PSM } = await import('tesseract.js');
   const worker = await createWorker('eng', 1, { cachePath: join(tmpdir(), 'atlas-tesseract') });
   try {
-    const { data } = await worker.recognize(Buffer.from(image));
-    return data.text;
+    const buffer = Buffer.from(image);
+    const page = await worker.recognize(buffer, {}, { blocks: true });
+    if (page.data.confidence >= PAGE_CONFIDENCE) return page.data.text;
+
+    await worker.setParameters({ tessedit_pageseg_mode: PSM.SPARSE_TEXT });
+    const scattered = await worker.recognize(buffer, {}, { blocks: true });
+    const kept = confidentLines(scattered.data.blocks ?? []);
+    const first = confidentLines(page.data.blocks ?? []);
+    return kept.length >= first.length ? kept : first;
   } finally {
     await worker.terminate();
   }

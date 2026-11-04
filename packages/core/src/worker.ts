@@ -34,7 +34,7 @@ export function startIngestWorker(core: Core, deps: ParseDeps = {}): IngestWorke
         throw error;
       }
     },
-    { connection, prefix: core.config.REDIS_PREFIX, concurrency: 2 },
+    { connection, prefix: core.config.REDIS_PREFIX, concurrency: core.config.INGEST_CONCURRENCY },
   );
 
   worker.on('failed', (job, error) => {

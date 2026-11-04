@@ -25,6 +25,8 @@ Settings that matter:
 - `TRUST_PROXY_HOPS` must match the number of proxies in front of the API, or rate limits see the wrong address.
 - `PARSE_ISOLATION=process` parses each upload in a child process with none of the worker's credentials. On in the
   containers and in `render.yaml`; off by default for development.
+- `INGEST_CONCURRENCY` is how many documents one worker processes at once (default 2). `render.yaml` sets 1, because the
+  worker shares a 0.1 CPU machine with the API and page requests slow down while it works.
 - `OTEL_EXPORTER_OTLP_ENDPOINT`, when set, sends traces there. `--profile observability` runs Grafana with Tempo
   on port 3000 for it, with the dashboard in `infra/grafana`.
 
@@ -48,9 +50,13 @@ cannot reach production. Vercel deploys the web app from git on its own.
 and re-uploading documents, because the stored vectors are the old size. Re-run `npm run eval` too: the best chunk
 size depends on the embedder.
 
+**Reading pictures.** An image is read with OCR. A page of text is read as one; a picture that reads poorly that way (an
+infographic, a screenshot) is read again as scattered text keeping only the words OCR is sure of. On the free Render
+machine one image takes about 35 to 45 seconds, against about 3 seconds on a laptop.
+
 **What to expect on free tiers.** The Render service sleeps after 15 minutes without traffic, so the first visit waits
 for it to wake. The free Redis has a monthly command quota. Supabase pauses a project after a week without use. Atlas
-M0 has no automatic backups. A free model key has request limits and a busy model can answer 503.
+M0 has no automatic backups. A free model key has request limits and a busy model can answer 429 or 503, so a refused embedding batch is retried up to five times with growing waits before the document fails; a very large file can still run out of allowance.
 
 ## Before pointing the public at it
 

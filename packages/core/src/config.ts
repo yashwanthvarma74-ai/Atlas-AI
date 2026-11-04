@@ -82,7 +82,9 @@ const envSchema = z.object({
   // "process" parses each upload in a child process that holds none of this one's credentials and can be killed
   // alone. Off by default so a development machine needs no build step; the containers turn it on.
   PARSE_ISOLATION: z.enum(['process', 'none']).default('none'),
-  INGEST_STAGE_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
+  // Documents processed at once by one worker. One, on a host where the worker shares a small machine with the API.
+  INGEST_CONCURRENCY: z.coerce.number().int().positive().default(2),
+  INGEST_STAGE_TIMEOUT_MS: z.coerce.number().int().positive().default(300_000),
 
   JWT_SECRET: z.string().min(32).default(DEV_SECRET),
   // The browser origin that may send requests that change data.

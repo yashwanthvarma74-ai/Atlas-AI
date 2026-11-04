@@ -1,8 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { ParseError, parseDocument } from './parse';
+import { confidentLines, ParseError, parseDocument } from './parse';
 import { makePdf } from './test/pdf';
 
 const enc = (text: string) => new TextEncoder().encode(text);
+
+describe('confidentLines', () => {
+  const word = (text: string, confidence: number) => ({ text, confidence });
+  const block = (...lines: ReturnType<typeof word>[][]) => ({
+    paragraphs: [{ lines: lines.map((words) => ({ words })) }],
+  });
+
+  it('keeps the words it is sure of, one line of the picture per line of text', () => {
+    const text = confidentLines([
+      block([word('FRONTEND', 96), word('BACKEND', 91)], [word('Basics', 88)]),
+    ]);
+    expect(text).toBe('FRONTEND BACKEND\nBasics');
+  });
+
+  it('drops doubtful words and stray symbols, and a line that is left empty', () => {
+    const text = confidentLines([
+      block(
+        [word('Postgres', 93), word('=]', 80), word('©', 90), word('Nodes', 40)],
+        [word('®', 95)],
+      ),
+    ]);
+    expect(text).toBe('Postgres');
+  });
+});
 
 describe('parseDocument: PDF', () => {
   it('reads the text of each page and keeps the page numbers', async () => {
