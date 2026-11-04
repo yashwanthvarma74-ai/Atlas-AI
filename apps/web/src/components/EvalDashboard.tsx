@@ -65,6 +65,14 @@ function Trend({ runs }: { runs: EvalRun[] }) {
   );
 }
 
+// "local:Xenova/bge-small-en-v1.5" reads as "bge-small-en-v1.5"; a provider with no model name stays as it is
+const model = (name: unknown) =>
+  String(name ?? 'unknown')
+    .split(':')
+    .pop()!
+    .split('/')
+    .pop()!;
+
 export default function EvalDashboard() {
   const { loading } = useRequireUser();
   const runs = useEvalRuns();
@@ -75,8 +83,9 @@ export default function EvalDashboard() {
     <section aria-labelledby="eval-title" className={styles.page}>
       <h1 id="eval-title">Evaluation</h1>
       <p className={styles.note}>
-        Scored on a generated benchmark with an offline embedder and answer model, so these show how
-        the pipeline behaves, not how it would do on real documents with a real model.
+        Every run asks 240 labelled questions of 30 generated documents and checks whether the right
+        passage comes back. Each run names the embedder and answer model it used. A generated
+        benchmark shows how retrieval behaves, not how it does on every real document.
       </p>
 
       {runs.isPending && <Skeleton height="8rem" />}
@@ -98,7 +107,8 @@ export default function EvalDashboard() {
           <p className={styles.note}>
             Commit {latest.commit}
             {latest.dirty && ' (with uncommitted changes)'}, {when(latest.createdAt)}, chunks of{' '}
-            {String(latest.config.chunkTokens)} tokens, reranker {String(latest.config.reranker)}.
+            {String(latest.config.chunkTokens)} tokens, reranker {String(latest.config.reranker)},
+            embedder {model(latest.config.embedder)}, answers by {model(latest.config.llm)}.
           </p>
           <table className={styles.table}>
             <caption className={styles.caption}>Latest run against the targets</caption>
@@ -165,6 +175,7 @@ export default function EvalDashboard() {
                 <tr>
                   <th scope="col">When</th>
                   <th scope="col">Commit</th>
+                  <th scope="col">Embedder</th>
                   <th scope="col">Chunks</th>
                   <th scope="col">Recall@10</th>
                 </tr>
@@ -174,6 +185,7 @@ export default function EvalDashboard() {
                   <tr key={run.id}>
                     <td>{when(run.createdAt)}</td>
                     <td>{run.commit}</td>
+                    <td>{model(run.config.embedder)}</td>
                     <td>
                       {String(run.config.chunkTokens)} / {String(run.config.overlapTokens)},{' '}
                       {String(run.config.reranker)}
