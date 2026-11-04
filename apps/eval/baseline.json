@@ -1,6 +1,6 @@
 {
-  "commit": "9c6bb92",
-  "dirty": true,
+  "commit": "48602f4",
+  "dirty": false,
   "createdAt": "2026-11-04T06:47:34.230Z",
   "datasetHash": "cbacab4d3d4a",
   "config": {
@@ -13,12 +13,12 @@
   },
   "metrics": {
     "questions": 240,
-    "recallAt1": 0.6166666666666667,
-    "recallAt5": 0.9583333333333334,
-    "recallAt10": 0.9666666666666667,
+    "recallAt1": 0.6041666666666666,
+    "recallAt5": 0.9458333333333333,
+    "recallAt10": 0.9541666666666667,
     "recallAt10ByKind": {
-      "lexical": 0.9583333333333334,
-      "paraphrase": 0.975
+      "lexical": 0.95,
+      "paraphrase": 0.9583333333333334
     },
     "citationConsistency": 1,
     "citationsChecked": 480,
@@ -40,5 +40,6 @@
       "output": 49
     },
     "costPerAnswerUsd": 0
-  }
+  },
+  "note": "Recorded on the CI runner (ubuntu-latest, x86_64), where the gate runs. The same run on an Apple M4 Pro gives recall@10 0.967: ONNX Runtime rounds slightly differently on the two."
 }

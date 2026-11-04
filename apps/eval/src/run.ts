@@ -92,6 +92,9 @@ export async function runEval(options: RunOptions): Promise<EvalRun> {
   const uploadDir = await mkdtemp(join(tmpdir(), 'atlas-eval-'));
 
   const config = loadConfig({
+    // the in-process model the deployment uses, unless the run asks for another
+    EMBEDDING_PROVIDER: 'local',
+    EMBEDDING_DIMENSIONS: '384',
     ...process.env,
     NODE_ENV: 'test',
     MONGODB_URI: base.toString(),
