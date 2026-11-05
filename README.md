@@ -124,16 +124,16 @@ flowchart LR
 
 ## Tech stack
 
-| Layer         | Technology                                                                                                          |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Layer         | Technology                                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Web           | Next.js 16, React 19, TanStack Query, [Meridian design system](https://github.com/yashwanthvarmakonduru/designSystem) |
-| API           | Node.js 22, Express 5, Zod, hand-written Server-Sent Events                                                         |
-| Ingest        | BullMQ on Redis, pdf.js, Tesseract.js, isolated child processes                                                     |
-| Retrieval     | MongoDB Atlas Vector Search + Atlas Search, reciprocal rank fusion                                                  |
-| Models        | bge-small-en-v1.5 on ONNX Runtime (in-process); Gemini live, with OpenAI, Anthropic and Ollama adapters             |
-| Observability | OpenTelemetry, Grafana and Tempo, Pino structured logs                                                              |
-| Quality       | Vitest, fast-check, Playwright, axe, Lighthouse CI, k6, a custom eval harness                                       |
-| Delivery      | Docker, GitHub Actions, Vercel, Render                                                                              |
+| API           | Node.js 22, Express 5, Zod, hand-written Server-Sent Events                                                           |
+| Ingest        | BullMQ on Redis, pdf.js, Tesseract.js, isolated child processes                                                       |
+| Retrieval     | MongoDB Atlas Vector Search + Atlas Search, reciprocal rank fusion                                                    |
+| Models        | bge-small-en-v1.5 on ONNX Runtime (in-process); Gemini live, with OpenAI, Anthropic and Ollama adapters               |
+| Observability | OpenTelemetry, Grafana and Tempo, Pino structured logs                                                                |
+| Quality       | Vitest, fast-check, Playwright, axe, Lighthouse CI, k6, a custom eval harness                                         |
+| Delivery      | Docker, GitHub Actions, Vercel, Render                                                                                |
 
 ## Getting started
 
