@@ -9,7 +9,7 @@ import { DATA_DIR, loadDataset } from './dataset';
 // can: the real answer model's time to first word, its citations and its cost, the real network, the real host. The
 // deployment's keys never leave it.
 //
-//   npm run remote -w @atlas/eval -- --url https://atlas-ai-seven-vert.vercel.app --answers 40
+//   npm run remote -w @atlas/eval -- --url https://atlasai-beta.vercel.app --answers 40
 //
 // It is paced under the API's per-address limits (30 searches and 20 answers a minute), so it takes a while. The
 // search endpoint returns the top 8 passages, so retrieval is reported as recall@8 here.

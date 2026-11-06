@@ -9,7 +9,7 @@ an interviewer will ask how you got it.
 
 What each claim rests on:
 
-- **Deployed:** <https://atlas-ai-seven-vert.vercel.app>, guest login, answers from Gemini.
+- **Deployed:** <https://atlasai-beta.vercel.app>, guest login, answers from Gemini.
 - **71.7% to 95.4%:** `npm run eval`. 71.7% was the first chunk settings with a word-matching embedder; a sweep of
   chunk size, overlap and reranker took it to 89.2%; moving to an in-process semantic embedder (`bge-small-en-v1.5`)
   took it to 95.4% on the CI runner (96.7% on an M4 Pro). The benchmark is generated (`docs/EVALUATION.md`).

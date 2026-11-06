@@ -1,6 +1,6 @@
 # Deploying
 
-**Live:** <https://atlas-ai-seven-vert.vercel.app>, on free tiers with no card: Vercel (web), Render (API and ingest
+**Live:** <https://atlasai-beta.vercel.app>, on free tiers with no card: Vercel (web), Render (API and ingest
 worker in one service), MongoDB Atlas M0 (database, Atlas Search and Vector Search), Upstash (Redis) and Supabase
 Storage (files, over its S3 API). Nothing in the repository holds a secret; each service has its own.
 

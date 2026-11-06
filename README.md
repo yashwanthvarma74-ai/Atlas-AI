@@ -24,7 +24,7 @@
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?logo=playwright&logoColor=white)
 
-[**Live demo**](https://atlas-ai-seven-vert.vercel.app) · [Architecture](#architecture) · [Evaluation](docs/EVALUATION.md) · [Decisions](docs/adr) · [Case study](docs/case-study.md)
+[**Live demo**](https://atlasai-beta.vercel.app) · [Architecture](#architecture) · [Evaluation](docs/EVALUATION.md) · [Decisions](docs/adr) · [Case study](docs/case-study.md)
 
 </div>
 
@@ -42,7 +42,7 @@ It is built to the standard of a production system rather than a demo: tenant is
 citations the model cannot invent, a labelled benchmark that gates every change in CI, and tracing from request to
 first token.
 
-> **Live demo:** [atlas-ai-seven-vert.vercel.app](https://atlas-ai-seven-vert.vercel.app) → _Continue as guest_. It
+> **Live demo:** [atlasai-beta.vercel.app](https://atlasai-beta.vercel.app) → _Continue as guest_. It
 > runs on free hosting with a tenth of a CPU core, so the first visit can take a minute to wake and a scanned image
 > takes a minute or two to read. Guest data is cleared on reload and after three hours.
 
