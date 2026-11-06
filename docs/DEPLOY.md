@@ -62,8 +62,7 @@ M0 has no automatic backups. A free model key has request limits and a busy mode
 
 - Keep `RATE_LIMIT_SCALE` at 1.
 - Run the worker in a container with no inbound network and a read-only filesystem except for `/data` and the
-  temporary directory. Parsing already happens in a child process without the worker's credentials
-  ([ADR 0016](adr/0016-traces-and-an-isolated-parser.md)), which is a process boundary and not a sandbox.
+  temporary directory. Parsing already happens in a child process without the worker's credentials, which is a process boundary and not a sandbox.
 - **Nothing is kept on the demo.** `WIPE_ON_REFRESH=true` empties a visitor's own workspaces (documents, files,
   passages, conversations) whenever they load a page, and `DATA_TTL_HOURS=3` deletes everyone's documents and
   conversations three hours after they were made. Both are off unless set.

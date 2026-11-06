@@ -220,14 +220,12 @@ Full table, with the test behind each row: [THREAT-MODEL.md](docs/THREAT-MODEL.m
 <details>
 <summary><b>Design decisions</b></summary>
 
-Seventeen architecture decision records, each with context, the decision, evidence and rejected alternatives, are in
+Five architecture decision records, each with context, the decision, evidence and rejected alternatives, are in
 [docs/adr](docs/adr). A few:
 
 - [Workspace access is proved by a type](docs/adr/0001-workspace-access-is-proved-by-a-type.md)
 - [Hybrid retrieval, and a tenant filter tested at every layer](docs/adr/0008-hybrid-retrieval-and-the-tenant-filter.md)
 - [Citations are owned by the server](docs/adr/0009-citations-are-owned-by-the-server.md)
-- [The assistant proposes, and a person approves](docs/adr/0014-the-assistant-proposes-and-a-person-approves.md)
-- [Embeddings run in the process, not behind someone else's quota](docs/adr/0017-embeddings-run-in-process.md)
 
 </details>
 
